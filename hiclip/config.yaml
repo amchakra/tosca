@@ -1,0 +1,29 @@
+# Config for hiCLIP mapping for STAU1 and STAU2 in mouse
+# A. M. Chakrabarti
+# Last updated: 28th January 2020
+
+datapath: /home/camp/chakraa2/working/nobby/projects/flora/iclip
+
+# star: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24
+star: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
+bt2: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
+genome_csv: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes.csv.gz
+
+# Scripts
+removesplicedreads: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/scripts/RemoveSplicedReads.py
+removeperfectlocalalignedreads: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/scripts/RemovePerfectLocalAlignedReads.py
+gethybrids: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetHybrids.R
+getmfe: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetMFE.R
+
+samples:
+
+  STAU1_ESC_neurons_129S6B6_day16_1_STAU1_rep1_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNCCTGCNNN.fastq.gz
+  STAU1_ESC_neurons_129S6B6_day16_2_STAU1_rep2_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNGGAGCNNN.fastq.gz
+  STAU2_ESC_neurons_129S6B6_day16_3_STAU2_rep1_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNAGTCCNNN.fastq.gz
+  STAU2_ESC_neurons_129S6B6_day16_4_STAU2_rep2_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNTCGCCNNN.fastq.gz
+  IgG_ESC_neurons_129S6B6_day16_5_IgG_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNCATACNNN.fastq.gz
+  input_ESC_neurons_129S6B6_day16_1_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNGTAACNNN.fastq.gz
+  input_ESC_neurons_129S6B6_day16_2_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNAGTTANNN.fastq.gz
+  input_ESC_neurons_129S6B6_day16_3_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNCTGTANNN.fastq.gz
+  input_ESC_neurons_129S6B6_day16_4_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNTATGANNN.fastq.gz
+  input_ESC_neurons_129S6B6_day16_5_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNGTAGANNN.fastq.gz
