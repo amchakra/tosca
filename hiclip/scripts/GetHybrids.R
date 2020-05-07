@@ -27,6 +27,7 @@ message("Extracting hybrids...")
 tic()
 hybrids.dt <- ExtractHybrids(aligned.bam = opt$aligned, chimeric.junction = opt$chimeric)
 hybrids.dt <- ReorientHybrids(hybrids.dt)
+hybrids.dt <- RemovePCRDuplicates(hybrids.dt)
 toc()
 
 # Get SJ motifs
