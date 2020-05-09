@@ -20,16 +20,16 @@ rule all:
         # expand("results/hybrids/{sample}.hybrid.bam", sample=config["samples"]),
         expand("results/preprocessed/{sample}.bt2.bam", sample=config["samples"]),
         expand("results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
-        expand("results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
-        expand("results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
-        expand("results/star_chimeric_0j/{sample}.genomic_hybrids.bam", sample=config["samples"]),
+        # expand("results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
+        # expand("results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
+        # expand("results/star_chimeric_0j/{sample}.genomic_hybrids.bam", sample=config["samples"]),
         # expand("results/bowtie2/{sample}.bam", sample=config["samples"]),
         expand("results/hybrids/{sample}.hybrids.tsv.gz", sample=config["samples"]),
         expand("results/hybrids/{sample}.hybrids.mfe.tsv.gz", sample=config["samples"]),
         expand("results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv.gz", sample=config["samples"]), 
         expand("results/bam/{sample}.intragenic_hybrids.mfe.clusters.bam", sample=config["samples"]),
         expand("results/clusters/{sample}.clusters.tsv", sample=config["samples"]),
-        "results/plots/bindingenergy.pdf"
+        "results/plots/cluster_bindingenergy.pdf"
         # expand("results/irclash_style/bowtie2/{sample}.bam", sample=config["samples"]),
 
 # =============================================================================
@@ -138,94 +138,94 @@ rule filterReads:
 
 # 1. STAR + chimeric
 
+# rule mapStar:
+#     input:
+#         fastq="results/preprocessed/{sample}.filtered.fastq.gz",
+#     output:
+#         bam="results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam",
+#         bai="results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam.bai",
+#         unmapped="results/star_chimeric/{sample}.Unmapped.out.mate1.gz",
+#         log="results/logs/{sample}.genome.log",
+#     params:
+#         starindex=config['star'],
+#         outprefix="results/star_chimeric/{sample}.",
+#         log="results/star_chimeric/{sample}.Log.final.out",
+#         cluster="-J mapStar -N 1 -c 8 --mem=40GB -t 12:00:00 -o logs/mapStar.{sample}.%A.log"
+#     threads:
+#         8
+#     shell:
+#         """
+#         ml SAMtools
+
+#         STAR --runThreadN {threads} \
+#         --genomeDir {params.starindex} --genomeLoad NoSharedMemory \
+#         --readFilesIn {input.fastq} --readFilesCommand zcat \
+#         --outFileNamePrefix {params.outprefix} \
+#         --outReadsUnmapped Fastx \
+#         --outFilterMultimapNmax 1 \
+#         --alignIntronMin 10 --scoreGapNoncan -4 --scoreGapATAC -4 \
+#         --chimSegmentMin 12 --chimJunctionOverhangMin 12  --chimScoreJunctionNonGTAG 0 --chimOutType WithinBam \
+#         --alignSJoverhangMin 12 --alignSJDBoverhangMin 12 --alignSJstitchMismatchNmax 5 -1 5 5 \
+#         --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
+
+#         pigz {params.outprefix}Unmapped.out.mate1
+
+#         sambamba index -t {threads} {output.bam}
+#         mv {params.log} {output.log}
+#         """
+
+# rule mapStar0:
+#     input:
+#         fastq="results/preprocessed/{sample}.filtered.fastq.gz",
+#     output:
+#         bam="results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam",
+#         bai="results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam.bai",
+#         unmapped="results/star_chimeric_0/{sample}.Unmapped.out.mate1.gz",
+#         log="results/logs/{sample}.genome.log",
+#     params:
+#         starindex=config['star'],
+#         outprefix="results/star_chimeric_0/{sample}.",
+#         log="results/star_chimeric_0/{sample}.Log.final.out",
+#         cluster="-J mapStar0 -N 1 -c 8 --mem=40GB -t 12:00:00 -o logs/mapStar0.{sample}.%A.log"
+#     threads:
+#         8
+#     shell:
+#         """
+#         ml SAMtools
+
+#         STAR --runThreadN {threads} \
+#         --genomeDir {params.starindex} --genomeLoad NoSharedMemory \
+#         --readFilesIn {input.fastq} --readFilesCommand zcat \
+#         --outFileNamePrefix {params.outprefix} \
+#         --outReadsUnmapped Fastx \
+#         --outFilterMultimapNmax 1 \
+#         --alignIntronMin 10 --scoreGapNoncan 0 --scoreGapATAC 0 --scoreGapGCAG 0 --scoreGap 0 \
+#         --chimSegmentMin 12 --chimJunctionOverhangMin 12  --chimScoreJunctionNonGTAG 0 \
+#         --chimNonchimScoreDropMin 10 --chimOutType WithinBAM \
+#         --alignSJoverhangMin 12 --alignSJDBoverhangMin 12 --alignSJstitchMismatchNmax 5 -1 5 5 \
+#         --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
+
+#         pigz {params.outprefix}Unmapped.out.mate1
+
+#         sambamba index -t {threads} {output.bam}
+#         mv {params.log} {output.log}
+#         """
+
 rule mapStar:
     input:
         fastq="results/preprocessed/{sample}.filtered.fastq.gz",
     output:
+        tmpbam=temp("results/star_chimeric/{sample}.Aligned.out.bam"),
         bam="results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam",
         bai="results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam.bai",
-        unmapped="results/star_chimeric/{sample}.Unmapped.out.mate1.gz",
+        chimeric="results/star_chimeric/{sample}.Chimeric.out.junction.gz",
+        # unmapped="results/star_chimeric/{sample}.Unmapped.out.mate1.gz",
         log="results/logs/{sample}.genome.log",
     params:
         starindex=config['star'],
         outprefix="results/star_chimeric/{sample}.",
         log="results/star_chimeric/{sample}.Log.final.out",
         cluster="-J mapStar -N 1 -c 8 --mem=40GB -t 12:00:00 -o logs/mapStar.{sample}.%A.log"
-    threads:
-        8
-    shell:
-        """
-        ml SAMtools
-
-        STAR --runThreadN {threads} \
-        --genomeDir {params.starindex} --genomeLoad NoSharedMemory \
-        --readFilesIn {input.fastq} --readFilesCommand zcat \
-        --outFileNamePrefix {params.outprefix} \
-        --outReadsUnmapped Fastx \
-        --outFilterMultimapNmax 1 \
-        --alignIntronMin 10 --scoreGapNoncan -4 --scoreGapATAC -4 \
-        --chimSegmentMin 12 --chimJunctionOverhangMin 12  --chimScoreJunctionNonGTAG 0 --chimOutType WithinBam \
-        --alignSJoverhangMin 12 --alignSJDBoverhangMin 12 --alignSJstitchMismatchNmax 5 -1 5 5 \
-        --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
-
-        pigz {params.outprefix}Unmapped.out.mate1
-
-        sambamba index -t {threads} {output.bam}
-        mv {params.log} {output.log}
-        """
-
-rule mapStar0:
-    input:
-        fastq="results/preprocessed/{sample}.filtered.fastq.gz",
-    output:
-        bam="results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam",
-        bai="results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam.bai",
-        unmapped="results/star_chimeric_0/{sample}.Unmapped.out.mate1.gz",
-        log="results/logs/{sample}.genome.log",
-    params:
-        starindex=config['star'],
-        outprefix="results/star_chimeric_0/{sample}.",
-        log="results/star_chimeric_0/{sample}.Log.final.out",
-        cluster="-J mapStar0 -N 1 -c 8 --mem=40GB -t 12:00:00 -o logs/mapStar0.{sample}.%A.log"
-    threads:
-        8
-    shell:
-        """
-        ml SAMtools
-
-        STAR --runThreadN {threads} \
-        --genomeDir {params.starindex} --genomeLoad NoSharedMemory \
-        --readFilesIn {input.fastq} --readFilesCommand zcat \
-        --outFileNamePrefix {params.outprefix} \
-        --outReadsUnmapped Fastx \
-        --outFilterMultimapNmax 1 \
-        --alignIntronMin 10 --scoreGapNoncan 0 --scoreGapATAC 0 --scoreGapGCAG 0 --scoreGap 0 \
-        --chimSegmentMin 12 --chimJunctionOverhangMin 12  --chimScoreJunctionNonGTAG 0 \
-        --chimNonchimScoreDropMin 10 --chimOutType WithinBAM \
-        --alignSJoverhangMin 12 --alignSJDBoverhangMin 12 --alignSJstitchMismatchNmax 5 -1 5 5 \
-        --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
-
-        pigz {params.outprefix}Unmapped.out.mate1
-
-        sambamba index -t {threads} {output.bam}
-        mv {params.log} {output.log}
-        """
-
-rule mapStar0j:
-    input:
-        fastq="results/preprocessed/{sample}.filtered.fastq.gz",
-    output:
-        tmpbam=temp("results/star_chimeric_0j/{sample}.Aligned.out.bam"),
-        bam="results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam",
-        bai="results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam.bai",
-        chimeric="results/star_chimeric_0j/{sample}.Chimeric.out.junction.gz",
-        # unmapped="results/star_chimeric_0j/{sample}.Unmapped.out.mate1.gz",
-        log="results/logs/{sample}_j.genome.log",
-    params:
-        starindex=config['star'],
-        outprefix="results/star_chimeric_0j/{sample}.",
-        log="results/star_chimeric_0j/{sample}.Log.final.out",
-        cluster="-J mapStar0j -N 1 -c 8 --mem=40GB -t 12:00:00 -o logs/mapStar0j.{sample}.%A.log"
     threads:
         8
     shell:
@@ -248,23 +248,23 @@ rule mapStar0j:
         mv {params.log} {output.log}
         """
 
-rule selectHybrids:
-    input:
-        bam="results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam"
-    output:
-        hybridbam="results/star_chimeric_0j/{sample}.genomic_hybrids.bam",
-        hybridbai="results/star_chimeric_0j/{sample}.genomic_hybrids.bam.bai"
-    params:
-        cluster="-J selectHybrids -N 1 -t 2:00:00 -o logs/selectHybrids.{sample}.%A.log"
-    shell:
-        """
-        samtools view -h {input.bam} | awk -v OFS="\t" '$0 ~ /^@/{{print $0;next;}} $6 ~ /N/' | samtools view -hb - | sambamba sort -t 8 -o {output.hybridbam} /dev/stdin
-        """
+# rule selectHybrids:
+#     input:
+#         bam="results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam"
+#     output:
+#         hybridbam="results/star_chimeric_0j/{sample}.genomic_hybrids.bam",
+#         hybridbai="results/star_chimeric_0j/{sample}.genomic_hybrids.bam.bai"
+#     params:
+#         cluster="-J selectHybrids -N 1 -t 2:00:00 -o logs/selectHybrids.{sample}.%A.log"
+#     shell:
+#         """
+#         samtools view -h {input.bam} | awk -v OFS="\t" '$0 ~ /^@/{{print $0;next;}} $6 ~ /N/' | samtools view -hb - | sambamba sort -t 8 -o {output.hybridbam} /dev/stdin
+#         """
 
 rule extractHybrids:
     input:
-        aligned="results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam",
-        chimeric="results/star_chimeric_0j/{sample}.Chimeric.out.junction.gz"
+        aligned="results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam",
+        chimeric="results/star_chimeric/{sample}.Chimeric.out.junction.gz"
     output:
         hybrids="results/hybrids/{sample}.hybrids.tsv.gz",
     params:
@@ -356,18 +356,21 @@ def clusters_input(wildcards):
 
 rule plotQC:
     input:
-        hybrids_input,
-        clusters_input
+        hybrids = hybrids_input,
+        clusters = clusters_input
     output:
-        "results/plots/orientation_count.pdf",
-        "results/plots/orientation_percent.pdf",
-        "results/plots/recovery_count.pdf",
-        "results/plots/recovery_percent.pdf",
-        "results/plots/bindingenergy.pdf",
-    script:
-        "script/PlotQC.R"
+        "results/plots/hybrid_orientation_count.pdf",
+        "results/plots/hybrid_orientation_percent.pdf",
+        "results/plots/hybrid_recovery_count.pdf",
+        "results/plots/hybrid_recovery_percent.pdf",
+        "results/plots/hybrid_sjmotif.pdf",
+        "results/plots/intragenichybrid_sjmotif.pdf",
+        "results/plots/cluster_bindingenergy.pdf",
     params:
         cluster="-J plotQC -c 8 --mem=32G -t 24:00:00 -o logs/plotQC.%A.log"
+    script:
+        "scripts/PlotQC.R"
+
 
 
 # # 2. Bowtie2
@@ -425,7 +428,7 @@ rule plotQC:
 #     input:
 #         fastq="results/star_chimeric/{sample}.Unmapped.out.mate1.gz",
 #     output:
-#     	fasta=temp("results/irclash/{sample}.fasta"),
+#       fasta=temp("results/irclash/{sample}.fasta"),
 #         sam="results/irclash/bowtie2/{sample}.sam",
 #         reordered="results/irclash/{sample}_reordered.fasta",
 #         # bam="results/irclash/star/{sample}.Aligned.sortedByCoord.out.bam",
@@ -441,20 +444,20 @@ rule plotQC:
 #     shell:
 #         """
 #         # Convert fastq to fasta
-# 		ml FASTX-Toolkit
-# 		zcat {input.fastq} | \
-# 		fastq_to_fasta > {output.fasta}
+#       ml FASTX-Toolkit
+#       zcat {input.fastq} | \
+#       fastq_to_fasta > {output.fasta}
 
 #         # First map unmapped
 #         ml Bowtie2
 #         bowtie2 {params.bt2param} -p {threads} -x {params.bt2index} -f -U {output.fasta} > {output.sam}
 
-# 		# Then re-arrange reads
-# 		perl /home/camp/chakraa2/working/nobby/bin/irCLASH/ext_clash_reads --in {output.sam} --seq {output.fasta} --out {output.reordered}
+#       # Then re-arrange reads
+#       perl /home/camp/chakraa2/working/nobby/bin/irCLASH/ext_clash_reads --in {output.sam} --seq {output.fasta} --out {output.reordered}
 
-# 		# # Then map with STAR
+#       # # Then map with STAR
 
-#         """	
+#         """   
 
 #           #       ml SAMtools
 
@@ -469,3 +472,4 @@ rule plotQC:
   #       --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
 
   #       sambamba index -t {threads} {output.bam}
+  

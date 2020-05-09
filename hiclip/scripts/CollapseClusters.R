@@ -11,7 +11,7 @@ suppressPackageStartupMessages(library(tictoc))
 # suppressPackageStartupMessages(library(parallel))
 
 option_list <- list(make_option(c("-i", "--input"), action = "store", type = "character", help = "Input hybrids file"),
-					make_option(c("-a", "--annotation"), action = "store", type = "character", help = "Annotation GTF")
+					make_option(c("-a", "--annotation"), action = "store", type = "character", help = "Annotation GTF"),
                     make_option(c("-o", "--output"), action = "store", type = "character", help = "Output clusters file"))
 
 opt_parser = OptionParser(option_list = option_list)
@@ -21,6 +21,9 @@ hybrids.dt <- fread(opt$input)
 
 clusters.dt <- CollapseClusters(hybrids.dt)
 fwrite(clusters.dt, opt$output, sep = "\t")
+
+message(nrow(clusters.dt[L_end >= R_start]), " clusters removed")
+clusters.dt <- clusters.dt[L_end < R_start]
 
 genes.gr <- rtracklayer::import.gff2(opt$annotation)
 clusters.grl <- ConvertCoordinates(clusters.dt, genes.gr = genes.gr, cores = 8)
