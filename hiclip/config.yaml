@@ -4,16 +4,23 @@
 
 datapath: /home/camp/chakraa2/working/nobby/projects/flora/iclip
 
-# star: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24
+stargenome: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24
+faigenome: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai
+
 star: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
 bt2: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
 genome_csv: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes.csv.gz
+gtf: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz
 
 # Scripts
 removesplicedreads: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/scripts/RemoveSplicedReads.py
 removeperfectlocalalignedreads: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/scripts/RemovePerfectLocalAlignedReads.py
 gethybrids: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetHybrids.R
 getmfe: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetMFE.R
+getclusters: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetClusters.R
+convertcoordinates: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/ConvertCoordinates.R
+converttobam: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/ConvertToBAM.py
+collapseclusters: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/CollapseClusters.R
 
 samples:
 

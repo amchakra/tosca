@@ -26,6 +26,10 @@ rule all:
         # expand("results/bowtie2/{sample}.bam", sample=config["samples"]),
         expand("results/hybrids/{sample}.hybrids.tsv.gz", sample=config["samples"]),
         expand("results/hybrids/{sample}.hybrids.mfe.tsv.gz", sample=config["samples"]),
+        expand("results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv.gz", sample=config["samples"]), 
+        expand("results/bam/{sample}.intragenic_hybrids.mfe.clusters.bam", sample=config["samples"]),
+        expand("results/clusters/{sample}.clusters.tsv", sample=config["samples"]),
+        "results/plots/bindingenergy.pdf"
         # expand("results/irclash_style/bowtie2/{sample}.bam", sample=config["samples"]),
 
 # =============================================================================
@@ -86,7 +90,7 @@ rule filterReads:
         b=temp("results/preprocessed/{sample}.Log.out"),
         c=temp("results/preprocessed/{sample}.SJ.out.tab"),
     params:
-        starindex=config['star'],
+        starindex=config['stargenome'],
         bt2index=config['bt2'],
         outprefix="results/preprocessed/{sample}.",
         removesplicedreadsscript=config['removesplicedreads'],
@@ -290,7 +294,80 @@ rule getMFE:
         pigz {params.hybrids}
         """
 
+rule getClusters:
+    input:
+        hybrids="results/hybrids/{sample}.hybrids.mfe.tsv.gz",
+    output:
+        hybrids="results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv.gz",
+    params:
+        hybrids="results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv",
+        percent=0.5,
+        getclustersscript=config['getclusters'],
+        cluster="-J getClusters -c 8 --mem=32G -t 24:00:00 -o logs/getClusters.{sample}.%A.log"
+    shell:
+        """
+        Rscript --vanilla {params.getclustersscript} -i {input.hybrids} -p {params.percent} -o {params.hybrids}
+        pigz {params.hybrids}
+        """
 
+rule collapseClusters:
+    input:
+        hybrids="results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv.gz",
+    output:
+        hybrids="results/clusters/{sample}.clusters.tsv",
+    params:
+        gtf=config['gtf'],
+        collapseclustersscript=config['collapseclusters'],
+        cluster="-J collapseClusters -c 8 --mem=32G -t 24:00:00 -o logs/collapseClusters.{sample}.%A.log"
+    shell:
+        """
+        Rscript --vanilla {params.collapseclustersscript} -i {input.hybrids} -a {params.gtf} -o {output.hybrids}
+        """
+
+rule convertCoordinates:
+    input:
+        hybrids="results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv.gz",
+    output:
+        bed="results/bed/{sample}.intragenic_hybrids.mfe.clusters.bed",
+        tempbam="results/bam/{sample}.intragenic_hybrids.mfe.clusters.temp.bam",
+        bam="results/bam/{sample}.intragenic_hybrids.mfe.clusters.bam",
+    params:
+        gtf=config['gtf'],
+        fai=config['faigenome'],
+        convertcoordinatesscript=config['convertcoordinates'],
+        converttobamscript=config['converttobam'],
+        cluster="-J convertCoordinates -c 8 --mem=32G -t 24:00:00 -o logs/convertCoordinates.{sample}.%A.log"
+    shell:
+        """
+        Rscript --vanilla {params.convertcoordinatesscript} -i {input.hybrids} -a {params.gtf} -o {output.bed}
+        
+        bedtools bedtobam -bed12 -i {output.bed} -g {params.fai} > {output.tempbam}
+        python {params.converttobamscript} {output.tempbam} {output.bam}
+        """
+
+# Function to define combined inputs for QC plots
+def hybrids_input(wildcards):
+    files = expand("results/hybrids/{sample}.hybrids.tsv.gz", sample = config["samples"])
+    return files
+
+def clusters_input(wildcards):
+    files = expand("results/clusters/{sample}.clusters.tsv", sample = config["samples"])
+    return files
+
+rule plotQC:
+    input:
+        hybrids_input,
+        clusters_input
+    output:
+        "results/plots/orientation_count.pdf",
+        "results/plots/orientation_percent.pdf",
+        "results/plots/recovery_count.pdf",
+        "results/plots/recovery_percent.pdf",
+        "results/plots/bindingenergy.pdf",
+    script:
+        "script/PlotQC.R"
+    params:
+        cluster="-J plotQC -c 8 --mem=32G -t 24:00:00 -o logs/plotQC.%A.log"
 
 
 # # 2. Bowtie2
