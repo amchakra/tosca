@@ -244,7 +244,7 @@ rule mapStar:
         --outSAMattributes All --outSAMtype BAM Unsorted --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
 
         sambamba sort -t {threads} -o {output.bam} {output.tmpbam}
-        pigz {params.outprefix}.Chimeric.out.junction
+        pigz {params.outprefix}Chimeric.out.junction
         mv {params.log} {output.log}
         """
 
