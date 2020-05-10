@@ -25,7 +25,15 @@ fwrite(clusters.dt, opt$output, sep = "\t")
 message(nrow(clusters.dt[L_end >= R_start]), " clusters removed")
 clusters.dt <- clusters.dt[L_end < R_start]
 
+message("Converting coordinates (new)...")
 genes.gr <- rtracklayer::import.gff2(opt$annotation)
+tic()
 clusters.grl <- ConvertCoordinates(clusters.dt, genes.gr = genes.gr, cores = 8)
+ExportBED(clusters.grl, clusters.dt, filename = gsub("tsv$", "old.bed", opt$output), sam_tag = TRUE)
+toc()
 
-ExportBED(clusters.grl, clusters.dt, filename = gsub("tsv$", "bed", opt$output), sam_tag = TRUE)
+# New method
+message("Converting coordinates (new)...")
+tic()
+ExportGenomicBED(seq.dt = seq.dt, genes.gr = genes.gr, sam_tag = TRUE, filename = gsub("tsv$", "bed", opt$output))
+toc()
