@@ -48,11 +48,13 @@ intragenic.hybrids.clusters.list <- lapply(1:length(intragenic.hybrids.list), fu
 
   # message(i)
   ClusterHybrids(intragenic.hybrids.list[[i]], percent_overlap = opt$percent)
+
 })
 
-intragenic.hybrids.clusters.dt <- rbindlist(intragenic.hybrids.clusters.list)
-solo.intragenic.hybrids.dt <- rbindlist(solo.intragenic.hybrids.list) # Add solos back in
-toomany.intragenic.hybrids.dt <- rbindlist(toomany.intragenic.hybrids.list)[, cluster := Inf]
+# Name and id order flipped for genes without clusters, because of merging clusters back in, hence use.names = TRUE
+intragenic.hybrids.clusters.dt <- rbindlist(intragenic.hybrids.clusters.list, use.names = TRUE)
+solo.intragenic.hybrids.dt <- rbindlist(solo.intragenic.hybrids.list, use.names = TRUE) # Add solos back in
+toomany.intragenic.hybrids.dt <- rbindlist(toomany.intragenic.hybrids.list, use.names = TRUE)[, cluster := Inf]
 intragenic.hybrids.clusters.dt <- rbind(intragenic.hybrids.clusters.dt, solo.intragenic.hybrids.dt, toomany.intragenic.hybrids.dt, use.names = TRUE, fill = TRUE)
 toc()
 

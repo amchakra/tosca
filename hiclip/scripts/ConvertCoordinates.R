@@ -19,7 +19,6 @@ opt <- parse_args(opt_parser)
 genes.gr <- rtracklayer::import.gff2(opt$annotation)
 
 hybrids.dt <- fread(opt$input)
-hybrids.dt <- RemovePCRDuplicates(hybrids.dt)
 seq.dt <- hybrids.dt[overlapping_hybrid %in% c(NA, FALSE)]
 seq.dt <- seq.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
 
