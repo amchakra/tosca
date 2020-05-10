@@ -24,7 +24,7 @@ hybrids.dt <- fread(opt$input)
 
 # Get intragenic hybrids
 intragenic.hybrids.dt <- hybrids.dt[L_seqnames == R_seqnames][grep("ENSMUSG", L_seqnames)]
-fwrite(hybrids.dt, gsub("\\.hybrids\\.", "\\.intragenic_hybrids\\.", opt$input), sep = "\t")
+fwrite(intragenic.hybrids.dt, gsub("\\.hybrids\\.", "\\.intragenic_hybrids\\.", opt$input), sep = "\t")
 
 # Get Cluster
 message("Clustering...")

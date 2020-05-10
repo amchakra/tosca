@@ -329,7 +329,7 @@ rule convertCoordinates:
         hybrids="results/hybrids/{sample}.intragenic_hybrids.mfe.clusters.tsv.gz",
     output:
         bed="results/bed/{sample}.intragenic_hybrids.mfe.clusters.bed",
-        tempbam="results/bam/{sample}.intragenic_hybrids.mfe.clusters.temp.bam",
+        tempbam=temp("results/bam/{sample}.intragenic_hybrids.mfe.clusters.temp.bam"),
         bam="results/bam/{sample}.intragenic_hybrids.mfe.clusters.bam",
     params:
         gtf=config['gtf'],
