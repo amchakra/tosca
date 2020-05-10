@@ -48,17 +48,31 @@ tic()
 seq.df <- data.frame(hybrids.dt[, .(id, L_sequence, R_sequence)])
 
 # Cluster jobs
-sjob <- slurm_apply(.slurm_GetMFE, seq.df, jobname = sapply(strsplit(basename(opt$input), "\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "24:00:00"), submit = TRUE)
-Sys.sleep(10) # To give it enough time to submit before the first check
-status <- get_job_status(sjob)$completed
-while(status == FALSE) status <- get_job_status(sjob)$completed
+sjob <- slurm_apply(.slurm_GetMFE, seq.df, jobname = sapply(strsplit(basename(opt$input), "\\."), "[[", 1), nodes = 100, cpus_per_node = 1, slurm_options = list(time = "24:00:00"), submit = TRUE)
+Sys.sleep(60) # To give it enough time to submit before the first check
+
+status <- FALSE
+while(status == FALSE) {
+
+	squeue.out <- system(paste("squeue -n", sjob$jobname), intern = TRUE) # Get contents of squeue for this job
+	if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
+	Sys.sleep(60)
+
+}
+
+# status <- get_job_status(sjob)$completed # This fails if not all the jobs have been submitted yet (i.e. in an array)
+# while(status == FALSE) {
+# 	status <- try(get_job_status(sjob)$completed)
+# 	Sys.sleep(10)
+# }
+
 mfe <- get_slurm_out(sjob, outtype = 'raw')
 
 # Remove temporary files
 cleanup_files(sjob) 
 
 # Merge back
-names(mfe) <- NULL # Not sure why it is names with L_sequence
+names(mfe) <- NULL # Not sure why it is names with L_sequence - not anymore...?
 mfe.dt <- as.data.table(unlist(mfe), keep.rownames = TRUE)
 setnames(mfe.dt, c("id", "mfe"))
 setkey(mfe.dt, id)
