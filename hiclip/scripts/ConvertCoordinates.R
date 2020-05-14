@@ -22,17 +22,17 @@ hybrids.dt <- fread(opt$input)
 seq.dt <- hybrids.dt[overlapping_hybrid %in% c(NA, FALSE)]
 seq.dt <- seq.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
 
-message("Converting coordinates...")
-tic()
-g.grl <- ConvertCoordinates(seq.dt = seq.dt, genes.gr = genes.gr, cores = 8)
-toc()
+# message("Converting coordinates...")
+# tic()
+# g.grl <- ConvertCoordinates(seq.dt = seq.dt, genes.gr = genes.gr, cores = 8)
+# toc()
 
-saveRDS(g.grl, gsub("bed$", "ggrl.rds", opt$output))
+# saveRDS(g.grl, gsub("bed$", "ggrl.rds", opt$output))
 
-ExportBED(g.grl = g.grl, hybrids.dt = seq.dt, filename = gsub("bed$", "old.bed", opt$output), sam_tag = TRUE)
+# ExportBED(g.grl = g.grl, hybrids.dt = seq.dt, filename = gsub("bed$", "old.bed", opt$output), sam_tag = TRUE)
 
 # New method
-message("Converting coordinates (new)...")
+message("Converting coordinates...")
 tic()
 ExportGenomicBED(seq.dt = seq.dt, genes.gr = genes.gr, sam_tag = TRUE, filename = opt$output)
 toc()
