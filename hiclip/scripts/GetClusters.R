@@ -54,7 +54,7 @@ intragenic.hybrids.clusters.list <- lapply(1:length(intragenic.hybrids.list), fu
 # Name and id order flipped for genes without clusters, because of merging clusters back in, hence use.names = TRUE
 intragenic.hybrids.clusters.dt <- rbindlist(intragenic.hybrids.clusters.list, use.names = TRUE)
 solo.intragenic.hybrids.dt <- rbindlist(solo.intragenic.hybrids.list, use.names = TRUE) # Add solos back in
-toomany.intragenic.hybrids.dt <- rbindlist(toomany.intragenic.hybrids.list, use.names = TRUE)[, cluster := Inf]
+toomany.intragenic.hybrids.dt <- ifelse(length(toomany.intragenic.hybrids.list) == 0, data.table(), rbindlist(toomany.intragenic.hybrids.list, use.names = TRUE)[, cluster := Inf]) # Not always have these then end up with a data frame with just Inf
 intragenic.hybrids.clusters.dt <- rbind(intragenic.hybrids.clusters.dt, solo.intragenic.hybrids.dt, toomany.intragenic.hybrids.dt, use.names = TRUE, fill = TRUE)
 toc()
 
