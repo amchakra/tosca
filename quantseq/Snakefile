@@ -1,0 +1,291 @@
+# Quantseq pipeline - for Flora's Rat 
+# A. M. Chakrabarti
+# 8th April 2020
+
+# Import config file & parameters
+configfile: 'config.yaml'
+
+# ==========
+# Endgame
+# ==========
+
+rule all:
+    input:
+        # expand("results/fastqc/{sample}_fastqc.html", sample=config["samples"]),
+        expand("results/coverage/{sample}_plus.bigwig", sample=config["samples"]),
+        expand("results/coverage/{sample}_minus.bigwig", sample=config["samples"]),
+        # expand("results/polyasite/{sample}.polyaregion.artefactsremoved.annotated.bed", sample=config["samples"]),
+        # "results/mergedclusters/mergedclusters.artefactsremoved.annotated.bed",
+        expand("results/polya_mapped/coverage/{sample}_plus.bigwig", sample=config["samples"]),
+        expand("results/polya_mapped/coverage/{sample}_minus.bigwig", sample=config["samples"]),
+        # expand("results/polyAclusters/{sample}.polya.threshold.bed", sample=config["samples"]),
+        # "results/polyAclusters/mergedClusters.bedgraph",
+        "results/polya_mapped/merged/polyAclusters.pos.bedgraph",
+        "results/polya_mapped/merged/polyAclusters.neg.bedgraph",
+        "results/mergedclusters/polyAclusters.bed",
+        expand("results/counts/{sample}.polyacount.bed", sample=config["samples"]),
+
+
+# ==========
+# Preprocessing steps
+# ==========
+
+rule fastqc:
+    input:
+        lambda wildcards: config["samples"][wildcards.sample]
+    output:
+        html="results/fastqc/{sample}_fastqc.html",
+        fczip=temp("results/fastqc/{sample}_fastqc.zip")
+    params:
+        fc="--outdir results/fastqc",
+        cluster="-J fastqc -N 1 --mem=16G -t 12:00:00 -o logs/fastqc.{sample}.%A.log"
+    run:
+        shell("fastqc {input} {params.fc}")
+        fastqc_out = "/".join(("results/fastqc", os.path.basename(input[0])))
+        fastqc_out = "_".join((fastqc_out, "fastqc.html"))
+        fastqc_out = fastqc_out.replace(".fastq.gz","")
+        shell("echo {fastqc_out}")
+        shell("mv {fastqc_out} {output.html}")
+
+# Remove adapters
+rule trimGalore:
+    input:
+        lambda wildcards: config["samples"][wildcards.sample]
+    output:
+        "results/trim_galore/{sample}_trimmed.fastq.gz",
+    params:
+        basic="-q 10 --gzip --length 10",
+        outputfolder="-o results/trim_galore",
+        log="results/trim_galore/{sample}_trimming_report.txt",
+        cluster="-J trimGalore -N 1 -c 1 --mem=16G -t 12:00:00 -o logs/trimGalore.{sample}.%A.log"
+    run:
+        shell("trim_galore {params.basic} {params.outputfolder} {input} &> {params.log}")
+        trimmed_out = "/".join(("results/trim_galore", os.path.basename(input[0])))
+        trimmed_out = trimmed_out.replace(".fastq.gz","")
+        trimmed_out = "_".join((trimmed_out, "trimmed.fq.gz"))
+        shell("echo {trimmed_out}")
+        shell("mv {trimmed_out} {output}")
+
+# ==========
+# Mapping
+# ==========
+
+# Then trim off the polyA tail and map
+rule mapStar:
+    input:
+        fastq="results/trim_galore/{sample}_trimmed.fastq.gz"
+    output:
+        polyAtrimmedfastq=temp("results/mapped/{sample}.polya.trimmed.fastq.gz"),
+        bam="results/mapped/{sample}.Aligned.sortedByCoord.out.bam",
+        bai="results/mapped/{sample}.Aligned.sortedByCoord.out.bam.bai",
+    threads:
+        8
+    params:
+        star_index=config['star_index'],
+        outprefix="results/mapped/{sample}.",
+        cluster="-J mapStar -N 1 -c 8 --mem-per-cpu=4GB -t 24:00:00 -o logs/mapStar.{sample}.%A.log"
+    shell:
+        """
+        cutadapt -j {threads} -m 18 --no-indels -e 0 -a "A{{1000}}" -o {output.polyAtrimmedfastq} {input.fastq}
+
+        STAR --runThreadN {threads} \
+        --genomeDir {params.star_index} --genomeLoad NoSharedMemory \
+        --readFilesIn {input.fastq} --readFilesCommand zcat \
+        --outFileNamePrefix {params.outprefix} \
+        --sjdbScore 1 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 \
+        --outFilterMultimapNmax 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 \
+        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 \
+        --outFilterType BySJout --twopassMode Basic \
+        --outSAMattributes All --outSAMstrandField intronMotif \
+        --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 60000000000 \
+        --quantMode GeneCounts
+
+        sambamba index -t {threads} {output.bam}
+        """
+
+# Create RPM normalised bigwig for IGV
+rule createbigwig:
+    input:
+        "results/mapped/{sample}.Aligned.sortedByCoord.out.bam"
+    output:
+        bigwig_pos="results/coverage/{sample}_plus.bigwig",
+        bigwig_neg="results/coverage/{sample}_minus.bigwig",
+        bg_pos=temp("results/coverage/{sample}.Signal.Unique.str1.out.bg"),
+        bg_neg=temp("results/coverage/{sample}.Signal.Unique.str2.out.bg"),
+        bg_multi_pos=temp("results/coverage/{sample}.Signal.UniqueMultiple.str1.out.bg"),
+        bg_multi_neg=temp("results/coverage/{sample}.Signal.UniqueMultiple.str2.out.bg")
+    params:
+        outprefix="results/coverage/{sample}.",
+        chr_lengths=config['chr_lengths'],
+        cluster="-N 1 -c 8 --mem-per-cpu=4GB -t 24:00:00 -o logs/createbigwig.{sample}.%A.log"
+    threads:
+        8
+    shell:
+        """
+        STAR --runThreadN {threads} --runMode inputAlignmentsFromBAM --inputBAMfile {input} --outWigType bedGraph --outWigStrand Stranded --outWigNorm RPM --outFileNamePrefix {params.outprefix}
+        bedSort {output.bg_pos} {output.bg_pos}
+        bedSort {output.bg_neg} {output.bg_neg}
+        bedGraphToBigWig {output.bg_pos} {params.chr_lengths} {output.bigwig_pos}
+        bedGraphToBigWig {output.bg_neg} {params.chr_lengths} {output.bigwig_neg}
+        """
+
+# ==========
+# Poly A read processing
+# ==========
+
+# Get polyA reads
+# Select those with AAAAA at the end
+# Then trim off the polyA tail and also the 5' 12 nucleotides (as recommended for Quantseq)
+
+rule getpolyAreads:
+    input:
+        fastq="results/trim_galore/{sample}_trimmed.fastq.gz"
+    output:
+        polyAfastq=temp("results/polya/{sample}.polya.fastq.gz"),
+        polyAtrimmedfastq="results/polya/{sample}.polya.trimmed.fastq.gz",
+        nopolyAfastq="results/polya/{sample}.nopolya.fastq.gz"
+    params:
+        cluster="-J getpolyAreads -N 1 -c 8 --mem-per-cpu=2G -t 24:00:00 -o logs/getpolyAreads.{sample}.%A.log"
+    shell:
+        """
+        cutadapt --no-indels -e 0 -O 5 -a "AAAAA$" --no-trim --untrimmed-output {output.nopolyAfastq} -o {output.polyAfastq} {input.fastq}
+        cutadapt -j 8 -m 18 --cut 12 --no-indels -e 0 -a "A{{1000}}" -o {output.polyAtrimmedfastq} {output.polyAfastq}
+        """
+
+# Map to genome and index
+# Currently only keeping uniquely mapped reads
+
+rule polyAmapstar:
+    input:
+        fastq="results/polya/{sample}.polya.trimmed.fastq.gz"
+    output:
+        bam="results/polya_mapped/{sample}.Aligned.sortedByCoord.out.bam",
+        bai="results/polya_mapped/{sample}.Aligned.sortedByCoord.out.bam.bai",
+    params:
+        star_index=config['star_index'],
+        outprefix="results/polya_mapped/{sample}.",
+        cluster="-J polyAmapstar -N 1 -c 8 --mem-per-cpu=6GB -t 24:00:00 -o logs/polyAmapstar.{sample}.%A.log"
+    threads:
+        8
+    shell:
+        """
+        STAR --runThreadN {threads} \
+        --genomeDir {params.star_index} --genomeLoad NoSharedMemory \
+        --readFilesIn {input.fastq} --readFilesCommand zcat \
+        --outFileNamePrefix {params.outprefix} \
+        --sjdbScore 1 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 \
+        --outFilterMultimapNmax 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 \
+        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 \
+        --outFilterType BySJout --twopassMode Basic \
+        --outSAMattributes All --outSAMstrandField intronMotif \
+        --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 60000000000
+
+        sambamba index -t 8 {output.bam}
+        """
+
+rule polyAcreate_bigwig:
+    input:
+        "results/polya_mapped/{sample}.Aligned.sortedByCoord.out.bam"
+    output:
+        bigwig_pos="results/polya_mapped/coverage/{sample}_plus.bigwig",
+        bigwig_neg="results/polya_mapped/coverage/{sample}_minus.bigwig",
+        bg_pos=temp("results/polya_mapped/coverage/{sample}.Signal.Unique.str1.out.bg"),
+        bg_neg=temp("results/polya_mapped/coverage/{sample}.Signal.Unique.str2.out.bg"),
+        bg_multi_pos=temp("results/polya_mapped/coverage/{sample}.Signal.UniqueMultiple.str1.out.bg"),
+        bg_multi_neg=temp("results/polya_mapped/coverage/{sample}.Signal.UniqueMultiple.str2.out.bg")
+    params:
+        outprefix="results/polya_mapped/coverage/{sample}.",
+        chr_lengths=config['chr_lengths'],
+        cluster="-J create_bigwig -N 1 -c 1 --mem=16G -t 12:00:00 -o logs/polyAcreate_bigwig.{sample}.%A.log"
+    shell:
+        """
+        STAR --runMode inputAlignmentsFromBAM --inputBAMfile {input} --outWigType bedGraph --outWigStrand Stranded --outWigNorm None --outFileNamePrefix {params.outprefix}
+        bedSort {output.bg_pos} {output.bg_pos}
+        bedSort {output.bg_neg} {output.bg_neg}
+        bedGraphToBigWig {output.bg_pos} {params.chr_lengths} {output.bigwig_pos}
+        bedGraphToBigWig {output.bg_neg} {params.chr_lengths} {output.bigwig_neg}
+        """
+
+# Function to define combined input for merge rule
+def polyAcoverage_inputs(wildcards):
+    files = expand("results/polya_mapped/{sample}.Aligned.sortedByCoord.out.bam", sample = config["samples"])
+    return files
+
+# Merge all polyA ends
+rule polyAcoverage:
+    input:
+        polyAcoverage_inputs
+    output:
+        bam=temp("results/polya_mapped/merged/polyAclusters.bam"),
+        bg_pos="results/polya_mapped/merged/polyAclusters.pos.bedgraph",
+        bg_neg="results/polya_mapped/merged/polyAclusters.neg.bedgraph"
+    params:
+        chr_lengths=config['chr_lengths'],
+        cluster="-J polyAcoverage -N 1 -c 8 --mem=16G -t 12:00:00 -o logs/polyAcoverage.%A.log"
+    shell:
+        """
+        sambamba merge -t 8 {output.bam} {input}
+        bedtools genomecov -bg -strand + -3 -ibam {output.bam} -g {params.chr_lengths} > {output.bg_pos}
+        bedtools genomecov -bg -strand - -3 -ibam {output.bam} -g {params.chr_lengths} > {output.bg_neg}
+        """
+
+# Filter random priming artefacts
+rule removeRandomPriming:
+    input:
+        bg_pos="results/polya_mapped/merged/polyAclusters.pos.bedgraph",
+        bg_neg="results/polya_mapped/merged/polyAclusters.neg.bedgraph"
+    output:
+        bed="results/mergedclusters/polyAclusters.bed",
+        uniquebed="results/mergedclusters/polyAclusters.unique.bed",
+    params:
+        randomprimingscript=config['randompriming'],
+        minreads=config['minreads'],
+        clusterdist=config['clusterdist'],
+        pas=config['pas'],
+        apa=config['apa'],
+        nopas=config['nopas'],
+        cluster="-N 1 -c 4 --mem=32G -t 12:00:00 -o logs/removeRandomPriming.%A.log"
+    shell:
+        """
+        Rscript --vanilla {params.randomprimingscript} --bg_pos {input.bg_pos} --bg_neg {input.bg_neg} --output {output.bed} \
+        --minreads {params.minreads} --clusterdist {params.clusterdist} \
+        --pas {params.pas} --apa {params.apa} --nopas {params.nopas} > results/mergedclusters/RemoveRandomPriming.rlog 2>&1
+        """
+
+# Annotate clusters with gene id
+rule annotateFilteredClusters:
+    input:
+        "results/mergedclusters/polyAclusters.unique.bed",
+    output:
+        annotatedbed="results/mergedclusters/polyAclusters.unique.annotated.bed",
+    params:
+        annotateclustersscript=config['annotateclusters'],
+        gff3=config['gff3'],
+        cluster="-N 1 -c 6 --mem=32G -t 12:00:00 -o logs/annotateFilteredClusters.%A.log"
+    shell:
+        """
+        Rscript --vanilla {params.annotateclustersscript} -b {input} -g {params.gff3} -t 6 > AnnotatePolyAClusters.rlog 2>&1
+        """
+
+rule createCountTable:
+    input:
+        pas="results/mergedclusters/polyAclusters.unique.annotated.bed",
+        bam="results/mapped/{sample}.Aligned.sortedByCoord.out.bam",
+    output:
+        polyacount="results/counts/{sample}.polyacount.bed",
+        bed=temp("results/counts/{sample}.Aligned.sortedByCoord.out.bed"),
+        polyabedgraph="results/counts/{sample}.polyacount.bedgraph",
+    params:
+        cluster="-N 1 -c 1 --mem=16G -t 12:00:00 -o logs/createCountTable.{sample}.%A.log"
+    shell:
+        """
+        # First convert BAM to BED for window
+        bedtools bamtobed -split -i {input.bam} > {output.bed}
+
+        # Then get non polyA read counts within a 100 window upstream of the polyA cluster
+        bedtools window -l 200 -r 50 -sw -sm -c -a {input.pas} -b {output.bed} > {output.polyacount}
+
+        # Bedgraphs for visualisation
+        awk '{{OFS="\t"}}{{if($6 == "+") {{print $1, $2, $3, $5}} else {{print $1, $2, $3, -$5}}}}' {output.polyacount} |
+        sort -k1,1 -k2,2n > {output.polyabedgraph}
+        """

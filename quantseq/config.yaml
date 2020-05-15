@@ -1,0 +1,70 @@
+# Config for Quantseq pipeline - for Flora's Rat 
+# A. M. Chakrabarti
+# 8th April 2020
+
+# Indices
+star_index: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/hiclip_v2/results/bowtie2_test/newstar/STAR_rn6_Ensembl94
+chr_lengths: /home/camp/chakraa2/working/nobby/genomes/sequences/Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa.fai
+# tian: /camp/lab/luscomben/working/nobby/projects/cristina/ref/human.PAS.hg38.utr3.sorted.bed.gz
+# zavolan: /home/camp/chakraa2/working/nobby/projects/quantseq/ref/Hsapiens_r1.0_hg38_liftOver.clusters_withTissueInfo.sorted.bed
+gtf: /home/camp/chakraa2/working/nobby/genomes/annotation/ensembl/Rattus_norvegicus.Rnor_6.0.99.gtf
+gff3: /home/camp/chakraa2/working/nobby/genomes/annotation/ensembl/Rattus_norvegicus.Rnor_6.0.99.gff3
+
+# Params
+trim_galore_params: TRUE
+mapq: 10
+minreads: 2 # Minimum number of reads per polyA cluster to keep cluster
+clusterdist: 200 # Distance between two clusters to merge
+# minsamples: 3 # Minimum number of samples polyA cluster needs to be in to keep cluster in merged clusters
+# minproportion: 0.05 # Minimum fraction of reads of a gene (summed across all samples) that need to contribute to a polyA cluster to keep cluster.
+# maxdistance: 100 # Maximum distance from end of no polyA read to polyA site
+pas: 0.5
+apa: 0.4
+nopas: 0.3
+
+# minreadcount: 5 # minimum coverage count to slice
+# mergedistance: 50 # memerging distance after slice
+
+# Scripts
+randompriming: /home/camp/chakraa2/working/nobby/projects/martina/quantseq/scripts/RemoveRandomPrimingBedgraph.R
+annotateclusters: /home/camp/chakraa2/working/nobby/projects/martina/quantseq/scripts/AnnotatePolyASites.R
+
+samples:
+
+  P0_WT_1a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A51_S47_L001_R1_001.fastq.gz
+  P0_WT_2a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A52_S48_L001_R1_001.fastq.gz
+  P0_WT_3a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A53_S49_L001_R1_001.fastq.gz
+  P0_KD_1a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A54_S50_L001_R1_001.fastq.gz
+  P0_KD_2a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A55_S51_L001_R1_001.fastq.gz
+  P0_KD_3a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A56_S52_L001_R1_001.fastq.gz
+  P7_WT_1a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A57_S53_L001_R1_001.fastq.gz
+  P7_WT_2a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A58_S54_L001_R1_001.fastq.gz
+  P7_WT_3a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A59_S55_L001_R1_001.fastq.gz
+  P7_KD_1a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A60_S57_L001_R1_001.fastq.gz
+  P7_KD_2a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A61_S58_L001_R1_001.fastq.gz
+  P7_KD_3a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A62_S59_L001_R1_001.fastq.gz
+  5w_WT_1a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A63_S60_L001_R1_001.fastq.gz
+  5w_WT_2a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A64_S61_L001_R1_001.fastq.gz
+  5w_WT_3a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A65_S62_L001_R1_001.fastq.gz
+  5w_KD_1a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A66_S63_L001_R1_001.fastq.gz
+  5w_KD_2a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A67_S64_L001_R1_001.fastq.gz
+  5w_KD_3a: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A68_S65_L001_R1_001.fastq.gz
+  P0_WT_1b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A69_S66_L001_R1_001.fastq.gz
+  P0_WT_2b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A70_S68_L001_R1_001.fastq.gz
+  P0_WT_3b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A71_S69_L001_R1_001.fastq.gz
+  P0_KD_1b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A72_S70_L001_R1_001.fastq.gz
+  P0_KD_2b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A73_S71_L001_R1_001.fastq.gz
+  P0_KD_3b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A74_S72_L001_R1_001.fastq.gz
+  P7_WT_1b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A75_S73_L001_R1_001.fastq.gz
+  P7_WT_2b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A76_S74_L001_R1_001.fastq.gz
+  P7_WT_3b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A77_S75_L001_R1_001.fastq.gz
+  P7_KD_1b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A78_S76_L001_R1_001.fastq.gz
+  P7_KD_2b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A79_S77_L001_R1_001.fastq.gz
+  P7_KD_3b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A80_S79_L001_R1_001.fastq.gz
+  5w_WT_1b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A81_S80_L001_R1_001.fastq.gz
+  5w_WT_2b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A82_S81_L001_R1_001.fastq.gz
+  5w_WT_3b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A83_S82_L001_R1_001.fastq.gz
+  5w_KD_1b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A84_S83_L001_R1_001.fastq.gz
+  5w_KD_2b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A85_S84_L001_R1_001.fastq.gz
+  5w_KD_3b: /home/camp/chakraa2/working/nobby/babs-data-ule/flora.lee/robert.goldstone/PM19255/191106_K00102_0416_AHFCMKBBXY/fastq/LEE595A86_S85_L001_R1_001.fastq.gz
+
