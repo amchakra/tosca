@@ -70,7 +70,7 @@ process filtersplicedreads {
     """
     #!/usr/bin/env python
 
-    # Script to filter our reads that map to annotated splice junctions
+    # Script to filter out reads that map to annotated splice junctions
     # A. M. Chakrabarti
     # 9th October 2018
 
