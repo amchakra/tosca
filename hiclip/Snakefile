@@ -16,13 +16,14 @@ DATAPATH=config['datapath']
 
 rule all:
     input:
-        expand("results/fastqc/{sample}_fastqc.html", sample=config["samples"]),
+        # expand("results/fastqc/{sample}_fastqc.html", sample=config["samples"]),
         # expand("results/hybrids/{sample}.hybrid.bam", sample=config["samples"]),
         expand("results/preprocessed/{sample}.bt2.bam", sample=config["samples"]),
         expand("results/star_chimeric/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
         # expand("results/star_chimeric_0/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
         # expand("results/star_chimeric_0j/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
         # expand("results/star_chimeric_0j/{sample}.genomic_hybrids.bam", sample=config["samples"]),
+        expand("results/star_chimeric_withinBAM/{sample}.Aligned.sortedByCoord.out.bam", sample=config["samples"]),
         # expand("results/bowtie2/{sample}.bam", sample=config["samples"]),
         expand("results/hybrids/{sample}.hybrids.tsv.gz", sample=config["samples"]),
         expand("results/hybrids/{sample}.hybrids.mfe.tsv.gz", sample=config["samples"]),
@@ -245,6 +246,43 @@ rule mapStar:
 
         sambamba sort -t {threads} -o {output.bam} {output.tmpbam}
         pigz {params.outprefix}Chimeric.out.junction
+        mv {params.log} {output.log}
+        """
+
+rule mapStarwithinBAM:
+    input:
+        fastq="results/preprocessed/{sample}.filtered.fastq.gz",
+    output:
+        tmpbam=temp("results/star_chimeric_withinBAM/{sample}.Aligned.out.bam"),
+        bam="results/star_chimeric_withinBAM/{sample}.Aligned.sortedByCoord.out.bam",
+        bai="results/star_chimeric_withinBAM/{sample}.Aligned.sortedByCoord.out.bam.bai",
+        # chimeric="results/star_chimeric_withinBAM/{sample}.Chimeric.out.junction.gz",
+        # unmapped="results/star_chimeric_withinBAM/{sample}.Unmapped.out.mate1.gz",
+        log="results/logs/{sample}.withinBAM.genome.log",
+    params:
+        starindex=config['star'],
+        outprefix="results/star_chimeric_withinBAM/{sample}.",
+        log="results/star_chimeric_withinBAM/{sample}.Log.final.out",
+        cluster="-J mapStar -N 1 -c 8 --mem=40GB -t 12:00:00 -o logs/mapStarwithinBAM.{sample}.%A.log"
+    threads:
+        8
+    shell:
+        """
+        ml SAMtools
+
+        STAR --runThreadN {threads} \
+        --genomeDir {params.starindex} --genomeLoad NoSharedMemory \
+        --readFilesIn {input.fastq} --readFilesCommand zcat \
+        --outFileNamePrefix {params.outprefix} \
+        --outFilterMultimapNmax 1 \
+        --alignIntronMin 10 --scoreGapNoncan 0 --scoreGapATAC 0 --scoreGapGCAG 0 --scoreGap 0 \
+        --chimSegmentMin 12 --chimJunctionOverhangMin 12  --chimScoreJunctionNonGTAG 0 \
+        --chimNonchimScoreDropMin 10 --chimOutType WithinBAM \
+        --alignSJoverhangMin 12 --alignSJDBoverhangMin 12 --alignSJstitchMismatchNmax 5 -1 5 5 \
+        --outSAMattributes All --outSAMtype BAM Unsorted --limitBAMsortRAM 9839723217 # --limitBAMsortRAM 6000000000
+
+        sambamba sort -t {threads} -o {output.bam} {output.tmpbam}
+        # pigz {params.outprefix}Chimeric.out.junction
         mv {params.log} {output.log}
         """
 

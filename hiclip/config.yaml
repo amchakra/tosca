@@ -105,6 +105,6 @@ samples:
 
   # PARIS data from Lu et al. (2016)
 
-  PARIS_mESC_1_ZL: /camp/home/chakraa2/working/nobby/projects/flora/mouse/paris/rbc/SRR2814766_1.rbc.fastq.gz
-  PARIS_mESC_2_ZL: /camp/home/chakraa2/working/nobby/projects/flora/mouse/paris/rbc/SRR2814767_1.rbc.fastq.gz
-  PARIS_mESC_3_ZL: /camp/home/chakraa2/working/nobby/projects/flora/mouse/paris/rbc/SRR2814768_1.rbc.fastq.gz
+  PARIS_mESC_1_ZL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/paris/rbc/SRR2814766_1.rbc.fastq.gz
+  PARIS_mESC_2_ZL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/paris/rbc/SRR2814767_1.rbc.fastq.gz
+  PARIS_mESC_3_ZL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/paris/rbc/SRR2814768_1.rbc.fastq.gz
