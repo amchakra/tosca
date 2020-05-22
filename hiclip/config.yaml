@@ -2,105 +2,105 @@
 # A. M. Chakrabarti
 # Last updated: 28th January 2020
 
-datapath: /home/camp/chakraa2/working/nobby/projects/flora/iclip
+datapath: /camp/lab/luscomben/home/users/chakraa2/projects/flora/iclip
 
-stargenome: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24
-faigenome: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai
+stargenome: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24
+faigenome: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai
 
-# star: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
-# bt2: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
-star: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes
-bt2: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes
+# star: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
+# bt2: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes
+star: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes
+bt2: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes
 
-# genome_csv: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes.csv.gz
-genome_csv: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz
-gtf: /home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz
+# genome_csv: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_genes.csv.gz
+genome_csv: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz
+gtf: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz
 
 # Scripts
-removesplicedreads: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/scripts/RemoveSplicedReads.py
-removeperfectlocalalignedreads: /home/camp/chakraa2/working/nobby/projects/flora/Staufen2/scripts/RemovePerfectLocalAlignedReads.py
-gethybrids: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetHybrids.R
-getmfe: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetMFE.R
-getclusters: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/GetClusters.R
-convertcoordinates: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/ConvertCoordinates.R
-converttobam: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/ConvertToBAM.py
-collapseclusters: /home/camp/chakraa2/working/nobby/projects/flora/mouse/hiclip/scripts/CollapseClusters.R
+removesplicedreads: /camp/lab/luscomben/home/users/chakraa2/projects/flora/Staufen2/scripts/RemoveSplicedReads.py
+removeperfectlocalalignedreads: /camp/lab/luscomben/home/users/chakraa2/projects/flora/Staufen2/scripts/RemovePerfectLocalAlignedReads.py
+gethybrids: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/hiclip/scripts/GetHybrids.R
+getmfe: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/hiclip/scripts/GetMFE.R
+getclusters: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/hiclip/scripts/GetClusters.R
+convertcoordinates: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/hiclip/scripts/ConvertCoordinates.R
+converttobam: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/hiclip/scripts/ConvertToBAM.py
+collapseclusters: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/hiclip/scripts/CollapseClusters.R
 
 samples:
 
   # First round of mouse hiCLIP
 
-  STAU1_ESC_neurons_129S6B6_day16_1_STAU1_rep1_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNCCTGCNNN.fastq.gz
-  STAU1_ESC_neurons_129S6B6_day16_2_STAU1_rep2_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNGGAGCNNN.fastq.gz
-  STAU2_ESC_neurons_129S6B6_day16_3_STAU2_rep1_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNAGTCCNNN.fastq.gz
-  STAU2_ESC_neurons_129S6B6_day16_4_STAU2_rep2_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNTCGCCNNN.fastq.gz
-  IgG_ESC_neurons_129S6B6_day16_5_IgG_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNCATACNNN.fastq.gz
-  input_ESC_neurons_129S6B6_day16_1_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNGTAACNNN.fastq.gz
-  input_ESC_neurons_129S6B6_day16_2_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNAGTTANNN.fastq.gz
-  input_ESC_neurons_129S6B6_day16_3_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNCTGTANNN.fastq.gz
-  input_ESC_neurons_129S6B6_day16_4_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNTATGANNN.fastq.gz
-  input_ESC_neurons_129S6B6_day16_5_20200114_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/demux/demux_NNNNGTAGANNN.fastq.gz
+  # STAU1_ESC_neurons_129S6B6_day16_1_STAU1_rep1_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNCCTGCNNN.fastq.gz
+  # STAU1_ESC_neurons_129S6B6_day16_2_STAU1_rep2_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNGGAGCNNN.fastq.gz
+  # STAU2_ESC_neurons_129S6B6_day16_3_STAU2_rep1_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNAGTCCNNN.fastq.gz
+  # STAU2_ESC_neurons_129S6B6_day16_4_STAU2_rep2_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNTCGCCNNN.fastq.gz
+  # IgG_ESC_neurons_129S6B6_day16_5_IgG_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNCATACNNN.fastq.gz
+  # input_ESC_neurons_129S6B6_day16_1_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNGTAACNNN.fastq.gz
+  # input_ESC_neurons_129S6B6_day16_2_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNAGTTANNN.fastq.gz
+  # input_ESC_neurons_129S6B6_day16_3_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNCTGTANNN.fastq.gz
+  # input_ESC_neurons_129S6B6_day16_4_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNTATGANNN.fastq.gz
+  # input_ESC_neurons_129S6B6_day16_5_20200114_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/demux/demux_NNNNGTAGANNN.fastq.gz
 
   # Second round of mouse hiCLIP
   # PM20059 LEE722A2-A24 UN2002_FL
-  # STAU1_ESC_129S6B6_2iLIFday0_1_STAU1_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNTCCACNNNNNN.fastq.gz
-  # STAU1_ESC_129S6B6_2iLIFday0_2_STAU1_rep2_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNCCGGANNNNNN.fastq.gz
-  # STAU1_ESC_NPCs_129S6B6_CAday8_3_STAU1_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNAGGCANNNNNN.fastq.gz
-  # STAU1_ESC_NPCs_129S6B6_CAday8_4_STAU1_rep2_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNGAATANNNNNN.fastq.gz
-  # STAU2_ESC_NPCs_129S6B6_CAday8_5_STAU2_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNTTTAANNNNNN.fastq.gz
-  # STAU2_ESC_NPCs_129S6B6_CAday8_6_STAU2_rep2_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNCATTTNNNNNN.fastq.gz
-  # STAU1_iPSC_NPC_control1_FGFpropagation_7_STAU1_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNACCTTNNNNNN.fastq.gz
-  # STAU1_iPSC_NPC_control1_FGFpropagation_8_STAU1_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNGTATTNNNNNN.fastq.gz
-  # STAU2_iPSC_NPC_control1_FGFpropagation_9_STAU2_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNTGCGTNNNNNN.fastq.gz
-  # STAU1_iPSC_motorneurons_control1_matureday18_10_STAU1_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNCAAGTNNNNNN.fastq.gz
-  # STAU1_iPSC_motorneurons_control1_matureday18_11_STAU1_rep2_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNGCTCTNNNNNN.fastq.gz
-  # STAU2_iPSC_motorneurons_control1_matureday18_12_STAU2_rep1_UMI10_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNAGACTNNNNNN.fastq.gz
-  # STAU1_ESC_129S6B6_2iLIFday0_1_STAU1_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNCTGATNNN.fastq.gz
-  # STAU1_ESC_129S6B6_2iLIFday0_2_STAU1_rep2_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNGCTTGNNN.fastq.gz
-  # STAU1_ESC_NPCs_129S6B6_CAday8_3_STAU1_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNATCTGNNN.fastq.gz
-  # STAU1_ESC_NPCs_129S6B6_CAday8_4_STAU1_rep2_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNTGTGGNNN.fastq.gz
-  # STAU2_ESC_NPCs_129S6B6_CAday8_5_STAU2_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNCAGGGNNN.fastq.gz
-  # STAU2_ESC_NPCs_129S6B6_CAday8_6_STAU2_rep2_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNGATCGNNN.fastq.gz
-  # STAU1_iPSC_NPC_control1_FGFpropagation_7_STAU1_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNATACGNNN.fastq.gz
-  # STAU1_iPSC_NPC_control1_FGFpropagation_8_STAU1_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNTCGAGNNN.fastq.gz
-  # STAU2_iPSC_NPC_control1_FGFpropagation_9_STAU2_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNCACAGNNN.fastq.gz
-  # STAU1_iPSC_motorneurons_control1_matureday18_10_STAU1_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNGTTTCNNN.fastq.gz
-  # STAU1_iPSC_motorneurons_control1_matureday18_11_STAU1_rep2_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNAACTCNNN.fastq.gz
-  # STAU2_iPSC_motorneurons_control1_matureday18_12_STAU2_rep1_UMI7_20200218_FL: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/PM20059/demux_NNNNTCATCNNN.fastq.gz
+  # STAU1_ESC_129S6B6_2iLIFday0_1_STAU1_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNTCCACNNNNNN.fastq.gz
+  # STAU1_ESC_129S6B6_2iLIFday0_2_STAU1_rep2_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNCCGGANNNNNN.fastq.gz
+  # STAU1_ESC_NPCs_129S6B6_CAday8_3_STAU1_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNAGGCANNNNNN.fastq.gz
+  # STAU1_ESC_NPCs_129S6B6_CAday8_4_STAU1_rep2_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNGAATANNNNNN.fastq.gz
+  # STAU2_ESC_NPCs_129S6B6_CAday8_5_STAU2_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNTTTAANNNNNN.fastq.gz
+  # STAU2_ESC_NPCs_129S6B6_CAday8_6_STAU2_rep2_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNCATTTNNNNNN.fastq.gz
+  # STAU1_iPSC_NPC_control1_FGFpropagation_7_STAU1_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNACCTTNNNNNN.fastq.gz
+  # STAU1_iPSC_NPC_control1_FGFpropagation_8_STAU1_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNGTATTNNNNNN.fastq.gz
+  # STAU2_iPSC_NPC_control1_FGFpropagation_9_STAU2_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNTGCGTNNNNNN.fastq.gz
+  # STAU1_iPSC_motorneurons_control1_matureday18_10_STAU1_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNCAAGTNNNNNN.fastq.gz
+  # STAU1_iPSC_motorneurons_control1_matureday18_11_STAU1_rep2_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNGCTCTNNNNNN.fastq.gz
+  # STAU2_iPSC_motorneurons_control1_matureday18_12_STAU2_rep1_UMI10_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNAGACTNNNNNN.fastq.gz
+  # STAU1_ESC_129S6B6_2iLIFday0_1_STAU1_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNCTGATNNN.fastq.gz
+  # STAU1_ESC_129S6B6_2iLIFday0_2_STAU1_rep2_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNGCTTGNNN.fastq.gz
+  # STAU1_ESC_NPCs_129S6B6_CAday8_3_STAU1_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNATCTGNNN.fastq.gz
+  # STAU1_ESC_NPCs_129S6B6_CAday8_4_STAU1_rep2_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNTGTGGNNN.fastq.gz
+  # STAU2_ESC_NPCs_129S6B6_CAday8_5_STAU2_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNCAGGGNNN.fastq.gz
+  # STAU2_ESC_NPCs_129S6B6_CAday8_6_STAU2_rep2_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNGATCGNNN.fastq.gz
+  # STAU1_iPSC_NPC_control1_FGFpropagation_7_STAU1_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNATACGNNN.fastq.gz
+  # STAU1_iPSC_NPC_control1_FGFpropagation_8_STAU1_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNTCGAGNNN.fastq.gz
+  # STAU2_iPSC_NPC_control1_FGFpropagation_9_STAU2_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNCACAGNNN.fastq.gz
+  # STAU1_iPSC_motorneurons_control1_matureday18_10_STAU1_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNGTTTCNNN.fastq.gz
+  # STAU1_iPSC_motorneurons_control1_matureday18_11_STAU1_rep2_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNAACTCNNN.fastq.gz
+  # STAU2_iPSC_motorneurons_control1_matureday18_12_STAU2_rep1_UMI7_20200218_FL: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/PM20059/demux_NNNNTCATCNNN.fastq.gz
 
   # From iMaps as issue with demultiplexing different sizes barcodes for above with older iCount
-  ctrl-igg-temp-esc-neurons-129s6b6-day16-5-igg-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/ctrl-igg-temp-esc-neurons-129s6b6-day16-5-igg-20200114-fl.fastq.gz
-  input-esc-129s6b6-2ilifday0-1-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-129s6b6-2ilifday0-1-20200218-fl.fastq.gz
-  input-esc-129s6b6-2ilifday0-13-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-129s6b6-2ilifday0-13-20200218-fl.fastq.gz
-  input-esc-129s6b6-2ilifday0-2-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-129s6b6-2ilifday0-2-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-14-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-14-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-15-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-15-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-16-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-16-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-3-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-3-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-4-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-4-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-5-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-5-20200218-fl.fastq.gz
-  input-esc-npcs-129s6b6-caday8-6-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-6-20200218-fl.fastq.gz
-  input-temp-esc-neurons-129s6b6-day16-1-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-1-20200114-fl.fastq.gz
-  input-temp-esc-neurons-129s6b6-day16-2-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-2-20200114-fl.fastq.gz
-  input-temp-esc-neurons-129s6b6-day16-3-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-3-20200114-fl.fastq.gz
-  input-temp-esc-neurons-129s6b6-day16-4-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-4-20200114-fl.fastq.gz
-  input-temp-esc-neurons-129s6b6-day16-5-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-5-20200114-fl.fastq.gz
-  stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi10-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi10-20200218-fl.fastq.gz
-  stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi7-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi7-20200218-fl.fastq.gz
-  stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi10-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi10-20200218-fl.fastq.gz
-  stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi7-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi7-20200218-fl.fastq.gz
-  stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi10-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi10-20200218-fl.fastq.gz
-  stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi7-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi7-20200218-fl.fastq.gz
-  stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi10-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi10-20200218-fl.fastq.gz
-  stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi7-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi7-20200218-fl.fastq.gz
-  stau1-temp-esc-neurons-129s6b6-day16-1-stau1-rep1-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-temp-esc-neurons-129s6b6-day16-1-stau1-rep1-20200114-fl.fastq.gz
-  stau1-temp-esc-neurons-129s6b6-day16-2-stau1-rep2-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-temp-esc-neurons-129s6b6-day16-2-stau1-rep2-20200114-fl.fastq.gz
-  stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi10-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi10-20200218-fl.fastq.gz
-  stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi7-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi7-20200218-fl.fastq.gz
-  stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi10-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi10-20200218-fl.fastq.gz
-  stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi7-20200218-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi7-20200218-fl.fastq.gz
-  stau2-temp-esc-neurons-129s6b6-day16-3-stau2-rep1-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-temp-esc-neurons-129s6b6-day16-3-stau2-rep1-20200114-fl.fastq.gz
-  stau2-temp-esc-neurons-129s6b6-day16-4-stau2-rep2-20200114-fl: /home/camp/chakraa2/working/nobby/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-temp-esc-neurons-129s6b6-day16-4-stau2-rep2-20200114-fl.fastq.gz
+  ctrl-igg-temp-esc-neurons-129s6b6-day16-5-igg-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/ctrl-igg-temp-esc-neurons-129s6b6-day16-5-igg-20200114-fl.fastq.gz
+  input-esc-129s6b6-2ilifday0-1-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-129s6b6-2ilifday0-1-20200218-fl.fastq.gz
+  input-esc-129s6b6-2ilifday0-13-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-129s6b6-2ilifday0-13-20200218-fl.fastq.gz
+  input-esc-129s6b6-2ilifday0-2-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-129s6b6-2ilifday0-2-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-14-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-14-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-15-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-15-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-16-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-16-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-3-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-3-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-4-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-4-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-5-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-5-20200218-fl.fastq.gz
+  input-esc-npcs-129s6b6-caday8-6-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-esc-npcs-129s6b6-caday8-6-20200218-fl.fastq.gz
+  input-temp-esc-neurons-129s6b6-day16-1-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-1-20200114-fl.fastq.gz
+  input-temp-esc-neurons-129s6b6-day16-2-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-2-20200114-fl.fastq.gz
+  input-temp-esc-neurons-129s6b6-day16-3-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-3-20200114-fl.fastq.gz
+  input-temp-esc-neurons-129s6b6-day16-4-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-4-20200114-fl.fastq.gz
+  input-temp-esc-neurons-129s6b6-day16-5-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/input-temp-esc-neurons-129s6b6-day16-5-20200114-fl.fastq.gz
+  stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi10-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi10-20200218-fl.fastq.gz
+  stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi7-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-1-stau1-rep1-umi7-20200218-fl.fastq.gz
+  stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi10-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi10-20200218-fl.fastq.gz
+  stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi7-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-129s6b6-2ilifday0-2-stau1-rep2-umi7-20200218-fl.fastq.gz
+  stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi10-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi10-20200218-fl.fastq.gz
+  stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi7-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-3-stau1-rep1-umi7-20200218-fl.fastq.gz
+  stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi10-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi10-20200218-fl.fastq.gz
+  stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi7-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-esc-npcs-129s6b6-caday8-4-stau1-rep2-umi7-20200218-fl.fastq.gz
+  stau1-temp-esc-neurons-129s6b6-day16-1-stau1-rep1-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-temp-esc-neurons-129s6b6-day16-1-stau1-rep1-20200114-fl.fastq.gz
+  stau1-temp-esc-neurons-129s6b6-day16-2-stau1-rep2-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau1-temp-esc-neurons-129s6b6-day16-2-stau1-rep2-20200114-fl.fastq.gz
+  stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi10-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi10-20200218-fl.fastq.gz
+  stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi7-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-5-stau2-rep1-umi7-20200218-fl.fastq.gz
+  stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi10-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi10-20200218-fl.fastq.gz
+  stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi7-20200218-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-esc-npcs-129s6b6-caday8-6-stau2-rep2-umi7-20200218-fl.fastq.gz
+  stau2-temp-esc-neurons-129s6b6-day16-3-stau2-rep1-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-temp-esc-neurons-129s6b6-day16-3-stau2-rep1-20200114-fl.fastq.gz
+  stau2-temp-esc-neurons-129s6b6-day16-4-stau2-rep2-20200114-fl: /camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/data/mesc-neuron-hiclip/stau2-temp-esc-neurons-129s6b6-day16-4-stau2-rep2-20200114-fl.fastq.gz
 
 
   # PARIS data from Lu et al. (2016)

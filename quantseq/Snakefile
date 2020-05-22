@@ -253,23 +253,24 @@ rule removeRandomPriming:
         """
 
 # Annotate clusters with gene id
-rule annotateFilteredClusters:
-    input:
-        "results/mergedclusters/polyAclusters.unique.bed",
-    output:
-        annotatedbed="results/mergedclusters/polyAclusters.unique.annotated.bed",
-    params:
-        annotateclustersscript=config['annotateclusters'],
-        gff3=config['gff3'],
-        cluster="-N 1 -c 6 --mem=32G -t 12:00:00 -o logs/annotateFilteredClusters.%A.log"
-    shell:
-        """
-        Rscript --vanilla {params.annotateclustersscript} -b {input} -g {params.gff3} -t 6 > AnnotatePolyAClusters.rlog 2>&1
-        """
+# rule annotateFilteredClusters:
+#     input:
+#         "results/mergedclusters/polyAclusters.unique.bed",
+#     output:
+#         annotatedbed="results/mergedclusters/polyAclusters.unique.annotated.bed",
+#     params:
+#         annotateclustersscript=config['annotateclusters'],
+#         gff3=config['gff3'],
+#         cluster="-N 1 -c 6 --mem=32G -t 12:00:00 -o logs/annotateFilteredClusters.%A.log"
+#     shell:
+#         """
+#         Rscript --vanilla {params.annotateclustersscript} -b {input} -g {params.gff3} -t 6 > AnnotatePolyAClusters.rlog 2>&1
+#         """
 
 rule createCountTable:
     input:
-        pas="results/mergedclusters/polyAclusters.unique.annotated.bed",
+        # pas="results/mergedclusters/polyAclusters.unique.annotated.bed",
+        pas="results/mergedclusters/polyAclusters.unique.bed",
         bam="results/mapped/{sample}.Aligned.sortedByCoord.out.bam",
     output:
         polyacount="results/counts/{sample}.polyacount.bed",
