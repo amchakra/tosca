@@ -13,7 +13,7 @@ process extracthybrids {
     time '12h'
 
     input:
-        tuple val(sample_id), path(reads), path(bai), path(genome_csv)
+        tuple val(sample_id), path(reads), path(bai), path(transcript_fasta_csv)
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz")
@@ -35,7 +35,7 @@ process extracthybrids {
 
     # Get SJ motifs
     message("Loading genome...")
-    genome.dt <- fread('$genome_csv')
+    genome.dt <- fread("$transcript_fasta_csv")
 
     message("Getting SJ motifs...")
     tic()
