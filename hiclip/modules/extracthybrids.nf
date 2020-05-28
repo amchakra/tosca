@@ -13,7 +13,7 @@ process extracthybrids {
     time '12h'
 
     input:
-        tuple val(sample_id), path(reads), path(bai)
+        tuple val(sample_id), path(reads), path(bai), path(genome_csv)
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz")
@@ -31,6 +31,15 @@ process extracthybrids {
     tic()
     hybrids.dt <- ExtractHybridsWithinBAM(aligned.bam = "$reads")
     hybrids.dt <- ReorientHybrids(hybrids.dt)
+    toc()
+
+    # Get SJ motifs
+    message("Loading genome...")
+    genome.dt <- fread($genome_csv)
+
+    message("Getting SJ motifs...")
+    tic()
+    hybrids.dt <- GetSJMotifs(hybrids.dt = hybrids.dt, genome.dt = genome.dt)
     toc()
 
     f_out <- gsub("dedup.bam", "hybrids.tsv.gz", "$reads")

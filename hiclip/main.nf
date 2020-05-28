@@ -38,6 +38,7 @@ params.star_transcript_index = '/camp/lab/luscomben/home/users/chakraa2/projects
 params.transcript_fasta_csv = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz'
 params.genome_fai = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai'
 params.transcript_gtf = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz'
+params.genome_csv = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz'
 
 // Create channels for static files
 ch_star_genome_index = Channel.fromPath(params.star_genome_index, checkIfExists: true)
@@ -45,6 +46,7 @@ ch_star_transcript_index = Channel.fromPath(params.star_transcript_index, checkI
 ch_transcript_fasta_csv = Channel.fromPath(params.transcript_fasta_csv, checkIfExists: true)
 ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
 ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
+ch_genome_csv = Channel.fromPath(params.genome_csv, checkIfExists: true)
 
 // Show banner
 log.info hiclipheader()
@@ -69,7 +71,7 @@ workflow {
 
     // Extract hybrids
     // Get binding energies
-    extracthybrids(deduplicate.out)
+    extracthybrids(deduplicate.out.combine(ch_genome_csv))
     getbindingenergy(extracthybrids.out.combine(ch_transcript_fasta_csv))
 
     // Get clusters
