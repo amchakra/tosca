@@ -8,7 +8,7 @@ process deduplicate {
     tag "${sample_id}"
     publishDir 'results/dedup', mode: 'copy', overwrite: false
 
-    memory '32G'
+    memory '64G'
     time '12h'
 
     input:
