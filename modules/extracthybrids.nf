@@ -35,7 +35,7 @@ process extracthybrids {
 
     # Get SJ motifs
     message("Loading genome...")
-    genome.dt <- fread($genome_csv)
+    genome.dt <- fread('$genome_csv')
 
     message("Getting SJ motifs...")
     tic()
