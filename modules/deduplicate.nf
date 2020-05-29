@@ -9,7 +9,7 @@ process deduplicate {
     publishDir 'results/dedup', mode: 'copy', overwrite: false
 
     memory '64G'
-    time '12h'
+    time '24h'
 
     input:
         tuple val(sample_id), path(reads), path(bai)
