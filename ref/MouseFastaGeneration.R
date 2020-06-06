@@ -58,6 +58,11 @@ findOverlaps(genes.gr, drop.self = TRUE, drop.redundant = TRUE)
 pc.genes.gr <- genes.gr[genes.gr$gene_type == "protein_coding"]
 pc.genes.gr <- dropSeqlevels(pc.genes.gr, "chrM", pruning.mode = "coarse") # will split out mitochondrial separately
 
+ol <- findOverlaps(pc.genes.gr, drop.self = TRUE, drop.redundant = TRUE)
+length(unique(c(queryHits(ol), subjectHits(ol))))
+
+pc.genes.gr[sort(unique(c(queryHits(ol), subjectHits(ol))))]
+
 # Get sequences
 pc.regions.seq <- getSeq(Mmusculus, pc.genes.gr)
 names(pc.regions.seq) <- paste0(pc.genes.gr$gene_name, "_", pc.genes.gr$gene_id)
@@ -105,8 +110,8 @@ system("pigz ~/Dropbox\\ \\(Lab\\)/rna_structure/ref/mouse/Mm_GencodeM24_rRNA_MT
 # Now annotate with regions of longest transcript
 # ======================================================
 
-TxDb <- makeTxDbFromGFF("~/Dropbox (The Francis Crick)/ehiCLIP/Mm/ref/gencode.vM24.annotation.gtf.gz")
-saveDb(TxDb, "~/Dropbox (The Francis Crick)/ehiCLIP/Mm/ref/gencode.vM24.sqlite")
+TxDb <- makeTxDbFromGFF("~/Dropbox (The Francis Crick)/rna_structure/ref/mouse/gencode.vM24.annotation.gtf.gz")
+saveDb(TxDb, "~/Dropbox (The Francis Crick)/rna_structure/ref/mouse/gencode.vM24.sqlite")
 
 TxDb <- keepStandardChromosomes(TxDb, pruning.mode = "coarse")
 
@@ -115,7 +120,8 @@ txlengths.dt <- data.table(transcriptLengths(TxDb, with.cds_len = TRUE, with.utr
 setnames(txlengths.dt, c("tx_name", "gene_id"), c("transcript_id", "gene_id"))
 txlengths.dt[, tx_id := NULL]
 
-gtf <- import.gff2("~/Dropbox (The Francis Crick)/ehiCLIP/Mm/ref/gencode.vM24.annotation.gtf.gz")
+# Need to load GTF to get extra metadata columns
+gtf <- import.gff2("~/Dropbox (The Francis Crick)/rna_structure/ref/mouse/gencode.vM24.annotation.gtf.gz")
 tx <- gtf[gtf$type == "transcript"]
 gencode.dt <- as.data.table(mcols(tx))[, .(gene_id, gene_type, gene_name, level, transcript_id, transcript_type)]
 stopifnot(nrow(txlengths.dt) == nrow(gencode.dt))
@@ -139,8 +145,9 @@ stopifnot(all(c(pc, rRNA, tRNA, miRNA, miRNA, lncRNA, ncRNA, other) %in% tx_biot
 # ==========
 
 # Select longest pc
-gencode.dt[transcript_type %in% pc, longest := max(tx_len), by = ensembl_gene_id]
-longest.pc.dt <- gencode.dt[transcript_type %in% pc & tx_len == longest] # selects longest
+longest.pc.dt <- gencode.dt[transcript_type %in% pc] # selects pc
+longest.pc.dt <- longest.pc.dt[, longest := max(tx_len), by = ensembl_gene_id][tx_len == longest] # selects longest
+
 setorder(longest.pc.dt, -nexon, -utr3_len, -cds_len, -utr5_len)
 setkey(longest.pc.dt, ensembl_gene_id)
 longest.pc.dt <- unique(longest.pc.dt, by = "ensembl_gene_id") # removes duplicates prioritising most exons then longest utr3 etc.
@@ -172,65 +179,206 @@ introns.gr <- regionGR(intron_tx.grl, region = "INTRON", coding = longest.pc.dt)
 utr3.gr <- regionGR(utr3_tx.grl, region = "UTR3", coding = longest.pc.dt)
 
 pc.regions.gr <- c(utr5.gr, cds.gr, introns.gr, utr3.gr)
-pc.regions.grl <- split(pc.regions.gr, pc.regions.gr$ensembl_gene_id)
-pc.regions.grl <- sort(pc.regions.grl)
+
+
+# Need to do it this way for regions that don't overlap the longest transcript
+exons_tx.grl <- exonsBy(TxDb, by = "tx", use.names = TRUE)
+# exons_g.grl <- exonsBy(TxDb, by = "gene")
 
 cl <- makeForkCluster(4)
-pc.regions.tc.grl <- parLapply(cl = cl, 1:length(pc.regions.grl), function(i) {
+pc.genes.regions.grl <- pblapply(cl = cl, seq_along(pc.genes.gr), function(i) {
+  
+  # message(i)
+  gr <- pc.genes.gr[i]
+  gene <- gr$gene_id
+  gene_name <- gr$gene_name
+  biotype <- gr$gene_type
 
-  message(i)
-  x <- pc.regions.grl[[i]]
-
-  if(unique(strand(x)) == "+") {
-
-    start <- min(start(x))
-    tc.gr <- x
-    tc.start <- start(tc.gr) - start + 1
-    tc.end <- end(tc.gr) - start + 1
-
-    tc.gr <- with(tc.gr, GRanges(seqnames = Rle(ensembl_gene_id),
-                                 ranges = IRanges(start = tc.start, end = tc.end),
-                                 strand = Rle("+"),
-                                 ensembl_gene_id = ensembl_gene_id,
-                                 gene_name = gene_name,
-                                 biotype = biotype,
-                                 region = region))
-
-    stopifnot(all(width(tc.gr) == width(x)))
-    stopifnot(length(reduce(tc.gr)) == 1)
-
-
-  } else if(unique(strand(x)) == "-") {
-
-    tc.gr <- x
-
-    # Need to fix this bit so annotate those bits of the gene thar aren't overlapped by the longest transcript
-    # gene.gr <- pc.genes.gr[pc.genes.gr$gene_id == unique(tc.gr$ensembl_gene_id)]
-    # rest.gr <- setdiff(gene.gr, tc.gr)
-
-    start <- max(end(x))
-
-
-    flipped.start <- abs(end(tc.gr) - start + 1)
-    flipped.end <- flipped.start + width(tc.gr) - 1
-
-    tc.gr <- with(tc.gr, GRanges(seqnames = Rle(ensembl_gene_id), # Maybe add underscore name here
-                                 ranges = IRanges(start = flipped.start, end = flipped.end),
-                                 strand = Rle("+"),
-                                 ensembl_gene_id = ensembl_gene_id,
-                                 gene_name = gene_name,
-                                 biotype = biotype,
-                                 region = region))
-
-    stopifnot(all(width(tc.gr) == width(x)))
-    stopifnot(length(reduce(tc.gr)) == 1)
+  gr <- unlist(tile(gr, width = 1))
+  gr$annot <- as.character(NA) 
+  annotated.gr <- GRanges()
+  gr_length <- length(gr)
+    
+  # First annotate those that overlap longest transcript
+  sel.pc.regions.gr <- pc.regions.gr[pc.regions.gr$ensembl_gene_id == gene] # Get matching gene
+  
+  ol <- findOverlaps(gr, sel.pc.regions.gr)
+  
+  # gr$ensembl_transcript_id <- as.character(NA)
+  # gr$ensembl_gene_id <- as.character(NA)
+  # gr$gene_name <- as.character(NA)
+  # gr$biotype <- as.character(NA)
+  # gr$region <- as.character(NA)
+  # 
+  # gr[queryHits(ol)]$ensembl_transcript_id <- sel.pc.regions.gr[subjectHits(ol)]$tx_name
+  # gr[queryHits(ol)]$ensembl_gene_id <- sel.pc.regions.gr[subjectHits(ol)]$ensembl_gene_id
+  # gr[queryHits(ol)]$gene_name <- sel.pc.regions.gr[subjectHits(ol)]$gene_name
+  # gr[queryHits(ol)]$biotype <- sel.pc.regions.gr[subjectHits(ol)]$biotype
+  # gr[queryHits(ol)]$region <- sel.pc.regions.gr[subjectHits(ol)]$region
+  
+  # Some protein coding genes don't have a protein coding transcript, e.g. ENSMUST00000155020.1
+  if(length(ol) != 0) {
+    
+    gr[queryHits(ol)]$annot <- paste0(sel.pc.regions.gr[subjectHits(ol)]$tx_name, "|",
+                                      sel.pc.regions.gr[subjectHits(ol)]$ensembl_gene_id, "|",
+                                      sel.pc.regions.gr[subjectHits(ol)]$gene_name, "|",
+                                      sel.pc.regions.gr[subjectHits(ol)]$biotype, "|",
+                                      sel.pc.regions.gr[subjectHits(ol)]$region)
+    
+    # annotated.gr <- gr[!is.na(gr$ensembl_transcript_id)]
+    # gr <- gr[is.na(gr$ensembl_transcript_id)]
+    annotated.pc.gr <- gr[!is.na(gr$annot)]
+    annotated.gr <- c(annotated.gr, annotated.pc.gr)
+    gr <- gr[is.na(gr$annot)]
 
   }
+  # First annotate the rest based on a heirarchy
+  
+  # UTR3
+  sel.utr3.gr <- unlist(utr3_tx.grl[names(utr3_tx.grl) %in% gencode.dt[ensembl_gene_id == gene & transcript_type %in% pc]$ensembl_transcript_id])
+  ol <- findOverlaps(gr, sel.utr3.gr)
+  if(length(ol) != 0) {
+    
+    gr[queryHits(ol)]$annot <- paste0(names(sel.utr3.gr[subjectHits(ol)]), "|",
+                                      gene, "|",
+                                      gene_name, "|",
+                                      biotype, "|",
+                                      "OTHER_UTR3")
+    
+    annotated.utr3.gr <- gr[!is.na(gr$annot)]
+    annotated.gr <- c(annotated.gr, annotated.utr3.gr)
+    gr <- gr[is.na(gr$annot)]
+    
+  }
+  
+  # CDS
+  sel.cds.gr <- unlist(cds_tx.grl[names(cds_tx.grl) %in% gencode.dt[ensembl_gene_id == gene & transcript_type %in% pc]$ensembl_transcript_id])
+  ol <- findOverlaps(gr, sel.cds.gr) 
 
-  return(tc.gr)
+  if(length(ol) != 0) {
+    
+    gr[queryHits(ol)]$annot <- paste0(names(sel.cds.gr[subjectHits(ol)]), "|",
+                                      gene, "|",
+                                      gene_name, "|",
+                                      biotype, "|",
+                                      "OTHER_CDS")
+    
+    annotated.cds.gr <- gr[!is.na(gr$annot)]
+    annotated.gr <- c(annotated.gr, annotated.cds.gr)
+    gr <- gr[is.na(gr$annot)]
+    
+  }
+  
+  # UTR5
+  sel.utr5.gr <- unlist(utr5_tx.grl[names(utr5_tx.grl) %in% gencode.dt[ensembl_gene_id == gene & transcript_type %in% pc]$ensembl_transcript_id])
+  ol <- findOverlaps(gr, sel.utr5.gr) 
+  
+  if(length(ol) != 0) {
+    
+    gr[queryHits(ol)]$annot <- paste0(names(sel.utr5.gr[subjectHits(ol)]), "|",
+                                      gene, "|",
+                                      gene_name, "|",
+                                      biotype, "|",
+                                      "OTHER_UTR5")
+    
+    annotated.utr5.gr <- gr[!is.na(gr$annot)]
+    annotated.gr <- c(annotated.gr, annotated.utr5.gr)    
+    gr <- gr[is.na(gr$annot)]
+    
+  } 
+   
+  # Introns
+  sel.intron.gr <- unlist(intron_tx.grl[names(intron_tx.grl) %in% gencode.dt[ensembl_gene_id == gene & transcript_type %in% pc]$ensembl_transcript_id])
+  ol <- findOverlaps(gr, sel.intron.gr) 
 
+  if(length(ol) != 0) {
+    
+    gr[queryHits(ol)]$annot <- paste0(names(sel.intron.gr[subjectHits(ol)]), "|",
+                                      gene, "|",
+                                      gene_name, "|",
+                                      biotype, "|",
+                                      "OTHER_INTRON")
+    
+    annotated.intron.gr <- gr[!is.na(gr$annot)]
+    annotated.gr <- c(annotated.gr, annotated.intron.gr)    
+    gr <- gr[is.na(gr$annot)]
+    
+  }   
+  
+  # Exons (i.e. non-protein coding)
+  sel.exons.gr <- unlist(exons_tx.grl[names(exons_tx.grl) %in% gencode.dt[ensembl_gene_id == gene]$ensembl_transcript_id])
+  ol <- findOverlaps(gr, sel.exons.gr) 
+  
+  if(length(ol) != 0) {
+    
+    gr[queryHits(ol)]$annot <- paste0(names(sel.exons.gr[subjectHits(ol)]), "|",
+                                      gene, "|",
+                                      gene_name, "|",
+                                      biotype, "|",
+                                      "OTHER_EXON")
+    
+    annotated.exon.gr <- gr[!is.na(gr$annot)]
+    annotated.gr <- c(annotated.gr, annotated.exon.gr)   
+    gr <- gr[is.na(gr$annot)]
+    
+  } 
+  
+  # Rest are introns
+  
+  if(length(gr) != 0) {
+    
+    gr$annot <- paste0("ENSMUST_ALL", "|",
+                       gene, "|",
+                       gene_name, "|",
+                       biotype, "|",
+                       "OTHER_INTRON")
+    
+    annotated.gr <- c(annotated.gr, gr)
+  
+  }
+  
+  annotated.gr <- sort(annotated.gr) # sort could be removed - just to check coord conversion
+  
+  stopifnot(length(annotated.gr) == gr_length)
+  
+  # Adjust coordinate depending on strand
+  if(unique(strand(annotated.gr)) == "+") {
+    
+    start <- min(start(annotated.gr))
+    tc.gr <- GRanges(seqnames = Rle(gene),
+                     ranges = IRanges(start = start(annotated.gr) - start + 1,
+                                      width = 1),
+                     strand = Rle("+"),
+                     annot = annotated.gr$annot)
+       
+    
+  } else if(unique(strand(annotated.gr)) == "-") {
+    
+    start <- max(start(annotated.gr))
+    tc.gr <- GRanges(seqnames = Rle(gene),
+                     ranges = IRanges(start = abs(start(annotated.gr) - start - 1),
+                                      width = 1),
+                     strand = Rle("+"),
+                     annot = annotated.gr$annot)
+    
+  }
+  
+  # Now need to collapse down (Not strictly necessary)
+  annotated.grl <- split(tc.gr, tc.gr$annot)
+  annotated.grl <- lapply(annotated.grl, reduce)
+  reduced.annotated.gr <- sort(unlist(GRangesList(annotated.grl)))
+  reduced.annotated.gr$annotation <- names(reduced.annotated.gr)
+  names(reduced.annotated.gr) <- NULL
+  
+  stopifnot(length(reduce(reduced.annotated.gr)) == 1)
+  stopifnot(width(reduce(reduced.annotated.gr)) == gr_length)
+  
+  return(reduced.annotated.gr)
+  
 })
 stopCluster(cl)
 
-pc.regions.tc.gr <- unlist(GRangesList(pc.regions.tc.grl))
-saveRDS(pc.regions.tc.gr, "~/Dropbox (The Francis Crick)/ehiCLIP/Mm/ref/gencode_vM24_pc.regions.tc.gr.rds")
+saveRDS(pc.genes.regions.grl, "~/Dropbox (The Francis Crick)/rna_structure/ref/mouse/gencode_vM24.pc.genes.regions.grl.rds")
+
+pc.genes.regions.gr <- unlist(GRangesList(pc.genes.regions.grl))
+saveRDS(pc.genes.regions.gr, "~/Dropbox (The Francis Crick)/rna_structure/ref/mouse/gencode_vM24.pc.genes.regions.gr.rds")
