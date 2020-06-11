@@ -36,8 +36,8 @@ process extracthybrids {
     # Get SJ motifs
     message("Loading genome...")
     genome.fa <- Biostrings::readDNAStringSet("$transcript_fa")
-    genome.dt <- data.table(gene_id = names(genome),
-                            sequence = as.character(genome))
+    genome.dt <- data.table(gene_id = names(genome.fa),
+                            sequence = as.character(genome.fa))
 
     message("Getting SJ motifs...")
     tic()

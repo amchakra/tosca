@@ -30,8 +30,8 @@ process getbindingenergy {
     message("Loading genome...")
     tic()
     genome.fa <- Biostrings::readDNAStringSet("$transcript_fa")
-    genome.dt <- data.table(gene_id = names(genome),
-                            sequence = as.character(genome))
+    genome.dt <- data.table(gene_id = names(genome.fa),
+                            sequence = as.character(genome.fa))
     toc()
 
     hybrids.dt <- fread("$hybrids")
