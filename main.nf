@@ -71,6 +71,8 @@ summary['Genome fasta index'] = params.genome_fai
 summary['Genome annotation'] = params.genome_gtf
 summary['Transcriptome fasta'] = params.transcript_fa
 summary['Transcriptome annotation'] = params.transcript_gtf
+summary['Deduplicate quickly'] = params.quickdedup
+
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
