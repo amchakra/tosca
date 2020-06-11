@@ -99,9 +99,9 @@ workflow {
 
     // Extract hybrids
     if ( params.quickdedup ) {
-        extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    } else {
         extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    } else {
+        extracthybrids(deduplicate.out.combine(ch_transcript_fa))
     }
     // Get binding energies
     getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
