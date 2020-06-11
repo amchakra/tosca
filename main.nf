@@ -29,26 +29,49 @@ include collapseclusters from './modules/collapseclusters.nf'
 include convertcoordinates from './modules/convertcoordinates.nf'
 include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 
-
 // Main workflow
 
+// Input variables
 params.input='metadata.csv'
-params.star_genome_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24'
-params.star_transcript_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes'
-params.transcript_fasta_csv = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz'
-params.genome_fai = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai'
-params.transcript_gtf = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz'
+params.org='mouse'
+
+// Genome variables
+params.genome_fa = params.genomes[ params.org ].genome_fa
+params.genome_fai = params.genomes[ params.org ].genome_fai
+params.genome_gtf = params.genomes[ params.org ].genome_gtf 
+params.transcript_fa = params.genomes[ params.org ].transcript_fa
+params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
+params.star_genome = params.genomes[ params.org ].star_genome
+params.star_transcript = params.genomes[ params.org ].star_transcript
+
+// params.star_genome_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24'
+// params.star_transcript_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes'
+// params.transcript_fasta_csv = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz'
+// params.genome_fai = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai'
+// params.transcript_gtf = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz'
 
 // Create channels for static files
-ch_star_genome_index = Channel.fromPath(params.star_genome_index, checkIfExists: true)
-ch_star_transcript_index = Channel.fromPath(params.star_transcript_index, checkIfExists: true)
-ch_transcript_fasta_csv = Channel.fromPath(params.transcript_fasta_csv, checkIfExists: true)
+ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
+ch_star_transcript = Channel.fromPath(params.star_transcript, checkIfExists: true)
+ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
 ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
 ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 
-// Show banner
+// Show header
 log.info hiclipheader()
+def summary = [:]
+summary['Output directory'] = params.outdir
+summary['Trace directory'] = params.tracedir
+summary['Genome fasta'] = params.genome_fa
+summary['Genome fasta index'] = params.genome_fai
+summary['Genome annotation'] = params.genome_gtf
+summary['Transcriptome fasta'] = params.transcript_fa
+summary['Transcriptome fasta csv'] = params.transcript_csv
+summary['Transcriptome annotation'] = params.transcript_gtf
+log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
+// Pipeline
 workflow {
 
     // Get fastq paths 
@@ -58,19 +81,19 @@ workflow {
     trim(metadata.out)
 
     // Filter spliced reads
-    premap(trim.out.combine(ch_star_genome_index))
+    premap(trim.out.combine(ch_star_genome))
     filtersplicedreads(premap.out)
 
     // Map chimerias
-    mapchimeras(filtersplicedreads.out.combine(ch_star_transcript_index))
+    mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
     // Remove PCR duplicates
     deduplicate(mapchimeras.out)
 
     // Extract hybrids
     // Get binding energies
-    extracthybrids(deduplicate.out.combine(ch_transcript_fasta_csv))
-    getbindingenergy(extracthybrids.out.combine(ch_transcript_fasta_csv))
+    extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
 
     // Get clusters
     clusterhybrids(getbindingenergy.out)

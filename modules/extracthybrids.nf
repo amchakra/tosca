@@ -35,7 +35,9 @@ process extracthybrids {
 
     # Get SJ motifs
     message("Loading genome...")
-    genome.dt <- fread("$transcript_fasta_csv")
+    genome.fa <- Biostrings::readDNAStringSet("/home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.fa")
+    genome.dt <- data.table(gene_id = names(genome),
+                            sequence = as.character(genome))
 
     message("Getting SJ motifs...")
     tic()

@@ -11,7 +11,7 @@ process getbindingenergy {
     time '24h'
 
     input:
-        tuple val(sample_id), path(hybrids), path(transcript_fasta_csv)
+        tuple val(sample_id), path(hybrids), path(transcript_fa)
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.mfe.tsv.gz")
@@ -29,7 +29,9 @@ process getbindingenergy {
     # Load genome
     message("Loading genome...")
     tic()
-    genome.dt <- fread("$transcript_fasta_csv")
+    genome.fa <- Biostrings::readDNAStringSet("/home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.fa")
+    genome.dt <- data.table(gene_id = names(genome),
+                            sequence = as.character(genome))
     toc()
 
     hybrids.dt <- fread("$hybrids")
