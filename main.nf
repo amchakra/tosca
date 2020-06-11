@@ -22,6 +22,7 @@ include premap from './modules/premap.nf'
 include filtersplicedreads from './modules/filtersplicedreads.nf'
 include mapchimeras from './modules/mapchimeras.nf'
 include deduplicate from './modules/deduplicate.nf'
+include deduplicate_unique from './modules/deduplicate.nf'
 include extracthybrids from './modules/extracthybrids.nf'
 include getbindingenergy from './modules/getbindingenergy.nf'
 include clusterhybrids from './modules/clusterhybrids.nf'
@@ -30,6 +31,9 @@ include convertcoordinates from './modules/convertcoordinates.nf'
 include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 
 // Main workflow
+
+// General variables
+params.quickdedup = true
 
 // Input variables
 params.input='metadata.csv'
@@ -66,7 +70,6 @@ summary['Genome fasta'] = params.genome_fa
 summary['Genome fasta index'] = params.genome_fai
 summary['Genome annotation'] = params.genome_gtf
 summary['Transcriptome fasta'] = params.transcript_fa
-summary['Transcriptome fasta csv'] = params.transcript_csv
 summary['Transcriptome annotation'] = params.transcript_gtf
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
@@ -88,7 +91,12 @@ workflow {
     mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
     // Remove PCR duplicates
-    deduplicate(mapchimeras.out)
+    if ( params.quickdedup ) {
+        deduplicate_unique(mapchimeras.out)
+    } else {
+        deduplicate(mapchimeras.out)
+    }
+
 
     // Extract hybrids
     // Get binding energies
