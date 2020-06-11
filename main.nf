@@ -97,10 +97,13 @@ workflow {
         deduplicate(mapchimeras.out)
     }
 
-
     // Extract hybrids
+    if ( params.quickdedup ) {
+        extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    } else {
+        extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    }
     // Get binding energies
-    extracthybrids(deduplicate.out.combine(ch_transcript_fa))
     getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
 
     // Get clusters
