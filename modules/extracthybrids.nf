@@ -13,7 +13,7 @@ process extracthybrids {
     time '12h'
 
     input:
-        tuple val(sample_id), path(reads), path(bai), path(transcript_fasta_csv)
+        tuple val(sample_id), path(reads), path(bai), path(transcript_fa)
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz")
@@ -35,7 +35,7 @@ process extracthybrids {
 
     # Get SJ motifs
     message("Loading genome...")
-    genome.fa <- Biostrings::readDNAStringSet("/home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.fa")
+    genome.fa <- Biostrings::readDNAStringSet("$transcript_fa")
     genome.dt <- data.table(gene_id = names(genome),
                             sequence = as.character(genome))
 

@@ -29,7 +29,7 @@ process getbindingenergy {
     # Load genome
     message("Loading genome...")
     tic()
-    genome.fa <- Biostrings::readDNAStringSet("/home/camp/chakraa2/working/nobby/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.fa")
+    genome.fa <- Biostrings::readDNAStringSet("$transcript_fa")
     genome.dt <- data.table(gene_id = names(genome),
                             sequence = as.character(genome))
     toc()
