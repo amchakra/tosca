@@ -48,7 +48,9 @@ library(tictoc)
 # Load annotation
 # =========
 
-genes.gr <- import.gff3("~/Dropbox (The Francis Crick)/rna_structure/ref/human/gencode.v34.annotation.gff3.gz")
+# genes.gr <- import.gff3("~/Dropbox (The Francis Crick)/rna_structure/ref/human/gencode.v34.annotation.gff3.gz")
+genes.gr <- import.gff3("gencode.v33.annotation.gff3.gz")
+genes.gr <- keepStandardChromosomes(genes.gr, pruning.mode = "coarse")
 genes.gr <- genes.gr[genes.gr$type == "gene"]
 
 # findOverlaps(genes.gr, drop.self = TRUE, drop.redundant = TRUE)
@@ -91,15 +93,19 @@ names(mt.regions.seq) <- paste0(mt.genes.gr$gene_name, "_", mt.genes.gr$gene_id)
 # Write out fasta
 # =========
 all.seq <- c(rrna.seq, pc.regions.seq, nc.regions.seq, mt.regions.seq)
-writeFasta(all.seq, "~/Dropbox (The Francis Crick)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.fa")
-system("pigz ~/Dropbox\\ \\(Lab\\)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.fa")
+# writeFasta(all.seq, "~/Dropbox (The Francis Crick)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.fa")
+# system("pigz ~/Dropbox\\ \\(Lab\\)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.fa")
+writeFasta(all.seq, "Hs_GencodeV33_rRNA_MT_genes.fa")
+system("pigz Hs_GencodeV33_rRNA_MT_genes.fa")
 
 # Combine for coordinate conversion
 seq.gr <- c(pc.genes.gr, nc.genes.gr, mt.genes.gr)
 seq.gr$fasta_id <- paste0(seq.gr$gene_name, "_", seq.gr$gene_id)
 seq.gr <- sort(seq.gr)
-export.gff2(seq.gr, "~/Dropbox (The Francis Crick)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.gtf")
-system("pigz ~/Dropbox\\ \\(Lab\\)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.gtf")
+# export.gff2(seq.gr, "~/Dropbox (The Francis Crick)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.gtf")
+# system("pigz ~/Dropbox\\ \\(Lab\\)/rna_structure/ref/human/Hs_GencodeV34_rRNA_MT_genes.gtf")
+export.gff2(seq.gr, "Hs_GencodeV33_rRNA_MT_genes.gtf")
+system("pigz Hs_GencodeV33_rRNA_MT_genes.gtf")
 
 # ======================================================
 # Now annotate with regions of longest transcript
