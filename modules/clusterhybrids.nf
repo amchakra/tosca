@@ -33,7 +33,7 @@ process clusterhybrids {
     hybrids.dt <- fread("$hybrids")
 
     # Get intragenic hybrids
-    intragenic.hybrids.dt <- hybrids.dt[L_seqnames == R_seqnames][grep("ENSMUSG", L_seqnames)]
+    intragenic.hybrids.dt <- hybrids.dt[L_seqnames == R_seqnames][grep("ENS", L_seqnames)]
     fwrite(intragenic.hybrids.dt, gsub("\\\\.hybrids\\\\.", "\\\\.intragenic_hybrids\\\\.", "$hybrids"), sep = "\t")
 
     # Get Cluster
