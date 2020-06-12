@@ -13,8 +13,10 @@ hiCLIP analysis pipeline.
 // Define DSL2
 nextflow.preview.dsl=2
 
-// Processes
+// Need to set these before module is loaded else not propagated
+params.intronmin = 10
 
+// Processes
 include hiclipheader from './modules/utils.nf'
 include metadata from './modules/metadata.nf'
 include trim from './modules/trim.nf'
@@ -34,7 +36,6 @@ include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 
 // General variables
 params.quickdedup = true
-params.intronmin = 10
 
 // Input variables
 params.input='metadata.csv'
