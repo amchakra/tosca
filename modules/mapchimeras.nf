@@ -19,7 +19,7 @@ process mapchimeras {
 
     shell:
 
-    intronmin = params.intronmin
+    intronmin = "$params.intronmin"
 
     """
     STAR --runThreadN ${task.cpus} \
