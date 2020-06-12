@@ -34,6 +34,7 @@ include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 
 // General variables
 params.quickdedup = true
+params.intronmin = 10
 
 // Input variables
 params.input='metadata.csv'
@@ -72,8 +73,9 @@ summary['Genome annotation'] = params.genome_gtf
 summary['Transcriptome fasta'] = params.transcript_fa
 summary['Transcriptome annotation'] = params.transcript_gtf
 summary['Deduplicate quickly'] = params.quickdedup
+summary['Minimum intron length'] = params.intronmin
 
-log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
 // Pipeline
@@ -85,39 +87,39 @@ workflow {
     // Trim
     trim(metadata.out)
 
-    // Filter spliced reads
-    premap(trim.out.combine(ch_star_genome))
-    filtersplicedreads(premap.out)
-
-    // Map chimerias
-    mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
-
-    // Remove PCR duplicates
-    if ( params.quickdedup ) {
-        deduplicate_unique(mapchimeras.out)
-    } else {
-        deduplicate(mapchimeras.out)
-    }
-
-    // Extract hybrids
-    if ( params.quickdedup ) {
-        extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
-    } else {
-        extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    }
-    // Get binding energies
-    getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
-
-    // Get clusters
-    clusterhybrids(getbindingenergy.out)
-
-    // Convert coordinates
-    // Write hybrid BAM
-    convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
-    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
-
-    // Collapse clusters
-    collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    Filter spliced reads
+    // premap(trim.out.combine(ch_star_genome))
+    // filtersplicedreads(premap.out)
+// 
+    Map chimerias
+    // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
+// 
+    Remove PCR duplicates
+    // if ( params.quickdedup ) {
+        // deduplicate_unique(mapchimeras.out)
+    // } else {
+        // deduplicate(mapchimeras.out)
+    // }
+// 
+    Extract hybrids
+    // if ( params.quickdedup ) {
+        // extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    // } else {
+        // extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    // }
+    Get binding energies
+    // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
+// 
+    Get clusters
+    // clusterhybrids(getbindingenergy.out)
+// 
+    Convert coordinates
+    Write hybrid BAM
+    // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
+    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+// 
+    Collapse clusters
+    // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
 
 }
 
