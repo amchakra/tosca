@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process clusterhybrids {
 
     tag "${sample_id}"
-    publishDir 'results/hybrids', mode: 'copy', overwrite: false
+    publishDir '{params.outdir}/hybrids', mode: 'copy', overwrite: true
 
     cpus 8
     time '24h'

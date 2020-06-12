@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process deduplicate {
 
     tag "${sample_id}"
-    publishDir 'results/dedup', mode: 'copy', overwrite: false
+    publishDir '{params.outdir}/dedup', mode: 'copy', overwrite: true
 
     memory '64G'
     time '24h'

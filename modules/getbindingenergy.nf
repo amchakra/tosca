@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process getbindingenergy {
 
     tag "${sample_id}"
-    publishDir 'results/hybrids', mode: 'copy', overwrite: false
+    publishDir '{params.outdir}/hybrids', mode: 'copy', overwrite: true
 
     time '24h'
 

@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process collapseclusters {
 
     tag "${sample_id}"
-    publishDir 'results/clusters', mode: 'copy', overwrite: false
+    publishDir '{params.outdir}/clusters', mode: 'copy', overwrite: true
 
     cpus 8
     time '24h'

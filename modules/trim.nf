@@ -5,7 +5,7 @@ nextflow.preview.dsl = 2
 
 process trim {
     tag "${sample_id}"
-    publishDir 'results/trimmed', mode: 'copy', overwrite: false
+    publishDir '{params.outdir}/trimmed', mode: 'copy', overwrite: true
 
     cpus 8
     time '24h'

@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process mapchimeras {
 
     tag "${sample_id}"
-    publishDir 'results/mapped', mode: 'copy', overwrite: false
+    publishDir '{params.outdir}/mapped', mode: 'copy', overwrite: true
 
     cpus 8
     time '12h'

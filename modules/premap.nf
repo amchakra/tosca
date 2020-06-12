@@ -6,6 +6,7 @@ nextflow.preview.dsl = 2
 process premap {
 
     tag "${sample_id}"
+    publishDir '{params.outdir}/trimmed', mode: 'copy', overwrite: true
 
     cpus 8
     time '12h'
