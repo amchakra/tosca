@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process filtersplicedreads {
 
     tag "${sample_id}"
-    publishDir '{params.outdir}/filtered', mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
 
     time '12h'
 

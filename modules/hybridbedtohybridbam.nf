@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process hybridbedtohybridbam {
 
     tag "${sample_id}"
-    publishDir '{params.outdir}/bam', mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/bam", mode: 'copy', overwrite: true
 
     cpus 8
     time '24h'

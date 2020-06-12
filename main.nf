@@ -88,38 +88,38 @@ workflow {
     trim(metadata.out)
 
     // Filter spliced reads
-    // premap(trim.out.combine(ch_star_genome))
-    // filtersplicedreads(premap.out)
+    premap(trim.out.combine(ch_star_genome))
+    filtersplicedreads(premap.out)
 
     // Map chimerias
-    // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
+    mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
     // Remove PCR duplicates
-    // if ( params.quickdedup ) {
-        // deduplicate_unique(mapchimeras.out)
-    // } else {
-        // deduplicate(mapchimeras.out)
-    // }
+    if ( params.quickdedup ) {
+        deduplicate_unique(mapchimeras.out)
+    } else {
+        deduplicate(mapchimeras.out)
+    }
 
     // Extract hybrids
-    // if ( params.quickdedup ) {
-        // extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
-    // } else {
-        // extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    // }
+    if ( params.quickdedup ) {
+        extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    } else {
+        extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    }
     // Get binding energies
-    // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
+    getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
 
     // Get clusters
-    // clusterhybrids(getbindingenergy.out)
+    clusterhybrids(getbindingenergy.out)
 
     // Convert coordinates
     // Write hybrid BAM
-    // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
-    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+    convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
+    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
 
     // Collapse clusters
-    // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
 
 }
 

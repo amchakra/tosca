@@ -3,11 +3,9 @@
 // Specify DSL2
 nextflow.preview.dsl = 2
 
-params.outdir = params.outdir
-
 process trim {
     tag "${sample_id}"
-    publishDir '{params.outdir}/trimmed', mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true
 
     cpus 8
     time '24h'

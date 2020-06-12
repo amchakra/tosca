@@ -6,7 +6,7 @@ nextflow.preview.dsl = 2
 process extracthybrids {
     
     tag "${sample_id}"
-    publishDir '{params.outdir}/hybrids', mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
     cpus 4
     memory '32G'
