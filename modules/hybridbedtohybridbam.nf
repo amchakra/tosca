@@ -15,7 +15,7 @@ process hybridbedtohybridbam {
         tuple val(sample_id), path(bed), path(genome_fai)
 
     output:
-        tuple val(sample_id), path("${sample_id}.intragenic_hybrids.mfe.clusters.bam")
+        tuple val(sample_id), path("${sample_id}.intragenic_hybrids.mfe.clusters.bam"), path("${sample_id}.intragenic_hybrids.mfe.clusters.bam.bai")
 
     script:
     """
