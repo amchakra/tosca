@@ -20,6 +20,10 @@ sbatch -c 8 --mem=40G -t 24:00:00 --wrap="STAR --runMode genomeGenerate --runThr
 --genomeDir STAR_Rn_Ens100Q_rRNA_MT_genes \
 --genomeFastaFiles Rn_Ens100Q_rRNA_MT_genes.fa"
 
+sbatch -c 8 --mem=40G -t 24:00:00 --wrap="STAR --runMode genomeGenerate --runThreadN 8 \
+--genomeDir Rn_Ens100Q_rRNA_MT_genes_masked \
+--genomeFastaFiles Rn_Ens100Q_rRNA_MT_genes_masked.fa"
+
 # ==========
 # Mouse
 # ==========
