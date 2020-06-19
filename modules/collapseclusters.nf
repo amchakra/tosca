@@ -31,7 +31,7 @@ process collapseclusters {
     hybrids.dt <- fread("$hybrids")
 
     clusters.dt <- CollapseClusters(hybrids.dt)
-    f_out <- gsub(".intragenic_hybrids.mfe.clusters.tsv.gz", ".clusters.tsv.gz", "$hybrids")
+    f_out <- paste0("$sample_id", ".clusters.tsv.gz")
     fwrite(clusters.dt, f_out, sep = "\t")
 
     message(nrow(clusters.dt[L_end >= R_start]), " clusters removed")
@@ -43,7 +43,7 @@ process collapseclusters {
     message("Converting coordinates...")
     genes.gr <- rtracklayer::import.gff2("$transcript_gtf")
     tic()
-    f_out <- gsub("tsv.gz", "bed", f_out)
+    f_out <- paste0("$sample_id", ".clusters.bed.gz")
     ExportGenomicBED(seq.dt = clusters.dt, genes.gr = genes.gr, sam_tag = TRUE, filename = gsub("tsv.gz", "bed", f_out))
     system(paste("pigz", f_out))
     toc()

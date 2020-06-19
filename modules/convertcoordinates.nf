@@ -37,7 +37,7 @@ process convertcoordinates {
     # New method
     message("Converting coordinates...")
     tic()
-    f_out <- gsub("tsv.gz", "bed", "$hybrids")
+    f_out <- paste0("$sample_id", ".intragenic_hybrids.mfe.clusters.bed.gz")
     ExportGenomicBED(seq.dt = seq.dt, genes.gr = genes.gr, sam_tag = TRUE, filename = f_out)
     system(paste("pigz", f_out))
     toc()

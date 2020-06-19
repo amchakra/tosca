@@ -34,7 +34,7 @@ process clusterhybrids {
 
     # Get intragenic hybrids
     intragenic.hybrids.dt <- hybrids.dt[L_seqnames == R_seqnames][grep("ENS", L_seqnames)]
-    fwrite(intragenic.hybrids.dt, gsub("\\\\.hybrids\\\\.", "\\\\.intragenic_hybrids\\\\.", "$hybrids"), sep = "\t")
+    fwrite(intragenic.hybrids.dt, paste0("$sample_id", ".intragenic_hybrids.tsv.gz"), sep = "\t")
 
     # Get Cluster
     message("Clustering...")
@@ -70,7 +70,7 @@ process clusterhybrids {
 
     stopifnot(nrow(intragenic.hybrids.clusters.dt) == nrow(intragenic.hybrids.dt))
 
-    f_out <- gsub("hybrids.mfe.tsv.gz", "intragenic_hybrids.mfe.clusters.tsv.gz", "$hybrids")
+    f_out <- paste0("$sample_id", ".intragenic_hybrids.mfe.clusters.tsv.gz")
     fwrite(intragenic.hybrids.clusters.dt, f_out, sep = "\t")
 
     message("Completed!")

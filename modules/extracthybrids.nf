@@ -44,7 +44,7 @@ process extracthybrids {
     hybrids.dt <- GetSJMotifs(hybrids.dt = hybrids.dt, genome.dt = genome.dt)
     toc()
 
-    f_out <- gsub("dedup.bam", "hybrids.tsv.gz", "$reads")
+    f_out <- paste0("$sample_id", ".hybrids.tsv.gz")
     fwrite(hybrids.dt, f_out, sep = "\t")
 
     message("Completed!")
