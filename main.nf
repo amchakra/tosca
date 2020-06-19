@@ -124,7 +124,7 @@ workflow {
 
     // Collapse clusters
     collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
-    clustermfe(collapseclusters.out.combine(ch_transcript_fa))
+    clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
 
 }
 
