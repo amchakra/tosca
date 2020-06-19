@@ -82,7 +82,7 @@ process getbindingenergy {
     hybrids.dt <- merge(hybrids.dt, mfe.dt, by = "id")
     toc()
 
-    f_out <- paste0("$sample_id", "hybrids.mfe.tsv.gz")
+    f_out <- paste0("$sample_id", ".hybrids.mfe.tsv.gz")
     fwrite(hybrids.dt, f_out, sep = "\t")
 
     message("Completed!")
