@@ -29,6 +29,7 @@ include extracthybrids from './modules/extracthybrids.nf'
 include getbindingenergy from './modules/getbindingenergy.nf'
 include clusterhybrids from './modules/clusterhybrids.nf'
 include collapseclusters from './modules/collapseclusters.nf'
+include clusterbindingenergy from './modules/clusterbindingenergy.nf'
 include convertcoordinates from './modules/convertcoordinates.nf'
 include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 
