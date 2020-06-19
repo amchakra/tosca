@@ -73,6 +73,8 @@ summary['Genome fasta index'] = params.genome_fai
 summary['Genome annotation'] = params.genome_gtf
 summary['Transcriptome fasta'] = params.transcript_fa
 summary['Transcriptome annotation'] = params.transcript_gtf
+summary['STAR genome'] = params.star_genome
+summary['STAR transcriptome'] = params.star_transcript
 summary['Deduplicate quickly'] = params.quickdedup
 summary['Minimum intron length'] = params.intronmin
 
@@ -121,23 +123,11 @@ workflow {
 
     // Collapse clusters
     collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    clustermfe(collapseclusters.out.combine(ch_transcript_fa))
 
 }
 
 workflow.onComplete {
-
-    // def msg = """\
-    //         Pipeline execution summary
-    //         ---------------------------
-    //         Completed at: ${workflow.complete}
-    //         Duration    : ${workflow.duration}
-    //         Success     : ${workflow.success}
-    //         workDir     : ${workflow.workDir}
-    //         exit status : ${workflow.exitStatus}
-    //         """
-    //         .stripIndent()
-
-    //     sendMail(to: 'anob.chakrabarti@crick.ac.uk', subject: 'hiCLIP pipeline execution', body: msg)
 
     log.info "\nPipeline complete!\n"
 
