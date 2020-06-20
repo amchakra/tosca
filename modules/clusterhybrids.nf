@@ -57,7 +57,7 @@ process clusterhybrids {
     intragenic.hybrids.clusters.list <- lapply(1:length(intragenic.hybrids.list), function(i) {
 
     # message(i)
-    ClusterHybrids(intragenic.hybrids.list[[i]], percent_overlap = 0.5)
+    ClusterHybrids(intragenic.hybrids.list[[i]], percent_overlap = 0.25)
 
     })
 
