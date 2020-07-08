@@ -28,9 +28,9 @@ process mapchimeras {
     --outFileNamePrefix ${sample_id}. \
     --outFilterMultimapNmax 1 \
     --alignIntronMin ${intronmin} --scoreGapNoncan 0 --scoreGapATAC 0 --scoreGapGCAG 0 --scoreGap 0 \
-    --chimSegmentMin 12 --chimJunctionOverhangMin 12  --chimScoreJunctionNonGTAG 0 \
+    --chimSegmentMin 16 --chimJunctionOverhangMin 16  --chimScoreJunctionNonGTAG 0 \
     --chimNonchimScoreDropMin 10 --chimOutType WithinBAM \
-    --alignSJoverhangMin 12 --alignSJDBoverhangMin 12 --alignSJstitchMismatchNmax 5 -1 5 5 \
+    --alignSJoverhangMin 16 --alignSJDBoverhangMin 16 --alignSJstitchMismatchNmax 5 -1 5 5 \
     --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 9839723217
 
     sambamba index -t ${task.cpus} ${sample_id}.Aligned.sortedByCoord.out.bam
