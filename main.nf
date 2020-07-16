@@ -33,6 +33,10 @@ include clusterbindingenergy from './modules/clusterbindingenergy.nf'
 include convertcoordinates from './modules/convertcoordinates.nf'
 include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 
+include splitfastq from './modules/splitfastq.nf'
+include convert_fastq_to_fasta from './modules/convert_fastq_to_fasta.nf'
+include mapblat from './modules/mapblat.nf'
+
 // Main workflow
 
 // General variables
@@ -88,43 +92,52 @@ workflow {
     // Get fastq paths 
     metadata(params.input)
 
+    // Split
+    splitfastq(metadata.out)
+
     // Trim
-    trim(metadata.out)
+    trim(splitfastq.out)
 
     // Filter spliced reads
-    premap(trim.out.combine(ch_star_genome))
-    filtersplicedreads(premap.out)
+    // premap(trim.out.combine(ch_star_genome))
+    // filtersplicedreads(premap.out)
+
+    // Convert to fasta
+    // convert_fastq_to_fasta(filtersplicedreads.out)
+
+    // Map chimeras
+    // mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
 
     // Map chimerias
-    mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
+    // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
     // Remove PCR duplicates
-    if ( params.quickdedup ) {
-        deduplicate_unique(mapchimeras.out)
-    } else {
-        deduplicate(mapchimeras.out)
-    }
+    // if ( params.quickdedup ) {
+    //     deduplicate_unique(mapchimeras.out)
+    // } else {
+    //     deduplicate(mapchimeras.out)
+    // }
 
-    // Extract hybrids
-    if ( params.quickdedup ) {
-        extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
-    } else {
-        extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    }
-    // Get binding energies
-    getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
+    // // Extract hybrids
+    // if ( params.quickdedup ) {
+    //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    // } else {
+    //     extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    // }
+    // // Get binding energies
+    // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
 
-    // Get clusters
-    clusterhybrids(getbindingenergy.out)
+    // // Get clusters
+    // clusterhybrids(getbindingenergy.out)
 
-    // Convert coordinates
-    // Write hybrid BAM
-    convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
-    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+    // // Convert coordinates
+    // // Write hybrid BAM
+    // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
+    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
 
-    // Collapse clusters
-    collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
-    clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
+    // // Collapse clusters
+    // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    // clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
 
 }
 
