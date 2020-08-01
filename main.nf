@@ -15,6 +15,8 @@ nextflow.preview.dsl=2
 
 // Need to set these before module is loaded else not propagated
 params.intronmin = 10
+params.evalue = 0.001
+params.maxhits = 100
 
 // Processes
 include hiclipheader from './modules/utils.nf'
@@ -36,6 +38,9 @@ include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
 include splitfastq from './modules/splitfastq.nf'
 include convert_fastq_to_fasta from './modules/convert_fastq_to_fasta.nf'
 include mapblat from './modules/mapblat.nf'
+include filterblat from './modules/filterblat.nf'
+include identifyhybrids from './modules/identifyhybrids.nf'
+include mergehybrids from './modules/mergehybrids.nf'
 
 // Main workflow
 
@@ -70,21 +75,21 @@ ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
-def summary = [:]
-summary['Output directory'] = params.outdir
-summary['Trace directory'] = params.tracedir
-summary['Genome fasta'] = params.genome_fa
-summary['Genome fasta index'] = params.genome_fai
-summary['Genome annotation'] = params.genome_gtf
-summary['Transcriptome fasta'] = params.transcript_fa
-summary['Transcriptome annotation'] = params.transcript_gtf
-summary['STAR genome'] = params.star_genome
-summary['STAR transcriptome'] = params.star_transcript
-summary['Deduplicate quickly'] = params.quickdedup
-summary['Minimum intron length'] = params.intronmin
+// def summary = [:]
+// summary['Output directory'] = params.outdir
+// summary['Trace directory'] = params.tracedir
+// summary['Genome fasta'] = params.genome_fa
+// summary['Genome fasta index'] = params.genome_fai
+// summary['Genome annotation'] = params.genome_gtf
+// summary['Transcriptome fasta'] = params.transcript_fa
+// summary['Transcriptome annotation'] = params.transcript_gtf
+// summary['STAR genome'] = params.star_genome
+// summary['STAR transcriptome'] = params.star_transcript
+// summary['Deduplicate quickly'] = params.quickdedup
+// summary['Minimum intron length'] = params.intronmin
 
-log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
-log.info "-\033[2m---------------------------------------------------------------\033[0m-"
+// log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
+// log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
 // Pipeline
 workflow {
@@ -92,21 +97,54 @@ workflow {
     // Get fastq paths 
     metadata(params.input)
 
-    // Split
-    splitfastq(metadata.out)
+    // metadata.out.view()
+
+    // // Split
+    // splitfastq(metadata.out)
+
+    // ch_spl = splitfastq.out
+    //     .flatten()
+    //     .map { file -> tuple(file.simpleName, file) }
 
     // Trim
-    trim(splitfastq.out)
+    // trim(ch_spl)
+    trim(metadata.out)
 
     // Filter spliced reads
-    // premap(trim.out.combine(ch_star_genome))
-    // filtersplicedreads(premap.out)
+    premap(trim.out.combine(ch_star_genome))
+    filtersplicedreads(premap.out)
+
+    // Split
+    splitfastq(filtersplicedreads.out)
+
+    ch_spl = splitfastq.out
+        .flatten()
+        .map { file -> tuple(file.simpleName, file) }
 
     // Convert to fasta
     // convert_fastq_to_fasta(filtersplicedreads.out)
+    convert_fastq_to_fasta(ch_spl)
+
+    // Merge back test
+    // ch_comb = convert_fastq_to_fasta.out
+    //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+    //     .groupTuple(by: 0)
+    //     .view()
 
     // Map chimeras
-    // mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
+    mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
+    filterblat(mapblat.out)
+
+    // Identify hybrids
+    identifyhybrids(filterblat.out.join(convert_fastq_to_fasta.out))
+
+    // Merge hybrids
+    ch_comb = identifyhybrids.out
+        .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+        .groupTuple(by: 0)
+        // .view()
+
+    mergehybrids(ch_comb)
 
     // Map chimerias
     // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
