@@ -5,13 +5,14 @@ nextflow.preview.dsl = 2
 
 process mapblat {
     tag "${sample_id}"
-    cache false
+    cache true
 
     cpus 8
     memory '32 G'
     time '24h'
 
     input:
+    
         tuple val(sample_id), path(reads), path(transcript_fa)
 
     output:

@@ -41,6 +41,7 @@ include mapblat from './modules/mapblat.nf'
 include filterblat from './modules/filterblat.nf'
 include identifyhybrids from './modules/identifyhybrids.nf'
 include mergehybrids from './modules/mergehybrids.nf'
+include deduplicate_blat from './modules/deduplicate.nf'
 
 // Main workflow
 
@@ -156,6 +157,8 @@ workflow {
     //     deduplicate(mapchimeras.out)
     // }
 
+    deduplicate_blat(mergehybrids.out)
+
     // // Extract hybrids
     // if ( params.quickdedup ) {
     //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
@@ -164,18 +167,19 @@ workflow {
     // }
     // // Get binding energies
     // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
+    getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
 
     // // Get clusters
-    // clusterhybrids(getbindingenergy.out)
+    clusterhybrids(getbindingenergy.out)
 
     // // Convert coordinates
     // // Write hybrid BAM
-    // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
-    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+    convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
+    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
 
     // // Collapse clusters
-    // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
-    // clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
+    collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
 
 }
 

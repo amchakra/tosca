@@ -31,7 +31,10 @@ process convertcoordinates {
     genes.gr <- rtracklayer::import.gff2("$transcript_gtf")
 
     hybrids.dt <- fread("$hybrids")
-    seq.dt <- hybrids.dt[overlapping_hybrid %in% c(NA, FALSE)] # Remove overlapping hybrids, NA is genomic orientation
+    # seq.dt <- hybrids.dt[overlapping_hybrid %in% c(NA, FALSE)] # Remove overlapping hybrids, NA is genomic orientation
+    seq.dt <- hybrids.dt
+    message(nrow(seq.dt[R_start < L_end]))
+    seq.dt[R_start < L_end, R_start := L_end + 1]    
     seq.dt <- seq.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
 
     # New method
