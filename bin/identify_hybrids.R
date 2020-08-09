@@ -13,7 +13,8 @@ option_list <- list(make_option(c("-b", "--blast"), action = "store", type = "ch
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
-# opt <- list(blast="results/filtered/demux_NNNNATCTGGGANNNNN.00.filtered.blast8.gz",
+# opt <- list(blast="20180504_cortex_P7_iCLIP_WT_eh.filtered.blast8.gz",
+#   fasta = "20180504_cortex_P7_iCLIP_WT_eh.fasta",
 #   output = "test.tsv",
 #   threads = 8)
 
@@ -120,69 +121,77 @@ FilterValidHybrids <- function(valid.hybrids.dt) {
   # 2. Select ones that overlap single hits
   # ==========
   
-  L.gr <- with(single.hybrids.dt, GRanges(seqnames = subject.x,
-                                          ranges = IRanges(start = s_start.x, end = s_end.x),
-                                          strand = "+",
-                                          evalue = evalue.x,
-                                          bitscore = bit_score.x,
-                                          read = query))
-  
-  R.gr <- with(single.hybrids.dt, GRanges(seqnames = subject.y,
-                                          ranges = IRanges(start = s_start.y, end = s_end.y),
-                                          strand = "+",
-                                          evalue = evalue.y,
-                                          bitscore = bit_score.y,
-                                          read = query))
-  
-  seqlevels(L.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
-  seqlevels(R.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
-  single.gi <- GInteractions(L.gr, R.gr)
-  single.gi <- swapAnchors(single.gi)
-  
-  L.gr <- with(multi.hybrids.dt, GRanges(seqnames = subject.x,
-                                         ranges = IRanges(start = s_start.x, end = s_end.x),
-                                         strand = "+",
-                                         evalue = evalue.x,
-                                         bitscore = bit_score.x,
-                                         read = query,
-                                         id = id))
-  
-  R.gr <- with(multi.hybrids.dt, GRanges(seqnames = subject.y,
-                                         ranges = IRanges(start = s_start.y, end = s_end.y),
-                                         strand = "+",
-                                         evalue = evalue.y,
-                                         bitscore = bit_score.y,
-                                         read = query,
-                                         id = id))
-  
-  seqlevels(L.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
-  seqlevels(R.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
-  multi.gi <- GInteractions(L.gr, R.gr)
-  multi.gi <- swapAnchors(multi.gi)
+  if(nrow(single.hybrids.dt) > 0) {
 
-  seqlevels(single.gi) <- unique(c(seqlevels(single.gi), seqlevels(multi.gi)))
-  seqlevels(multi.gi) <- unique(c(seqlevels(single.gi), seqlevels(multi.gi)))  
-  multi.gi$ol <- countOverlaps(multi.gi, single.gi, ignore.strand = FALSE, use.region = "both")
-  
-  multi.ol.dt <- data.table(query = multi.gi$anchor1.read,
-                            id = multi.gi$anchor1.id,
-                            ol = multi.gi$ol)
-  multi.ol.dt <- multi.ol.dt[ol > 0]
-  multi.ol.dt[, max_ol := max(ol), by = query]
-  multi.ol.dt <- multi.ol.dt[ol == max_ol] # Select one with most overlaps
-  
-  ol.multi.hybrids.dt <- multi.hybrids.dt[id %in% multi.ol.dt$id]
+      L.gr <- with(single.hybrids.dt, GRanges(seqnames = subject.x,
+                                              ranges = IRanges(start = s_start.x, end = s_end.x),
+                                              strand = "+",
+                                              evalue = evalue.x,
+                                              bitscore = bit_score.x,
+                                              read = query))
+      
+      R.gr <- with(single.hybrids.dt, GRanges(seqnames = subject.y,
+                                              ranges = IRanges(start = s_start.y, end = s_end.y),
+                                              strand = "+",
+                                              evalue = evalue.y,
+                                              bitscore = bit_score.y,
+                                              read = query))
+      
+      seqlevels(L.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
+      seqlevels(R.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
+      single.gi <- GInteractions(L.gr, R.gr)
+      single.gi <- swapAnchors(single.gi)
+      
+      L.gr <- with(multi.hybrids.dt, GRanges(seqnames = subject.x,
+                                            ranges = IRanges(start = s_start.x, end = s_end.x),
+                                            strand = "+",
+                                            evalue = evalue.x,
+                                            bitscore = bit_score.x,
+                                            read = query,
+                                            id = id))
+      
+      R.gr <- with(multi.hybrids.dt, GRanges(seqnames = subject.y,
+                                            ranges = IRanges(start = s_start.y, end = s_end.y),
+                                            strand = "+",
+                                            evalue = evalue.y,
+                                            bitscore = bit_score.y,
+                                            read = query,
+                                            id = id))
+      
+      seqlevels(L.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
+      seqlevels(R.gr) <- unique(c(seqlevels(L.gr), seqlevels(R.gr)))
+      multi.gi <- GInteractions(L.gr, R.gr)
+      multi.gi <- swapAnchors(multi.gi)
 
-  ol.multi.hybrids.dt[, max_q := max(q_length_exc_gap), by = query] # select one with most aligned
-  ol.multi.hybrids.dt <- ol.multi.hybrids.dt[q_length_exc_gap == max_q]
+      seqlevels(single.gi) <- unique(c(seqlevels(single.gi), seqlevels(multi.gi)))
+      seqlevels(multi.gi) <- unique(c(seqlevels(single.gi), seqlevels(multi.gi)))  
+      multi.gi$ol <- countOverlaps(multi.gi, single.gi, ignore.strand = FALSE, use.region = "both")
+      
+      multi.ol.dt <- data.table(query = multi.gi$anchor1.read,
+                                id = multi.gi$anchor1.id,
+                                ol = multi.gi$ol)
+      multi.ol.dt <- multi.ol.dt[ol > 0]
+      multi.ol.dt[, max_ol := max(ol), by = query]
+      multi.ol.dt <- multi.ol.dt[ol == max_ol] # Select one with most overlaps
+      
+      ol.multi.hybrids.dt <- multi.hybrids.dt[id %in% multi.ol.dt$id]
 
-  ol.multi.hybrids.dt[, max_q_ol := max(q_ol), by = query] # select one with shortest gap
-  ol.multi.hybrids.dt <- ol.multi.hybrids.dt[q_ol == max_q_ol]
+      ol.multi.hybrids.dt[, max_q := max(q_length_exc_gap), by = query] # select one with most aligned
+      ol.multi.hybrids.dt <- ol.multi.hybrids.dt[q_length_exc_gap == max_q]
 
-  ol.multi.hybrids.dt[, multi := .N, by = query]
-  ol.multi.hybrids.dt <- ol.multi.hybrids.dt[multi == 1] # only keep ones with now one solution
-  ol.multi.hybrids.dt[, h_sel := "multi_overlap"]
+      ol.multi.hybrids.dt[, max_q_ol := max(q_ol), by = query] # select one with shortest gap
+      ol.multi.hybrids.dt <- ol.multi.hybrids.dt[q_ol == max_q_ol]
+
+      ol.multi.hybrids.dt[, multi := .N, by = query]
+      ol.multi.hybrids.dt <- ol.multi.hybrids.dt[multi == 1] # only keep ones with now one solution
+      ol.multi.hybrids.dt[, h_sel := "multi_overlap"]
   
+  } else {
+
+      ol.multi.hybrids.dt <- data.table()
+
+  }
+
   # ==========
   # 2. Select ones based on quality of hybrid
   # ==========
