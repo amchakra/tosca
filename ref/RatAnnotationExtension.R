@@ -256,3 +256,14 @@ other.gtf <- gtf[!gtf$gene_id %in% extended.tx.gr$gene_id]
 stopifnot(all(start(extended.tx.gr) <= end(extended.tx.gr)))
 # seqlevelsStyle(other.gtf) <- "NCBI"
 export(c(extended.tx.gr, other.gtf), "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.gtf", format = "gtf")
+
+# Modify for htseq-clip
+gtf <- import.gff2("~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.gtf.gz")
+gtf[is.na(gtf$gene_name)]$gene_name <- gtf[is.na(gtf$gene_name)]$gene_id
+# export.gff2(gtf, "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.name.gtf")
+
+gtf$type <- as.character(gtf$type)
+gtf[gtf$type == "five_prime_utr"]$type <- "five_prime_UTR"
+gtf[gtf$type == "three_prime_utr"]$type <- "three_prime_UTR"
+
+export.gff2(gtf, "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.name.gtf")
