@@ -5,6 +5,7 @@ nextflow.preview.dsl = 2
 
 process convert_fastq_to_fasta {
     tag "${sample_id}"
+    cache false
 
     cpus 8
     time '24h'

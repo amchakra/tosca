@@ -9,7 +9,7 @@ params.maxhits = params.maxhits
 process identifyhybrids {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
     time '24h'
     cpus = 8

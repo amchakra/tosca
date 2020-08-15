@@ -9,7 +9,7 @@ params.maxhits = params.maxhits
 process filterblat {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
 
     time '24h'
 

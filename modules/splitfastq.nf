@@ -5,7 +5,7 @@ nextflow.preview.dsl = 2
 
 process splitfastq {
     tag "${sample_id}"
-    publishDir "${params.outdir}/split", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/split", mode: 'copy', overwrite: true
 
     cpus 1
     time '24h'

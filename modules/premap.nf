@@ -27,7 +27,6 @@ process premap {
         --outSAMunmapped Within \
         --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
         --alignIntronMin 20 --alignIntronMax 100000 \
-        --outFilterMismatchNoverReadLmax 0.04 \
         --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 60000000000
 
     sambamba index -t ${task.cpus} ${sample_id}.Aligned.sortedByCoord.out.bam
