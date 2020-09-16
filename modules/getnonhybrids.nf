@@ -14,7 +14,7 @@ process getnonhybrids {
         tuple val(sample_id), path(hybrids) path(reads)
 
     output:
-        tuple val(sample_id), path(fastq)
+        tuple val(sample_id), path("${sample_id}.nonhybrid.fastq.gz")
 
     script:
     
