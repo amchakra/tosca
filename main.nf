@@ -11,7 +11,7 @@ hiCLIP analysis pipeline.
 */
 
 // Define DSL2
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 // Need to set these before module is loaded else not propagated
 params.intronmin = 10
@@ -19,30 +19,30 @@ params.evalue = 0.001
 params.maxhits = 100
 
 // Processes
-include hiclipheader from './modules/utils.nf'
-include metadata from './modules/metadata.nf'
-include trim from './modules/trim.nf'
-include premap from './modules/premap.nf'
-include filtersplicedreads from './modules/filtersplicedreads.nf'
-include mapchimeras from './modules/mapchimeras.nf'
-include deduplicate from './modules/deduplicate.nf'
-include deduplicate_unique from './modules/deduplicate.nf'
-include extracthybrids from './modules/extracthybrids.nf'
-include getbindingenergy from './modules/getbindingenergy.nf'
-include clusterhybrids from './modules/clusterhybrids.nf'
-include collapseclusters from './modules/collapseclusters.nf'
-include clusterbindingenergy from './modules/clusterbindingenergy.nf'
-include convertcoordinates from './modules/convertcoordinates.nf'
-include hybridbedtohybridbam from './modules/hybridbedtohybridbam.nf'
+include { hiclipheader } from './modules/utils.nf'
+include { metadata } from './modules/metadata.nf'
+include { trim } from './modules/trim.nf'
+include { premap } from './modules/premap.nf'
+include { filtersplicedreads } from './modules/filtersplicedreads.nf'
+include { mapchimeras } from './modules/mapchimeras.nf'
+include { deduplicate } from './modules/deduplicate.nf'
+include { deduplicate_unique } from './modules/deduplicate.nf'
+include { extracthybrids } from './modules/extracthybrids.nf'
+include { getbindingenergy } from './modules/getbindingenergy.nf'
+include { clusterhybrids } from './modules/clusterhybrids.nf'
+include { collapseclusters } from './modules/collapseclusters.nf'
+include { clusterbindingenergy } from './modules/clusterbindingenergy.nf'
+include { convertcoordinates } from './modules/convertcoordinates.nf'
+include { hybridbedtohybridbam } from './modules/hybridbedtohybridbam.nf'
 
-include splitfastq from './modules/splitfastq.nf'
-include convert_fastq_to_fasta from './modules/convert_fastq_to_fasta.nf'
-include mapblat from './modules/mapblat.nf'
-include filterblat from './modules/filterblat.nf'
-include identifyhybrids from './modules/identifyhybrids.nf'
-include mergehybrids from './modules/mergehybrids.nf'
-include deduplicate_blat from './modules/deduplicate.nf'
-include getnonhybrids from './modules/getnonhybrids.nf'
+include { splitfastq } from './modules/splitfastq.nf'
+include { convert_fastq_to_fasta } from './modules/convert_fastq_to_fasta.nf'
+include { mapblat } from './modules/mapblat.nf'
+include { filterblat } from './modules/filterblat.nf'
+include { identifyhybrids } from './modules/identifyhybrids.nf'
+include { mergehybrids } from './modules/mergehybrids.nf'
+include { deduplicate_blat } from './modules/deduplicate.nf'
+include { getnonhybrids } from './modules/getnonhybrids.nf'
 
 // Main workflow
 
