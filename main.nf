@@ -42,6 +42,7 @@ include filterblat from './modules/filterblat.nf'
 include identifyhybrids from './modules/identifyhybrids.nf'
 include mergehybrids from './modules/mergehybrids.nf'
 include deduplicate_blat from './modules/deduplicate.nf'
+include getnonhybrids from './modules/getnonhybrids.nf'
 
 // Main workflow
 
@@ -147,6 +148,8 @@ workflow {
 
     mergehybrids(ch_comb)
 
+    // Get non-hybrid reads for later
+    getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
     // Map chimerias
     // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
