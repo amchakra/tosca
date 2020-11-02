@@ -46,21 +46,20 @@ include { getnonhybrids } from './modules/getnonhybrids.nf'
 
 // Main workflow
 
-// General variables
-params.quickdedup = true
-
 // Input variables
 params.input='metadata.csv'
 params.org='mouse'
 
 // Genome variables
-params.genome_fa = params.genomes[ params.org ].genome_fa
-params.genome_fai = params.genomes[ params.org ].genome_fai
-params.genome_gtf = params.genomes[ params.org ].genome_gtf 
-params.transcript_fa = params.genomes[ params.org ].transcript_fa
-params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
-params.star_genome = params.genomes[ params.org ].star_genome
-params.star_transcript = params.genomes[ params.org ].star_transcript
+params.transcript_fa = '/camp/home/chakraa2/home/projects/virus/sars-cov-2/bauer/rSARS-CoV-2.fasta'
+
+// params.genome_fa = params.genomes[ params.org ].genome_fa
+// params.genome_fai = params.genomes[ params.org ].genome_fai
+// params.genome_gtf = params.genomes[ params.org ].genome_gtf 
+// params.transcript_fa = params.genomes[ params.org ].transcript_fa
+// params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
+// params.star_genome = params.genomes[ params.org ].star_genome
+// params.star_transcript = params.genomes[ params.org ].star_transcript
 
 // params.star_genome_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24'
 // params.star_transcript_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes'
@@ -99,39 +98,19 @@ workflow {
     // Get fastq paths 
     metadata(params.input)
 
-    // metadata.out.view()
-
-    // // Split
-    // splitfastq(metadata.out)
-
-    // ch_spl = splitfastq.out
-    //     .flatten()
-    //     .map { file -> tuple(file.simpleName, file) }
-
     // Trim
     // trim(ch_spl)
-    trim(metadata.out)
-
-    // Filter spliced reads
-    premap(trim.out.combine(ch_star_genome))
-    filtersplicedreads(premap.out)
+    // trim(metadata.out)
 
     // Split
-    splitfastq(filtersplicedreads.out)
+    splitfastq(metadata.out)
 
     ch_spl = splitfastq.out
         .flatten()
         .map { file -> tuple(file.simpleName, file) }
 
     // Convert to fasta
-    // convert_fastq_to_fasta(filtersplicedreads.out)
     convert_fastq_to_fasta(ch_spl)
-
-    // Merge back test
-    // ch_comb = convert_fastq_to_fasta.out
-    //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-    //     .groupTuple(by: 0)
-    //     .view()
 
     // Map chimeras
     mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
@@ -148,41 +127,41 @@ workflow {
 
     mergehybrids(ch_comb)
 
-    // Get non-hybrid reads for later
-    getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
-    // Map chimerias
-    // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
+    // // Get non-hybrid reads for later
+    // getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
+    // // Map chimerias
+    // // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
-    // Remove PCR duplicates
-    // if ( params.quickdedup ) {
-    //     deduplicate_unique(mapchimeras.out)
-    // } else {
-    //     deduplicate(mapchimeras.out)
-    // }
+    // // Remove PCR duplicates
+    // // if ( params.quickdedup ) {
+    // //     deduplicate_unique(mapchimeras.out)
+    // // } else {
+    // //     deduplicate(mapchimeras.out)
+    // // }
 
-    deduplicate_blat(mergehybrids.out)
+    // deduplicate_blat(mergehybrids.out)
 
-    // // Extract hybrids
-    // if ( params.quickdedup ) {
-    //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
-    // } else {
-    //     extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    // }
-    // // Get binding energies
-    // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
-    getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
+    // // // Extract hybrids
+    // // if ( params.quickdedup ) {
+    // //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    // // } else {
+    // //     extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    // // }
+    // // // Get binding energies
+    // // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
+    // getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
 
-    // // Get clusters
-    clusterhybrids(getbindingenergy.out)
+    // // // Get clusters
+    // clusterhybrids(getbindingenergy.out)
 
-    // // Convert coordinates
-    // // Write hybrid BAM
-    convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
-    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+    // // // Convert coordinates
+    // // // Write hybrid BAM
+    // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
+    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
 
-    // // Collapse clusters
-    collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
-    clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
+    // // // Collapse clusters
+    // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    // clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
 
 }
 
