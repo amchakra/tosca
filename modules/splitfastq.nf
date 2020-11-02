@@ -18,7 +18,7 @@ process splitfastq {
 
     shell:
     """
-    zcat $reads | split -l 400000 --additional-suffix .fastq - ${sample_id}_
+    zcat $reads | split -l 4000000 --additional-suffix .fastq - ${sample_id}_
     pigz *.fastq
     """
 

@@ -112,16 +112,16 @@ workflow {
     mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
     filterblat(mapblat.out)
 
-    // Identify hybrids
-    identifyhybrids(filterblat.out.join(convert_fastq_to_fasta.out))
+    // // Identify hybrids
+    // identifyhybrids(filterblat.out.join(convert_fastq_to_fasta.out))
 
-    // Merge hybrids
-    ch_comb = identifyhybrids.out
-        .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-        .groupTuple(by: 0)
-        // .view()
+    // // Merge hybrids
+    // ch_comb = identifyhybrids.out
+    //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+    //     .groupTuple(by: 0)
+    //     // .view()
 
-    mergehybrids(ch_comb)
+    // mergehybrids(ch_comb)
 
     // // Get non-hybrid reads for later
     // getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
