@@ -7,7 +7,7 @@ process splitfastq {
     tag "${sample_id}"
     // publishDir "${params.outdir}/split", mode: 'copy', overwrite: true
 
-    cpus 1
+    cpus 8
     time '24h'
 
     input:
