@@ -51,7 +51,7 @@ params.input='metadata.csv'
 params.org='mouse'
 
 // Genome variables
-params.transcript_fa = '/camp/home/chakraa2/home/projects/virus/sars-cov-2/bauer/rSARS-CoV-2.fasta'
+params.transcript_fa = '/camp/home/chakraa2/home/projects/virus/sars-cov-2/bauer/data/rSARS-CoV-2.fasta'
 
 // params.genome_fa = params.genomes[ params.org ].genome_fa
 // params.genome_fai = params.genomes[ params.org ].genome_fai
@@ -68,11 +68,11 @@ params.transcript_fa = '/camp/home/chakraa2/home/projects/virus/sars-cov-2/bauer
 // params.transcript_gtf = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz'
 
 // Create channels for static files
-ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
-ch_star_transcript = Channel.fromPath(params.star_transcript, checkIfExists: true)
+// ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
+// ch_star_transcript = Channel.fromPath(params.star_transcript, checkIfExists: true)
 ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
-ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
-ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
+// ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
+// ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
@@ -97,10 +97,6 @@ workflow {
 
     // Get fastq paths 
     metadata(params.input)
-
-    // Trim
-    // trim(ch_spl)
-    // trim(metadata.out)
 
     // Split
     splitfastq(metadata.out)
