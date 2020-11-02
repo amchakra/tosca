@@ -259,8 +259,9 @@ ptm <- proc.time()
 
 # Load fasta for read lengths
 fasta <- readDNAStringSet(opt$fasta)
-fasta.dt <- data.table(query = names(fasta),
-                       readlength = width(fasta))
+# fasta.dt <- data.table(query = names(fasta),
+#                        readlength = width(fasta))
+fasta.dt <- data.table(query = sapply(strsplit(names(fasta), " "), "[[", 1), readlength = width(fasta)) # updated for David's fasta header
 setkey(fasta.dt, query)
 
 # Load blast and get read lengths
