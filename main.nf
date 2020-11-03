@@ -76,21 +76,22 @@ ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
-// def summary = [:]
-// summary['Output directory'] = params.outdir
-// summary['Trace directory'] = params.tracedir
+def summary = [:]
+summary['Output directory'] = params.outdir
+summary['Trace directory'] = params.tracedir
+summary['Matadata file'] = params.input
 // summary['Genome fasta'] = params.genome_fa
 // summary['Genome fasta index'] = params.genome_fai
 // summary['Genome annotation'] = params.genome_gtf
-// summary['Transcriptome fasta'] = params.transcript_fa
+summary['Transcriptome fasta'] = params.transcript_fa
 // summary['Transcriptome annotation'] = params.transcript_gtf
 // summary['STAR genome'] = params.star_genome
 // summary['STAR transcriptome'] = params.star_transcript
 // summary['Deduplicate quickly'] = params.quickdedup
 // summary['Minimum intron length'] = params.intronmin
 
-// log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
-// log.info "-\033[2m---------------------------------------------------------------\033[0m-"
+log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
+log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
 // Pipeline
 workflow {

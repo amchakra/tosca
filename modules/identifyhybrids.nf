@@ -23,11 +23,10 @@ process identifyhybrids {
 
     script:
 
-    evalue = "$params.evalue"
-    maxhits = "$params.maxhits"
+    identify_hybrids = "$baseDir/bin/identify_hybrids.R"
 
     """
-    Rscript --vanilla /camp/home/chakraa2/home/projects/flora/hiclip/blat/tosca/bin/identify_hybrids.R -t ${task.cpus} -b $blast8 -f $reads -o ${sample_id}.hybrids.tsv.gz
+    Rscript --vanilla $identify_hybrids -t ${task.cpus} -b $blast8 -f $reads -o ${sample_id}.hybrids.tsv.gz
     """
 
 }
