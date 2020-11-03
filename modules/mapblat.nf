@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 
 process mapblat {
     tag "${sample_id}"
-    cache false
+    // cache false
 
     cpus 8
     memory '32 G'
