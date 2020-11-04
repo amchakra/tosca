@@ -124,6 +124,9 @@ workflow {
 
     mergehybrids(ch_comb)
 
+    // Get binding energies
+    getbindingenergy(ch_comb.out.combine(ch_transcript_fa))
+
     // // Get non-hybrid reads for later
     // getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
     // // Map chimerias
