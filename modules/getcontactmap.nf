@@ -26,6 +26,7 @@ process getcontactmap {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(primavera))
 
     # Functions
 
