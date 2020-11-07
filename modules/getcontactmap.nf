@@ -52,8 +52,7 @@ process getcontactmap {
 
     genome.size <- as.numeric("$genomesize")
 
-    message(basename(hybrid.file))
-    hybrid.dt <- fread(hybrid.file)
+    hybrid.dt <- fread("$hybrids")
     print(hybrid.dt[, .N, by = hybrid_selection])
     hybrid.dt <- hybrid.dt[hybrid_selection == "single"]
     
