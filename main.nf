@@ -17,6 +17,8 @@ nextflow.enable.dsl=2
 params.intronmin = 10
 params.evalue = 0.001
 params.maxhits = 100
+params.genomesize = 29900
+params.mfe = false
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
@@ -43,6 +45,8 @@ include { identifyhybrids } from './modules/identifyhybrids.nf'
 include { mergehybrids } from './modules/mergehybrids.nf'
 include { deduplicate_blat } from './modules/deduplicate.nf'
 include { getnonhybrids } from './modules/getnonhybrids.nf'
+
+include { getcontactmap } from './modules/getcontactmap.nf'
 
 // Main workflow
 
@@ -84,6 +88,8 @@ summary['Matadata file'] = params.input
 // summary['Genome fasta index'] = params.genome_fai
 // summary['Genome annotation'] = params.genome_gtf
 summary['Transcriptome fasta'] = params.transcript_fa
+summary['Genome size'] = params.genomesize
+summary['Get binding energy'] = params.mfe
 // summary['Transcriptome annotation'] = params.transcript_gtf
 // summary['STAR genome'] = params.star_genome
 // summary['STAR transcriptome'] = params.star_transcript
@@ -125,7 +131,12 @@ workflow {
     mergehybrids(ch_comb)
 
     // Get binding energies
-    getbindingenergy(mergehybrids.out.combine(ch_transcript_fa))
+    if(params.mfe) {
+        getbindingenergy(mergehybrids.out.combine(ch_transcript_fa))
+    }
+
+    // Get contact maps
+    getcontactmap(mergehybrids.out)
 
     // // Get non-hybrid reads for later
     // getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
