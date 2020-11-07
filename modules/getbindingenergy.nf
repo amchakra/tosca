@@ -52,7 +52,8 @@ process getbindingenergy {
     seq.df <- data.frame(hybrids.dt[, .(id, L_sequence, R_sequence)]) # Split out relevant part of hybrids.dt
 
     # Cluster jobs
-    sjob <- slurm_apply(.slurm_GetMFE, seq.df, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 1, slurm_options = list(time = "24:00:00"), submit = TRUE)
+    # sjob <- slurm_apply(.slurm_GetMFE, seq.df, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 1, slurm_options = list(time = "24:00:00"), submit = TRUE)
+    sjob <- slurm_apply(.slurm_AnalyseMFE, seq.df, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 1, slurm_options = list(time = "24:00:00"), submit = TRUE)
     Sys.sleep(60) # To give it enough time to submit before the first check
 
     status <- FALSE
@@ -64,18 +65,24 @@ process getbindingenergy {
 
     }
 
-    mfe <- get_slurm_out(sjob, outtype = 'raw')
+    # mfe <- get_slurm_out(sjob, outtype = 'raw')
+    mfe <- get_slurm_out(sjob, outtype = 'table')
+    mfe.dt <- as.data.table(mfe, keep.rownames = TRUE)
+    setnames(mfe.dt, "rn", "id")
+    setkey(mfe.dt, id)
+    mfe.dt[mfe > 0, mfe := 0] # Get rid of positives
+    mfe.dt[is.na(mfe), mfe := 0] # Fix for positives < 10?
 
     # Remove temporary files
     cleanup_files(sjob) 
 
     # Merge back
-    names(mfe) <- NULL # Not sure why it is names with L_sequence - not anymore...?
-    mfe.dt <- as.data.table(unlist(mfe), keep.rownames = TRUE)
-    setnames(mfe.dt, c("id", "mfe"))
-    setkey(mfe.dt, id)
-    mfe.dt[mfe > 0, mfe := 0] # Get rid of positives
-    mfe.dt[is.na(mfe), mfe := 0] # Fix for positives < 10?
+    # names(mfe) <- NULL # Not sure why it is names with L_sequence - not anymore...?
+    # mfe.dt <- as.data.table(unlist(mfe), keep.rownames = TRUE)
+    # setnames(mfe.dt, c("id", "mfe"))
+    # setkey(mfe.dt, id)
+    # mfe.dt[mfe > 0, mfe := 0] # Get rid of positives
+    # mfe.dt[is.na(mfe), mfe := 0] # Fix for positives < 10?
 
     setkey(hybrids.dt, id)
 
