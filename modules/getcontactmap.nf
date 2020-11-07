@@ -73,7 +73,7 @@ process getcontactmap {
     saveRDS(mat, file = paste0("$sample_id", ".hybrid.mat.rds"))
 
     # Bin matrix
-    binned.mat <- bin_matrix(rep1.mat, bin.size = 100)
+    binned.mat <- bin_matrix(mat, bin.size = 100)
     binned.dt <- data.table(reshape2::melt(binned.mat))
 
     binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
