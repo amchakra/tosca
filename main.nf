@@ -19,6 +19,7 @@ params.evalue = 0.001
 params.maxhits = 100
 params.genomesize = 29900
 params.mfe = false
+params.cluster = false
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
@@ -90,6 +91,7 @@ summary['Matadata file'] = params.input
 summary['Transcriptome fasta'] = params.transcript_fa
 summary['Genome size'] = params.genomesize
 summary['Get binding energy'] = params.mfe
+summary['Cluster hybrids'] = params.cluster
 // summary['Transcriptome annotation'] = params.transcript_gtf
 // summary['STAR genome'] = params.star_genome
 // summary['STAR transcriptome'] = params.star_transcript
@@ -163,7 +165,14 @@ workflow {
     // getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
 
     // // // Get clusters
-    // clusterhybrids(getbindingenergy.out)
+    if(params.cluster) {
+        if(params.mfe) {
+            clusterhybrids(getbindingenergy.out)
+        } else {
+            clusterhybrids(getbindingenergy.out)
+        }
+    }
+  
 
     // // // Convert coordinates
     // // // Write hybrid BAM
