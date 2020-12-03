@@ -96,3 +96,7 @@ export.bed(reduced.sel.genes.gr, reduced.sel.genes.bed)
 
 cmd <- paste("bedtools getfasta -s -name -fi", masked.fasta, "-bed", reduced.sel.genes.bed, "| pigz > ~/projects/hiclip/human.fa.gz")
 system(cmd)
+
+invisible(file.remove(reduced.sel.genes.bed))
+invisible(file.remove(masked.fasta))
+invisible(file.remove(paste0(masked.fasta, ".fai")))
