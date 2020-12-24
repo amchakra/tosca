@@ -1,0 +1,3 @@
+[submodule "luslab-nf-modules"]
+	path = luslab-nf-modules
+	url = https://github.com/luslab/luslab-nf-modules
