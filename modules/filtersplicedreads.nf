@@ -3,22 +3,27 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process filtersplicedreads {
+process FILTERSPLICEDREADS {
 
-    tag "${meta.sample_id}"
+    tag "${sample_id}"
     publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
 
     time '12h'
 
     input:
-        tuple val(meta), path(bam), path(bai)
+        tuple val(sample_id), path(bam), path(bai)
 
     output:
-        tuple val(meta), path("${meta.sample_id}.unspliced.fastq.gz")
+        tuple val(sample_id), path("${sample_id}.unspliced.fastq.gz")
 
     script:
+
+    cmd = "filter_spliced_reads.py $bam ${sample_id} > ${sample_id}.filter_spliced_reads.log"
+
+    if(params.verbose) { println ("[MODULE] FILTERSPLICEDREADS: " + cmd) }
+
     """
-    remove_spliced_reads.py $bam ${meta.sample_id}
+    $cmd
     """
     
 }

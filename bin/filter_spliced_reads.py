@@ -44,7 +44,7 @@ def FilterBam(bam_in, bam_out):
 
 if len(sys.argv) == 3:
     f_in = sys.argv[1]
-    f_out = sys.argv[2] + 'unspliced.bam',
+    f_out = sys.argv[2] + '.unspliced.bam'
     
     # First filter to get unspliced bam
     bam_in = pysam.AlignmentFile(f_in, "rb")
@@ -52,7 +52,7 @@ if len(sys.argv) == 3:
     FilterBam(bam_in, bam_out)
 
     # System call to bedtools to convert to fastq
-    fastq_out = sys.argv[2], '.unspliced.fastq.gz')
+    fastq_out = sys.argv[2] + '.unspliced.fastq.gz'
     run(f'bedtools bamtofastq -i {f_out} -fq /dev/stdout | pigz > {fastq_out}', shell = True)
 
 else:

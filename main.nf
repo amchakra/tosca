@@ -26,8 +26,11 @@ params.min_readlength = 16
 include { hiclipheader } from './modules/utils.nf'
 include { METADATA } from './modules/metadata.nf'
 include { CUTADAPT } from './modules/cutadapt.nf'
-include { star_align_reads as PREMAP } from './luslab-nf-modules/tools/star/main.nf'
-include { filtersplicedreads } from './modules/filtersplicedreads.nf'
+include { PREMAP } from './modules/premap.nf'
+include { FILTERSPLICEDREADS } from './modules/filtersplicedreads.nf'
+
+
+
 include { mapchimeras } from './modules/mapchimeras.nf'
 include { deduplicate } from './modules/deduplicate.nf'
 include { deduplicate_unique } from './modules/deduplicate.nf'
@@ -56,8 +59,8 @@ params.premap = true
 
 
 // Input variables
-params.input='metadata.csv'
-params.org='mouse'
+// params.input='metadata.csv'
+// params.org='mouse'
 
 // Genome variables
 params.genome_fa = params.genomes[ params.org ].genome_fa
@@ -77,21 +80,21 @@ ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
-// def summary = [:]
-// summary['Output directory'] = params.outdir
-// summary['Trace directory'] = params.tracedir
-// summary['Genome fasta'] = params.genome_fa
-// summary['Genome fasta index'] = params.genome_fai
-// summary['Genome annotation'] = params.genome_gtf
-// summary['Transcriptome fasta'] = params.transcript_fa
-// summary['Transcriptome annotation'] = params.transcript_gtf
-// summary['STAR genome'] = params.star_genome
-// summary['STAR transcriptome'] = params.star_transcript
-// summary['Deduplicate quickly'] = params.quickdedup
-// summary['Minimum intron length'] = params.intronmin
+def summary = [:]
+summary['Output directory'] = params.outdir
+summary['Trace directory'] = params.tracedir
+summary['Genome fasta'] = params.genome_fa
+summary['Genome fasta index'] = params.genome_fai
+summary['Genome annotation'] = params.genome_gtf
+summary['Transcriptome fasta'] = params.transcript_fa
+summary['Transcriptome annotation'] = params.transcript_gtf
+summary['STAR genome'] = params.star_genome
+summary['STAR transcriptome'] = params.star_transcript
+summary['Deduplicate quickly'] = params.quickdedup
+summary['Minimum intron length'] = params.intronmin
 
-// log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
-// log.info "-\033[2m---------------------------------------------------------------\033[0m-"
+log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
+log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
 // Pipeline
 workflow {
@@ -103,8 +106,8 @@ workflow {
     CUTADAPT(METADATA.out)
 
     // Filter spliced reads
-    // PREMAP(params.modules['TRIMADAPTERS'], TRIMADAPTERS.out.fastq, ch_star_genome)
-    // filtersplicedreads(PREMAP.out.bam_files)
+    PREMAP(CUTADAPT.out.fastq, ch_star_genome.collect())
+    FILTERSPLICEDREADS(PREMAP.out.bam)
 
     // // Split
     // splitfastq(filtersplicedreads.out)

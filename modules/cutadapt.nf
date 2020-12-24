@@ -11,10 +11,10 @@ process CUTADAPT {
     time '24h'
 
     input:
-    tuple val(sample_id), path(reads)
+        tuple val(sample_id), path(reads)
 
     output:
-    tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: fastq
+        tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: fastq
 
     script:
     args = " -j ${task.cpus}"
@@ -25,7 +25,7 @@ process CUTADAPT {
 
     cmd = "cutadapt $args $reads > ${sample_id}_cutadapt.log"
 
-    println ("[MODULE] cutadapt command: " + cmd)
+    if(params.verbose) { println ("[MODULE] CUTADAPT: " + cmd) }
 
     """
     $cmd
