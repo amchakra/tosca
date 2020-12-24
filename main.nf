@@ -54,9 +54,6 @@ include { getnonhybrids } from './modules/getnonhybrids.nf'
 params.quickdedup = true
 params.premap = true
 
-params.adapter = 'AGATCGGAAGAGC'
-params.min_quality = 10
-params.min_readlength = 16
 
 // Input variables
 params.input='metadata.csv'
