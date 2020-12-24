@@ -11,11 +11,12 @@ process CUTADAPT {
     time '24h'
 
     input:
-        tuple val(sample_id), path(reads)
+    tuple val(sample_id), path(reads)
 
     output:
-        tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: fastq
+    tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: fastq
 
+    script:
     args = " -j ${task.cpus}"
     args += " -a " + params.adapter 
     args += " -q " + params.min_quality
@@ -26,7 +27,6 @@ process CUTADAPT {
 
     println ("[MODULE] cutadapt command: " + cmd)
 
-    shell:
     """
     $cmd
     """
