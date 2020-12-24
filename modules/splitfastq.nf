@@ -3,9 +3,8 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process splitfastq {
+process SPLIT_FASTQ {
     tag "${sample_id}"
-    // publishDir "${params.outdir}/split", mode: 'copy', overwrite: true
 
     cpus 1
     time '24h'
@@ -14,24 +13,18 @@ process splitfastq {
         tuple val(sample_id), path(reads)
 
     output:
-        path("${sample_id}_*.fastq.gz")
+        path("${sample_id}_*.fastq.gz"), emit: fastq
 
-    shell:
+    script:
+
+    split_size = params.split_size * 4
+
+    cmd = "gunzip -c $reads | split -l $split_size --additional-suffix .fastq - ${sample_id}_ && pigz *.fastq"
+
+    if(params.verbose) { println ("[MODULE] CUTADAPT: " + cmd) }
+
     """
-    zcat $reads | split -l 400000 --additional-suffix .fastq - ${sample_id}_
-    pigz *.fastq
+    $cmd
     """
 
 }
-
-// workflow splitfastq {
-
-//     main:
-//         split_fastq()
-//         Channel
-//             .fromPath(split_fastq.out)
-//             .map { file -> tuple(file.baseName, file)}
-//             .set { data }
-//     emit: data
-
-// }

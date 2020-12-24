@@ -15,6 +15,7 @@ process CUTADAPT {
 
     output:
         tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: fastq
+        path("*.cutadapt.log"), emit: log
 
     script:
     args = " -j ${task.cpus}"
@@ -23,7 +24,7 @@ process CUTADAPT {
     args += " --minimum-length " + params.min_readlength
     args += " -o ${sample_id}.trimmed.fastq.gz"
 
-    cmd = "cutadapt $args $reads > ${sample_id}_cutadapt.log"
+    cmd = "cutadapt $args $reads > ${sample_id}.cutadapt.log"
 
     if(params.verbose) { println ("[MODULE] CUTADAPT: " + cmd) }
 

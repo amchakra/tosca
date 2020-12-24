@@ -22,34 +22,38 @@ params.adapter = 'AGATCGGAAGAGC'
 params.min_quality = 10
 params.min_readlength = 16
 
+params.split_size = 100000
+
 // Processes
 include { hiclipheader } from './modules/utils.nf'
 include { METADATA } from './modules/metadata.nf'
 include { CUTADAPT } from './modules/cutadapt.nf'
 include { PREMAP } from './modules/premap.nf'
-include { FILTERSPLICEDREADS } from './modules/filtersplicedreads.nf'
+include { FILTER_SPLICED_READS } from './modules/premap.nf'
+include { SPLIT_FASTQ } from './modules/splitfastq.nf'
+include { FASTQ_TO_FASTA } from './modules/convert_fastq_to_fasta.nf'
+include { BLAT } from './modules/mapblat.nf'
+include { FILTER_BLAT } from './modules/mapblat.nf'
 
+// include { mapchimeras } from './modules/mapchimeras.nf'
+// include { deduplicate } from './modules/deduplicate.nf'
+// include { deduplicate_unique } from './modules/deduplicate.nf'
+// include { extracthybrids } from './modules/extracthybrids.nf'
+// include { getbindingenergy } from './modules/getbindingenergy.nf'
+// include { clusterhybrids } from './modules/clusterhybrids.nf'
+// include { collapseclusters } from './modules/collapseclusters.nf'
+// include { clusterbindingenergy } from './modules/clusterbindingenergy.nf'
+// include { convertcoordinates } from './modules/convertcoordinates.nf'
+// include { hybridbedtohybridbam } from './modules/hybridbedtohybridbam.nf'
 
-
-include { mapchimeras } from './modules/mapchimeras.nf'
-include { deduplicate } from './modules/deduplicate.nf'
-include { deduplicate_unique } from './modules/deduplicate.nf'
-include { extracthybrids } from './modules/extracthybrids.nf'
-include { getbindingenergy } from './modules/getbindingenergy.nf'
-include { clusterhybrids } from './modules/clusterhybrids.nf'
-include { collapseclusters } from './modules/collapseclusters.nf'
-include { clusterbindingenergy } from './modules/clusterbindingenergy.nf'
-include { convertcoordinates } from './modules/convertcoordinates.nf'
-include { hybridbedtohybridbam } from './modules/hybridbedtohybridbam.nf'
-
-include { splitfastq } from './modules/splitfastq.nf'
-include { convert_fastq_to_fasta } from './modules/convert_fastq_to_fasta.nf'
-include { mapblat } from './modules/mapblat.nf'
-include { filterblat } from './modules/filterblat.nf'
-include { identifyhybrids } from './modules/identifyhybrids.nf'
-include { mergehybrids } from './modules/mergehybrids.nf'
-include { deduplicate_blat } from './modules/deduplicate.nf'
-include { getnonhybrids } from './modules/getnonhybrids.nf'
+// include { splitfastq } from './modules/splitfastq.nf'
+// include { convert_fastq_to_fasta } from './modules/convert_fastq_to_fasta.nf'
+// include { mapblat } from './modules/mapblat.nf'
+// include { filterblat } from './modules/filterblat.nf'
+// include { identifyhybrids } from './modules/identifyhybrids.nf'
+// include { mergehybrids } from './modules/mergehybrids.nf'
+// include { deduplicate_blat } from './modules/deduplicate.nf'
+// include { getnonhybrids } from './modules/getnonhybrids.nf'
 
 // Main workflow
 
@@ -83,17 +87,28 @@ log.info hiclipheader()
 def summary = [:]
 summary['Output directory'] = params.outdir
 summary['Trace directory'] = params.tracedir
-summary['Genome fasta'] = params.genome_fa
-summary['Genome fasta index'] = params.genome_fai
+// summary['Genome fasta'] = params.genome_fa
+// summary['Genome fasta index'] = params.genome_fai
 summary['Genome annotation'] = params.genome_gtf
 summary['Transcriptome fasta'] = params.transcript_fa
 summary['Transcriptome annotation'] = params.transcript_gtf
 summary['STAR genome'] = params.star_genome
-summary['STAR transcriptome'] = params.star_transcript
-summary['Deduplicate quickly'] = params.quickdedup
-summary['Minimum intron length'] = params.intronmin
+// summary['STAR transcriptome'] = params.star_transcript
+// summary['Deduplicate quickly'] = params.quickdedup
+// summary['Minimum intron length'] = params.intronmin
 
 log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
+log.info "-\033[2m---------------------------------------------------------------\033[0m-"
+
+def settings = [:]
+settings['Adapter sequence'] = params.adapter
+settings['Minimum read quality'] = params.min_quality
+settings['Minimum read length'] = params.min_readlength
+settings['FASTQ split size'] = params.split_size
+settings['Minimum e-value'] = params.evalue
+settings['Maximum hits/read'] = params.maxhits
+
+log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
 // Pipeline
@@ -107,18 +122,21 @@ workflow {
 
     // Filter spliced reads
     PREMAP(CUTADAPT.out.fastq, ch_star_genome.collect())
-    FILTERSPLICEDREADS(PREMAP.out.bam)
+    FILTER_SPLICED_READS(PREMAP.out.bam)
 
-    // // Split
-    // splitfastq(filtersplicedreads.out)
+    // Split
+    SPLIT_FASTQ(FILTER_SPLICED_READS.out.fastq)
 
-    // ch_spl = splitfastq.out
-    //     .flatten()
-    //     .map { file -> tuple(file.simpleName, file) }
+    ch_split_fastq = SPLIT_FASTQ.out.fastq
+        .flatten()
+        .map { file -> tuple(file.simpleName, file) }
 
-    // // Convert to fasta
-    // // convert_fastq_to_fasta(filtersplicedreads.out)
-    // convert_fastq_to_fasta(ch_spl)
+    // Convert to fasta
+    FASTQ_TO_FASTA(ch_split_fastq)
+
+    // Map hybrids
+    BLAT(FASTQ_TO_FASTA.out.fasta, ch_transcript_fa.collect())
+    FILTER_BLAT(BLAT.out.blast8)
 
     // // Merge back test
     // // ch_comb = convert_fastq_to_fasta.out

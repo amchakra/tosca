@@ -3,7 +3,7 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process FILTERSPLICEDREADS {
+process FILTER_SPLICED_READS {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
@@ -14,7 +14,8 @@ process FILTERSPLICEDREADS {
         tuple val(sample_id), path(bam), path(bai)
 
     output:
-        tuple val(sample_id), path("${sample_id}.unspliced.fastq.gz")
+        tuple val(sample_id), path("${sample_id}.unspliced.fastq.gz"), emit: fastq
+        path("*.filter_spliced_reads.log"), emit: log
 
     script:
 
