@@ -18,6 +18,10 @@ params.intronmin = 10
 params.evalue = 0.001
 params.maxhits = 100
 
+params.adapter = 'AGATCGGAAGAGC'
+params.min_quality = 10
+params.min_readlength = 16
+
 // Processes
 include { hiclipheader } from './modules/utils.nf'
 include { METADATA } from './modules/metadata.nf'
