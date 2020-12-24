@@ -20,9 +20,9 @@ params.maxhits = 100
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
-include { metadata } from './modules/metadata.nf'
-include { trim } from './modules/trim.nf'
-include { premap } from './modules/premap.nf'
+include { fastq_metadata as METADATA } from './luslab-nf-modules/tools/metadata/main.nf'
+include { cutadapt as TRIMADAPTERS } from './luslab-nf-modules/tools/cutadapt/main.nf'
+include { star_align_reads as PREMAP } from './luslab-nf-modules/tools/star/main.nf'
 include { filtersplicedreads } from './modules/filtersplicedreads.nf'
 include { mapchimeras } from './modules/mapchimeras.nf'
 include { deduplicate } from './modules/deduplicate.nf'
@@ -48,6 +48,7 @@ include { getnonhybrids } from './modules/getnonhybrids.nf'
 
 // General variables
 params.quickdedup = true
+params.premap = true
 
 // Input variables
 params.input='metadata.csv'
@@ -61,12 +62,6 @@ params.transcript_fa = params.genomes[ params.org ].transcript_fa
 params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
 params.star_genome = params.genomes[ params.org ].star_genome
 params.star_transcript = params.genomes[ params.org ].star_transcript
-
-// params.star_genome_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/STAR_GRCm38_GencodeM24'
-// params.star_transcript_index = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes'
-// params.transcript_fasta_csv = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.csv.gz'
-// params.genome_fai = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/GRCm38.primary_assembly.genome.fa.fai'
-// params.transcript_gtf = '/camp/lab/luscomben/home/users/chakraa2/projects/flora/mouse/ref/Mm_GencodeM24_rRNA_MT_genes.gtf.gz'
 
 // Create channels for static files
 ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
@@ -97,23 +92,13 @@ log.info hiclipheader()
 workflow {
 
     // Get fastq paths 
-    metadata(params.input)
+    METADATA(params.input)
 
-    // metadata.out.view()
-
-    // // Split
-    // splitfastq(metadata.out)
-
-    // ch_spl = splitfastq.out
-    //     .flatten()
-    //     .map { file -> tuple(file.simpleName, file) }
-
-    // Trim
-    // trim(ch_spl)
-    trim(metadata.out)
+    // Trim adapters
+    TRIMADAPTERS(params.modules['TRIMADAPTERS'], metadata.out.metadata)
 
     // Filter spliced reads
-    premap(trim.out.combine(ch_star_genome))
+    PREMAP(params.modules['TRIMADAPTERS'], TRIMADAPTERS.out.fastq, ch_star_genome)
     filtersplicedreads(premap.out)
 
     // Split
