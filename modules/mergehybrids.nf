@@ -3,10 +3,10 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process mergehybrids {
+process MERGE_HYBRIDS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/merged", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
     time '24h'
 
@@ -14,7 +14,7 @@ process mergehybrids {
         tuple val(sample_id), path(hybrids)
 
     output:
-        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz")
+        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
 
     script:
     

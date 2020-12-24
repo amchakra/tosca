@@ -34,6 +34,9 @@ include { SPLIT_FASTQ } from './modules/splitfastq.nf'
 include { FASTQ_TO_FASTA } from './modules/convert_fastq_to_fasta.nf'
 include { BLAT } from './modules/mapblat.nf'
 include { FILTER_BLAT } from './modules/mapblat.nf'
+include { IDENTIFY_HYBRIDS } from './modules/identifyhybrids.nf'
+include { MERGE_HYBRIDS } from './modules/mergehybrids.nf'
+include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 
 // include { mapchimeras } from './modules/mapchimeras.nf'
 // include { deduplicate } from './modules/deduplicate.nf'
@@ -144,34 +147,26 @@ workflow {
     // //     .groupTuple(by: 0)
     // //     .view()
 
-    // // Map chimeras
-    // mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
-    // filterblat(mapblat.out)
+    // Identify hybrids
+    IDENTIFY_HYBRIDS(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
 
-    // // Identify hybrids
-    // identifyhybrids(filterblat.out.join(convert_fastq_to_fasta.out))
+    // Merge hybrids
+    ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
+        .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+        .groupTuple(by: 0)
+        // .view()
 
-    // // Merge hybrids
-    // ch_comb = identifyhybrids.out
-    //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-    //     .groupTuple(by: 0)
-    //     // .view()
+    MERGE_HYBRIDS(ch_merge_hybrids)
 
-    // mergehybrids(ch_comb)
-
-    // // Get non-hybrid reads for later
-    // getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
-    // Map chimerias
-    // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
+    // Get non-hybrid reads for later
+    GET_NON_HYBRIDS(MERGE_HYBRIDS.out.hybrids.join(METADATA.out))
 
     // Remove PCR duplicates
-    // if ( params.quickdedup ) {
-    //     deduplicate_unique(mapchimeras.out)
-    // } else {
-    //     deduplicate(mapchimeras.out)
-    // }
-
-    // deduplicate_blat(mergehybrids.out)
+    if ( params.quickdedup ) {
+        deduplicate_blat(mergehybrids.out)
+    } else {
+        deduplicate_blat(mergehybrids.out)
+    }
 
     // // // Extract hybrids
     // // if ( params.quickdedup ) {

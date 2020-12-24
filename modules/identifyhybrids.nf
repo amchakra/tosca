@@ -3,13 +3,10 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-params.evalue = params.evalue
-params.maxhits = params.maxhits
-
-process identifyhybrids {
+process IDENTIFY_HYBRIDS {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/hybrids/split/", mode: 'copy', overwrite: true
 
     time '24h'
     cpus = 8
@@ -19,15 +16,12 @@ process identifyhybrids {
         tuple val(sample_id), path(blast8), path(reads)
 
     output:
-        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz")
+        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
 
     script:
 
-    evalue = "$params.evalue"
-    maxhits = "$params.maxhits"
-
     """
-    Rscript --vanilla /camp/home/chakraa2/home/projects/flora/hiclip/blat/tosca/bin/identify_hybrids.R -t ${task.cpus} -b $blast8 -f $reads -o ${sample_id}.hybrids.tsv.gz
+    identify_hybrids.R -t ${task.cpus} -b $blast8 -f $reads -o ${sample_id}.hybrids.tsv.gz
     """
 
 }

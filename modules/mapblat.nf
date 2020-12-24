@@ -28,7 +28,7 @@ process mapblat {
 
 process BLAT {
     tag "${sample_id}"
-    cache false
+    cache true
 
     cpus 8
     memory '32 G'
