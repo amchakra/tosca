@@ -95,7 +95,7 @@ workflow {
     METADATA(params.input)
 
     // Trim adapters
-    TRIMADAPTERS(params.modules['TRIMADAPTERS'], metadata.out.metadata)
+    TRIMADAPTERS(params.modules['TRIMADAPTERS'], METADATA.out.metadata)
 
     // Filter spliced reads
     PREMAP(params.modules['TRIMADAPTERS'], TRIMADAPTERS.out.fastq, ch_star_genome)
