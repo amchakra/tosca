@@ -99,42 +99,42 @@ workflow {
 
     // Filter spliced reads
     PREMAP(params.modules['TRIMADAPTERS'], TRIMADAPTERS.out.fastq, ch_star_genome)
-    filtersplicedreads(premap.out)
+    filtersplicedreads(PREMAP.out.bam_files)
 
-    // Split
-    splitfastq(filtersplicedreads.out)
+    // // Split
+    // splitfastq(filtersplicedreads.out)
 
-    ch_spl = splitfastq.out
-        .flatten()
-        .map { file -> tuple(file.simpleName, file) }
+    // ch_spl = splitfastq.out
+    //     .flatten()
+    //     .map { file -> tuple(file.simpleName, file) }
 
-    // Convert to fasta
-    // convert_fastq_to_fasta(filtersplicedreads.out)
-    convert_fastq_to_fasta(ch_spl)
+    // // Convert to fasta
+    // // convert_fastq_to_fasta(filtersplicedreads.out)
+    // convert_fastq_to_fasta(ch_spl)
 
-    // Merge back test
-    // ch_comb = convert_fastq_to_fasta.out
+    // // Merge back test
+    // // ch_comb = convert_fastq_to_fasta.out
+    // //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+    // //     .groupTuple(by: 0)
+    // //     .view()
+
+    // // Map chimeras
+    // mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
+    // filterblat(mapblat.out)
+
+    // // Identify hybrids
+    // identifyhybrids(filterblat.out.join(convert_fastq_to_fasta.out))
+
+    // // Merge hybrids
+    // ch_comb = identifyhybrids.out
     //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
     //     .groupTuple(by: 0)
-    //     .view()
+    //     // .view()
 
-    // Map chimeras
-    mapblat(convert_fastq_to_fasta.out.combine(ch_transcript_fa))
-    filterblat(mapblat.out)
+    // mergehybrids(ch_comb)
 
-    // Identify hybrids
-    identifyhybrids(filterblat.out.join(convert_fastq_to_fasta.out))
-
-    // Merge hybrids
-    ch_comb = identifyhybrids.out
-        .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-        .groupTuple(by: 0)
-        // .view()
-
-    mergehybrids(ch_comb)
-
-    // Get non-hybrid reads for later
-    getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
+    // // Get non-hybrid reads for later
+    // getnonhybrids(mergehybrids.out.join(filtersplicedreads.out))
     // Map chimerias
     // mapchimeras(filtersplicedreads.out.combine(ch_star_transcript))
 
@@ -145,29 +145,29 @@ workflow {
     //     deduplicate(mapchimeras.out)
     // }
 
-    deduplicate_blat(mergehybrids.out)
+    // deduplicate_blat(mergehybrids.out)
 
-    // // Extract hybrids
-    // if ( params.quickdedup ) {
-    //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
-    // } else {
-    //     extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    // }
-    // // Get binding energies
-    // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
-    getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
+    // // // Extract hybrids
+    // // if ( params.quickdedup ) {
+    // //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
+    // // } else {
+    // //     extracthybrids(deduplicate.out.combine(ch_transcript_fa))
+    // // }
+    // // // Get binding energies
+    // // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
+    // getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
 
-    // // Get clusters
-    clusterhybrids(getbindingenergy.out)
+    // // // Get clusters
+    // clusterhybrids(getbindingenergy.out)
 
-    // // Convert coordinates
-    // // Write hybrid BAM
-    convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
-    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+    // // // Convert coordinates
+    // // // Write hybrid BAM
+    // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))
+    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
 
-    // // Collapse clusters
-    collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
-    clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
+    // // // Collapse clusters
+    // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))
+    // clusterbindingenergy(collapseclusters.out.combine(ch_transcript_fa))
 
 }
 
