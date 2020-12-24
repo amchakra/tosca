@@ -20,8 +20,8 @@ params.maxhits = 100
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
-include { fastq_metadata as METADATA } from './luslab-nf-modules/tools/metadata/main.nf'
-include { cutadapt as TRIMADAPTERS } from './luslab-nf-modules/tools/cutadapt/main.nf'
+include { METADATA } from './modules/metadata.nf'
+include { CUTADAPT } from './modules/cutadapt.nf'
 include { star_align_reads as PREMAP } from './luslab-nf-modules/tools/star/main.nf'
 include { filtersplicedreads } from './modules/filtersplicedreads.nf'
 include { mapchimeras } from './modules/mapchimeras.nf'
@@ -49,6 +49,10 @@ include { getnonhybrids } from './modules/getnonhybrids.nf'
 // General variables
 params.quickdedup = true
 params.premap = true
+
+params.adapter = 'AGATCGGAAGAGC'
+params.min_quality = 10
+params.min_readlength = 16
 
 // Input variables
 params.input='metadata.csv'
@@ -95,11 +99,11 @@ workflow {
     METADATA(params.input)
 
     // Trim adapters
-    TRIMADAPTERS(params.modules['TRIMADAPTERS'], METADATA.out.metadata)
+    CUTADAPT(METADATA.out)
 
     // Filter spliced reads
-    PREMAP(params.modules['TRIMADAPTERS'], TRIMADAPTERS.out.fastq, ch_star_genome)
-    filtersplicedreads(PREMAP.out.bam_files)
+    // PREMAP(params.modules['TRIMADAPTERS'], TRIMADAPTERS.out.fastq, ch_star_genome)
+    // filtersplicedreads(PREMAP.out.bam_files)
 
     // // Split
     // splitfastq(filtersplicedreads.out)
