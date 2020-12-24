@@ -14,15 +14,16 @@ hiCLIP analysis pipeline.
 nextflow.enable.dsl=2
 
 // Need to set these before module is loaded else not propagated
-params.intronmin = 10
-params.evalue = 0.001
-params.maxhits = 100
-
 params.adapter = 'AGATCGGAAGAGC'
 params.min_quality = 10
 params.min_readlength = 16
 
 params.split_size = 100000
+
+params.evalue = 0.001
+params.maxhits = 100
+
+params.shuffled_mfe = false
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
@@ -37,6 +38,8 @@ include { FILTER_BLAT } from './modules/mapblat.nf'
 include { IDENTIFY_HYBRIDS } from './modules/identifyhybrids.nf'
 include { MERGE_HYBRIDS } from './modules/mergehybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
+include { deduplicate_blat } from './modules/deduplicate.nf'
+include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
 
 // include { mapchimeras } from './modules/mapchimeras.nf'
 // include { deduplicate } from './modules/deduplicate.nf'
@@ -110,6 +113,7 @@ settings['Minimum read length'] = params.min_readlength
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
+settings['Shuffled binding energy'] = params.shuffled_mfe
 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
@@ -163,10 +167,13 @@ workflow {
 
     // Remove PCR duplicates
     if ( params.quickdedup ) {
-        deduplicate_blat(mergehybrids.out)
+        deduplicate_blat(MERGE_HYBRIDS.out.hybrids)
     } else {
-        deduplicate_blat(mergehybrids.out)
+        deduplicate_blat(MERGE_HYBRIDS.out.hybrids)
     }
+
+    // Get binding energies
+    GET_BINDING_ENERGY(deduplicate_blat.out.hybrids, ch_transcript_fa.collect())
 
     // // // Extract hybrids
     // // if ( params.quickdedup ) {

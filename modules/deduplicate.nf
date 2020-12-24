@@ -73,7 +73,7 @@ process deduplicate_blat {
         tuple val(sample_id), path(hybrids)
 
     output:
-        tuple val(sample_id), path("${sample_id}.uniquehybrids.tsv.gz")
+        tuple val(sample_id), path("${sample_id}.uniquehybrids.tsv.gz"), emit: hybrids
 
     script:
 
