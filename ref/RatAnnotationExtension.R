@@ -62,9 +62,12 @@ pas.genes.gr <- pas.genes.gr[pas.genes.gr$distance < pas.genes.gr$distance_to_ne
 
 # Adjust gene ends
 # Only change if end is less than the PAS (+ve strand)
-end(pas.genes.gr[strand(pas.genes.gr) == "+" & end(pas.genes.gr) < pas.genes.gr$pas]) <- pas.genes.gr[strand(pas.genes.gr) == "+" & end(pas.genes.gr) < pas.genes.gr$pas]$pas
-# Only change if start is greater than the PAS (-ve strand)
-start(pas.genes.gr[strand(pas.genes.gr) == "-" & start(pas.genes.gr) > pas.genes.gr$pas]) <- pas.genes.gr[strand(pas.genes.gr) == "-" & start(pas.genes.gr) > pas.genes.gr$pas]$pas  
+pos.pas.genes.gr <- pas.genes.gr[strand(pas.genes.gr) == "+" & end(pas.genes.gr) < pas.genes.gr$pas]
+end(pos.pas.genes.gr) <- pos.pas.genes.gr$pas
+neg.pas.genes.gr <- pas.genes.gr[strand(pas.genes.gr) == "-" & start(pas.genes.gr) > pas.genes.gr$pas]
+start(neg.pas.genes.gr) <- neg.pas.genes.gr$pas
+
+pas.genes.gr <- c(pos.pas.genes.gr, neg.pas.genes.gr)
 
 pas.genes.grl <- split(pas.genes.gr, pas.genes.gr$gene_id)
 tic()
@@ -130,6 +133,8 @@ tx.longest.dt <- unique(tx.lengths.dt, by = "gene_id")
 
 # i <- 1923
 # i <- which(extended.genes.gr$gene_name == "Mapt")
+# i <- which(extended.genes.gr$gene_name == "Glis1")
+# i <- which(extended.genes.gr$gene_name == "Sobp")
 
 tic()
 cl <- makeForkCluster(4)
@@ -184,12 +189,14 @@ extended.tx.list <- parLapply(cl = cl, 1:length(extended.genes.gr), function(i) 
     # Extend last exon
     if(as.character(strand(epas.gr)) == "+") {
       
+      end.exon <- end(sel.tx[sel.tx$type == "exon"][nearest(epas.gr, sel.tx[sel.tx$type == "exon"])])
       end(sel.tx[sel.tx$type == "exon"][nearest(epas.gr, sel.tx[sel.tx$type == "exon"])]) <- end(epas.gr)
       
     }
     
     if(as.character(strand(epas.gr)) == "-") {
       
+      start.exon <- start(sel.tx[sel.tx$type == "exon"][nearest(epas.gr, sel.tx[sel.tx$type == "exon"])])
       start(sel.tx[sel.tx$type == "exon"][nearest(epas.gr, sel.tx[sel.tx$type == "exon"])]) <- start(epas.gr)
       
     }    
@@ -207,7 +214,7 @@ extended.tx.list <- parLapply(cl = cl, 1:length(extended.genes.gr), function(i) 
     
     if(as.character(strand(epas.gr)) == "+") {
       
-      utr3.start <- end(new.utr3) + 1 # one after the exon end
+      utr3.start <- end.exon + 1 # one after the exon end
       end(new.utr3) <- end(epas.gr)
       start(new.utr3) <- utr3.start
       sel.tx <- c(sel.tx, new.utr3) # Needs to be at the end
@@ -216,9 +223,9 @@ extended.tx.list <- parLapply(cl = cl, 1:length(extended.genes.gr), function(i) 
     
     if(as.character(strand(epas.gr)) == "-") {
       
-      utr3.start <- start(new.utr3) - 1 # one after the exon end
+      utr3.end <- start.exon - 1 # one after the exon end
       start(new.utr3) <- start(epas.gr)
-      end(new.utr3) <- utr3.start
+      end(new.utr3) <- utr3.end
       sel.tx <- c(sel.tx, new.utr3)  
       
     }    
@@ -246,5 +253,17 @@ toc()
 
 # This will be a bit out of order, but should be alright as all still appropriately grouped by gene and transcript
 other.gtf <- gtf[!gtf$gene_id %in% extended.tx.gr$gene_id]
+stopifnot(all(start(extended.tx.gr) <= end(extended.tx.gr)))
 # seqlevelsStyle(other.gtf) <- "NCBI"
-export(c(extended.tx.gr, other.gtf), "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.gtt", format = "gtf")
+export(c(extended.tx.gr, other.gtf), "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.gtf", format = "gtf")
+
+# Modify for htseq-clip
+gtf <- import.gff2("~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.gtf.gz")
+gtf[is.na(gtf$gene_name)]$gene_name <- gtf[is.na(gtf$gene_name)]$gene_id
+# export.gff2(gtf, "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.name.gtf")
+
+gtf$type <- as.character(gtf$type)
+gtf[gtf$type == "five_prime_utr"]$type <- "five_prime_UTR"
+gtf[gtf$type == "three_prime_utr"]$type <- "three_prime_UTR"
+
+export.gff2(gtf, "~/Dropbox (The Francis Crick)/rna_structure/ref/rat/Rn_Ens100_Q_v3.10k_0.01score.extended.name.gtf")
