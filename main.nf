@@ -29,14 +29,9 @@ params.shuffled_mfe = false
 include { hiclipheader } from './modules/utils.nf'
 include { METADATA } from './modules/metadata.nf'
 include { CUTADAPT } from './modules/cutadapt.nf'
-include { PREMAP } from './modules/premap.nf'
-include { FILTER_SPLICED_READS } from './modules/premap.nf'
-include { SPLIT_FASTQ } from './modules/splitfastq.nf'
-include { FASTQ_TO_FASTA } from './modules/convert_fastq_to_fasta.nf'
-include { BLAT } from './modules/mapblat.nf'
-include { FILTER_BLAT } from './modules/mapblat.nf'
-include { IDENTIFY_HYBRIDS } from './modules/identifyhybrids.nf'
-include { MERGE_HYBRIDS } from './modules/mergehybrids.nf'
+include { PREMAP } from './workflows/premap.nf'
+include { GET_HYBRIDS } from './workflows/gethybrids.nf'
+
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { deduplicate_blat } from './modules/deduplicate.nf'
 include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
@@ -128,62 +123,48 @@ workflow {
     CUTADAPT(METADATA.out)
 
     // Filter spliced reads
-    PREMAP(CUTADAPT.out.fastq, ch_star_genome.collect())
-    FILTER_SPLICED_READS(PREMAP.out.bam)
+    // PREMAP(CUTADAPT.out.fastq, ch_star_genome.collect())
+    // FILTER_SPLICED_READS(PREMAP.out.bam)
+    PREMAP(CUTADAPT.out.fastq, ch_star_genome)
 
-    // Split
-    SPLIT_FASTQ(FILTER_SPLICED_READS.out.fastq)
+    // // Split
+    // SPLIT_FASTQ(PREMAP.out.fastq)
 
-    ch_split_fastq = SPLIT_FASTQ.out.fastq
-        .flatten()
-        .map { file -> tuple(file.simpleName, file) }
+    // ch_split_fastq = SPLIT_FASTQ.out.fastq
+    //     .flatten()
+    //     .map { file -> tuple(file.simpleName, file) }
 
-    // Convert to fasta
-    FASTQ_TO_FASTA(ch_split_fastq)
+    // // Convert to fasta
+    // FASTQ_TO_FASTA(ch_split_fastq)
 
-    // Map hybrids
-    BLAT(FASTQ_TO_FASTA.out.fasta, ch_transcript_fa.collect())
-    FILTER_BLAT(BLAT.out.blast8)
+    // // Map hybrids
+    // BLAT(FASTQ_TO_FASTA.out.fasta, ch_transcript_fa.collect())
+    // FILTER_BLAT(BLAT.out.blast8)
 
-    // // Merge back test
-    // // ch_comb = convert_fastq_to_fasta.out
-    // //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-    // //     .groupTuple(by: 0)
-    // //     .view()
+    // // Identify hybrids
+    // IDENTIFY_HYBRIDS(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
 
-    // Identify hybrids
-    IDENTIFY_HYBRIDS(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
+    // // Merge hybrids
+    // ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
+    //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+    //     .groupTuple(by: 0)
+    //     // .view()
 
-    // Merge hybrids
-    ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
-        .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-        .groupTuple(by: 0)
-        // .view()
-
-    MERGE_HYBRIDS(ch_merge_hybrids)
+    // MERGE_HYBRIDS(ch_merge_hybrids)
+    GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa)
 
     // Get non-hybrid reads for later
-    GET_NON_HYBRIDS(MERGE_HYBRIDS.out.hybrids.join(METADATA.out))
+    GET_NON_HYBRIDS(GET_HYBRIDS.out.hybrids.join(METADATA.out))
 
     // Remove PCR duplicates
     if ( params.quickdedup ) {
-        deduplicate_blat(MERGE_HYBRIDS.out.hybrids)
+        deduplicate_blat(GET_HYBRIDS.out.hybrids)
     } else {
-        deduplicate_blat(MERGE_HYBRIDS.out.hybrids)
+        deduplicate_blat(GET_HYBRIDS.out.hybrids)
     }
 
     // Get binding energies
     GET_BINDING_ENERGY(deduplicate_blat.out.hybrids, ch_transcript_fa.collect())
-
-    // // // Extract hybrids
-    // // if ( params.quickdedup ) {
-    // //     extracthybrids(deduplicate_unique.out.combine(ch_transcript_fa))
-    // // } else {
-    // //     extracthybrids(deduplicate.out.combine(ch_transcript_fa))
-    // // }
-    // // // Get binding energies
-    // // getbindingenergy(extracthybrids.out.combine(ch_transcript_fa))
-    // getbindingenergy(deduplicate_blat.out.combine(ch_transcript_fa))
 
     // // // Get clusters
     // clusterhybrids(getbindingenergy.out)
