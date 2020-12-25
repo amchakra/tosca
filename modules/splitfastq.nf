@@ -5,7 +5,8 @@ nextflow.enable.dsl=2
 
 process SPLIT_FASTQ {
     tag "${sample_id}"
-
+    if(params.keep_intermediates) cache true
+    
     cpus 1
     time '24h'
 
@@ -31,7 +32,7 @@ process SPLIT_FASTQ {
 
 process FASTQ_TO_FASTA {
     tag "${sample_id}"
-    cache true
+    if(params.keep_intermediates) cache true
 
     cpus 8
     time '24h'

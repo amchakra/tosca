@@ -63,6 +63,7 @@ include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
 
 // General variables
 params.premap = true
+params.keep_intermediates = true
 
 
 // Input variables
@@ -87,6 +88,7 @@ ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
+
 def summary = [:]
 summary['Output directory'] = params.outdir
 summary['Trace directory'] = params.tracedir
@@ -117,11 +119,10 @@ settings['Shuffled binding energy'] = params.shuffled_mfe
 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
-log.info "-----------------------------------------------------------------"
+log.info "\033[1;93m-----------------------------------------------------------------\033[0m"
 
 // Pipeline
 workflow {
-
 
     /* 
     PREPARE INPUTS
@@ -148,17 +149,11 @@ workflow {
     */
     GET_NON_HYBRIDS(GET_HYBRIDS.out.hybrids.join(METADATA.out))
 
-
     /* 
     PROCESS HYBRIDS
     */
-    // Remove PCR duplicates
-    DEDUPLICATE(GET_HYBRIDS.out.hybrids)
-    // if ( params.quickdedup ) {
-    //     deduplicate_blat(GET_HYBRIDS.out.hybrids)
-    // } else {
-    //     deduplicate_blat(GET_HYBRIDS.out.hybrids)
-    // }
+    DEDUPLICATE(GET_HYBRIDS.out.hybrids) // Remove PCR duplicates
+
 
     // Get binding energies
     GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect())

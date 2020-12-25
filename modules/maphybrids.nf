@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 
 process BLAT {
     tag "${sample_id}"
-    cache true
+    if(params.keep_intermediates) cache true
 
     cpus 8
     memory '32 G'
@@ -34,7 +34,7 @@ process BLAT {
 process FILTER_BLAT {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
+    if(params.keep_intermediates) publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
     
     memory '16 G'
     time '24h'
