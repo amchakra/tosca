@@ -105,6 +105,7 @@ def settings = [:]
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
 settings['Minimum read length'] = params.min_readlength
+settings['Premapping'] = params.premap
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
@@ -112,50 +113,41 @@ settings['Shuffled binding energy'] = params.shuffled_mfe
 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
+log.info "-----------------------------------------------------------------"
 
 // Pipeline
 workflow {
 
-    // Get fastq paths 
-    METADATA(params.input)
 
-    // Trim adapters
-    CUTADAPT(METADATA.out)
+    /* 
+    PREPARE INPUTS
+    */
+    METADATA(params.input) // Get fastq paths 
+    CUTADAPT(METADATA.out) // Trim adapters
 
-    // Filter spliced reads
-    // PREMAP(CUTADAPT.out.fastq, ch_star_genome.collect())
-    // FILTER_SPLICED_READS(PREMAP.out.bam)
-    PREMAP(CUTADAPT.out.fastq, ch_star_genome)
+    /* 
+    IDENTIFY HYBRIDS
+    */
+    if(params.premap) {
 
-    // // Split
-    // SPLIT_FASTQ(PREMAP.out.fastq)
+        PREMAP(CUTADAPT.out.fastq, ch_star_genome) // Filter spliced reads
+        GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa) // Identify hybrids
 
-    // ch_split_fastq = SPLIT_FASTQ.out.fastq
-    //     .flatten()
-    //     .map { file -> tuple(file.simpleName, file) }
+    } else {
 
-    // // Convert to fasta
-    // FASTQ_TO_FASTA(ch_split_fastq)
+        GET_HYBRIDS(CUTADAPT.out.fastq, ch_transcript_fa) // Identify hybrids
 
-    // // Map hybrids
-    // BLAT(FASTQ_TO_FASTA.out.fasta, ch_transcript_fa.collect())
-    // FILTER_BLAT(BLAT.out.blast8)
+    }
 
-    // // Identify hybrids
-    // IDENTIFY_HYBRIDS(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
-
-    // // Merge hybrids
-    // ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
-    //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-    //     .groupTuple(by: 0)
-    //     // .view()
-
-    // MERGE_HYBRIDS(ch_merge_hybrids)
-    GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa)
-
-    // Get non-hybrid reads for later
+    /* 
+    IDENTIFY NON-HYBRIDS
+    */
     GET_NON_HYBRIDS(GET_HYBRIDS.out.hybrids.join(METADATA.out))
 
+
+    /* 
+    PROCESS HYBRIDS
+    */
     // Remove PCR duplicates
     if ( params.quickdedup ) {
         deduplicate_blat(GET_HYBRIDS.out.hybrids)
