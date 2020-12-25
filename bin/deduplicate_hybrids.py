@@ -58,6 +58,10 @@ if len(sys.argv) == 5:
         unique_hybrids = [deduplicate(group) for name, group in hybrids_grp]
         unique_hybrids = pd.concat(unique_hybrids)
 
+    else:
+
+        unique_hybrids = hybrids
+
     toc = time.perf_counter()
 
     # Write out
