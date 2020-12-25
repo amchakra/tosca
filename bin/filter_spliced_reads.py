@@ -56,4 +56,4 @@ if len(sys.argv) == 3:
     run(f'bedtools bamtofastq -i {f_out} -fq /dev/stdout | pigz > {fastq_out}', shell = True)
 
 else:
-    print("python RemoveSplicedReads.py <input_bam> <output_stem>")
+    print("filter_spliced_reads.py <input_bam> <output_stem>")
