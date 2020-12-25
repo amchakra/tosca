@@ -110,3 +110,28 @@ process deduplicate_blat {
     """
 
 }
+
+process DEDUPLICATE {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/dedup", mode: 'copy', overwrite: false
+
+    memory '32G'
+    time '24h'
+
+    input:
+        tuple val(sample_id), path(hybrids)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.uniquehybrids.tsv.gz"), emit: hybrids
+
+    script:
+
+    umi_separator = params.umi_separator
+    dedup_method = params.dedup_method
+
+    """
+    deduplicate_hybrids.py $hybrids ${sample_id}.uniquehybrids.tsv.gz $umi_separator $dedup_method > ${sample_id}.dedup.log
+    """
+
+}

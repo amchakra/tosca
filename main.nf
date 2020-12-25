@@ -23,6 +23,9 @@ params.split_size = 100000
 params.evalue = 0.001
 params.maxhits = 100
 
+params.umi_separator = '_'
+params.dedup_method = 'directional'
+
 params.shuffled_mfe = false
 
 // Processes
@@ -33,7 +36,7 @@ include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
-include { deduplicate_blat } from './modules/deduplicate.nf'
+include { DEDUPLICATE } from './modules/deduplicate.nf'
 include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
 
 // include { mapchimeras } from './modules/mapchimeras.nf'
@@ -59,7 +62,6 @@ include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
 // Main workflow
 
 // General variables
-params.quickdedup = true
 params.premap = true
 
 
@@ -109,6 +111,8 @@ settings['Premapping'] = params.premap
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
+settings['UMI separator'] = params.umi_separator
+settings['Deduplication method'] = params.dedup_method
 settings['Shuffled binding energy'] = params.shuffled_mfe
 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
@@ -149,14 +153,15 @@ workflow {
     PROCESS HYBRIDS
     */
     // Remove PCR duplicates
-    if ( params.quickdedup ) {
-        deduplicate_blat(GET_HYBRIDS.out.hybrids)
-    } else {
-        deduplicate_blat(GET_HYBRIDS.out.hybrids)
-    }
+    DEDUPLICATE(GET_HYBRIDS.out.hybrids)
+    // if ( params.quickdedup ) {
+    //     deduplicate_blat(GET_HYBRIDS.out.hybrids)
+    // } else {
+    //     deduplicate_blat(GET_HYBRIDS.out.hybrids)
+    // }
 
     // Get binding energies
-    GET_BINDING_ENERGY(deduplicate_blat.out.hybrids, ch_transcript_fa.collect())
+    GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect())
 
     // // // Get clusters
     // clusterhybrids(getbindingenergy.out)
