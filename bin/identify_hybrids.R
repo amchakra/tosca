@@ -69,7 +69,8 @@ GetValidHybrids <- function(blast8.query.dt, min_unmapped_length = 21, q_minover
   hybrids.dt <- hybrids.dt[evalue == min_evalue]  
   
   # Match up with fasta read length and remove if enough of a continuous match
-  if(any(hybrids.dt$unmapped < (min_unmapped_length - q_minoverlap) & hybrids.dt$unmapped == 100)) {
+  # if(any(hybrids.dt$unmapped < (min_unmapped_length - q_minoverlap) & hybrids.dt$unmapped == 100)) {
+  if(any(hybrids.dt$unmapped < min_unmapped_length - q_minoverlap))) {  
     
     return(data.table())
     

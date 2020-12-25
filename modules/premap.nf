@@ -6,7 +6,7 @@ nextflow.enable.dsl=2
 process STAR {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
+    if(params.keep_intermediates) publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
 
     cpus 8
     memory 48G

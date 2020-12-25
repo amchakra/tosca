@@ -6,6 +6,7 @@ nextflow.enable.dsl=2
 include { SPLIT_FASTQ; FASTQ_TO_FASTA } from '../modules/splitfastq.nf'
 include { BLAT; FILTER_BLAT } from '../modules/maphybrids.nf'
 include { IDENTIFY_HYBRIDS; MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
+include { IDENTIFY_HYBRIDS_2; MERGE_HYBRIDS_2 } from '../modules/identifyhybrids.nf'
 
 workflow GET_HYBRIDS {
 
@@ -39,6 +40,17 @@ workflow GET_HYBRIDS {
         // .view()
 
     MERGE_HYBRIDS(ch_merge_hybrids)
+
+    // Identify hybrids
+    IDENTIFY_HYBRIDS_2(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
+
+    // Merge hybrids
+    ch_merge_hybrids = IDENTIFY_HYBRIDS_2.out.hybrids
+        .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+        .groupTuple(by: 0)
+        // .view()
+
+    MERGE_HYBRIDS_2(ch_merge_hybrids)
 
     emit:
     hybrids = MERGE_HYBRIDS.out.hybrids

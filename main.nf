@@ -14,6 +14,8 @@ hiCLIP analysis pipeline.
 nextflow.enable.dsl=2
 
 // Need to set these before module is loaded else not propagated
+params.keep_intermediates = true
+
 params.adapter = 'AGATCGGAAGAGC'
 params.min_quality = 10
 params.min_readlength = 16
@@ -63,7 +65,7 @@ include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
 
 // General variables
 params.premap = true
-params.keep_intermediates = true
+
 
 
 // Input variables
@@ -119,7 +121,7 @@ settings['Shuffled binding energy'] = params.shuffled_mfe
 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
-log.info "\033[1;93m-----------------------------------------------------------------\033[0m"
+log.info "-----------------------------------------------------------------"
 
 // Pipeline
 workflow {
@@ -156,7 +158,7 @@ workflow {
 
 
     // Get binding energies
-    GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect())
+    // GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect())
 
     // // // Get clusters
     // clusterhybrids(getbindingenergy.out)
