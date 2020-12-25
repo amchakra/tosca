@@ -46,14 +46,17 @@ if len(sys.argv) == 5:
     # Read in hybrids
     hybrids = pd.read_csv(f_in, sep='\t')
     hybrids = hybrids[hybrids['hybrid_selection'].isin(['single', 'multi_overlap'])]
-    hybrids["umi"] = hybrids['read'].str.replace(".*" + umi_separator, "", regex = True)
 
-    hybrids_grp = hybrids.groupby(['L_seqnames', 'L_start', 'L_end', 'R_seqnames', 'R_start', 'R_end'])
+    if dedup_method != 'none':
 
-    # Deduplicate
-    clusterer = UMIClusterer(cluster_method=dedup_method)
-    unique_hybrids = [deduplicate(group) for name, group in hybrids_grp]
-    unique_hybrids = pd.concat(unique_hybrids)
+        hybrids["umi"] = hybrids['read'].str.replace(".*" + umi_separator, "", regex = True)
+
+        hybrids_grp = hybrids.groupby(['L_seqnames', 'L_start', 'L_end', 'R_seqnames', 'R_start', 'R_end'])
+
+        # Deduplicate
+        clusterer = UMIClusterer(cluster_method=dedup_method)
+        unique_hybrids = [deduplicate(group) for name, group in hybrids_grp]
+        unique_hybrids = pd.concat(unique_hybrids)
 
     toc = time.perf_counter()
 
