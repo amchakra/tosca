@@ -15,7 +15,7 @@ process GET_BINDING_ENERGY {
         path(transcript_fa)
 
     output:
-        tuple val(sample_id), path("${sample_id}.hybrids.mfe.tsv.gz")
+        tuple val(sample_id), path("${sample_id}.hybrids.mfe.tsv.gz"), emit: hybrids
 
     script:
 

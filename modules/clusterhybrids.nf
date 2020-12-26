@@ -3,6 +3,31 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
+process CLUSTER_HYBRIDS {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+
+    cpus 8
+    memory 32G
+    time '24h'
+
+    input:
+        tuple val(sample_id), path(hybrids)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.intragenic_hybrids.mfe.clusters.tsv.gz"), emit: hybrids
+
+    script:
+
+    percent_overlap = params.percent_overlap
+    sample_size = params.sample_size
+
+    """
+    cluster_hybrids.R --hybrids $hybrids -t ${task.cpus} -p $percent_overlap -s $sample_size -o ${sample_id}.intragenic_hybrids.mfe.clusters.tsv.gz
+    """
+}
+
 process clusterhybrids {
 
     tag "${sample_id}"
