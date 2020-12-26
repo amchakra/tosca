@@ -49,7 +49,7 @@ if len(sys.argv) == 5:
 
     if dedup_method != 'none':
 
-        hybrids["umi"] = hybrids['read'].str.replace(".*" + umi_separator, "", regex = True)
+        hybrids["umi"] = hybrids['name'].str.replace(".*" + umi_separator, "", regex = True)
 
         # hybrids_grp = hybrids.groupby(['L_seqnames', 'L_start', 'L_end', 'R_seqnames', 'R_start', 'R_end'])
         # Removed end as requirement as may have been single end sequenced to different lengths

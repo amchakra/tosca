@@ -30,6 +30,8 @@ params.dedup_method = 'directional'
 
 params.shuffled_mfe = false
 
+params.goi = false
+
 // Processes
 include { hiclipheader } from './modules/utils.nf'
 include { METADATA } from './modules/metadata.nf'
@@ -40,6 +42,9 @@ include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { DEDUPLICATE } from './modules/deduplicate.nf'
 include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
+include { clusterhybrids } from './modules/clusterhybrids.nf'
+
+include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
 // include { mapchimeras } from './modules/mapchimeras.nf'
 // include { deduplicate } from './modules/deduplicate.nf'
@@ -66,8 +71,6 @@ include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
 // General variables
 params.premap = true
 
-
-
 // Input variables
 // params.input='metadata.csv'
 // params.org='mouse'
@@ -77,6 +80,7 @@ params.genome_fa = params.genomes[ params.org ].genome_fa
 params.genome_fai = params.genomes[ params.org ].genome_fai
 params.genome_gtf = params.genomes[ params.org ].genome_gtf 
 params.transcript_fa = params.genomes[ params.org ].transcript_fa
+params.transcript_fai = params.genomes[ params.org ].transcript_fai
 params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
 params.star_genome = params.genomes[ params.org ].star_genome
 params.star_transcript = params.genomes[ params.org ].star_transcript
@@ -85,8 +89,12 @@ params.star_transcript = params.genomes[ params.org ].star_transcript
 ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
 ch_star_transcript = Channel.fromPath(params.star_transcript, checkIfExists: true)
 ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
+ch_transcript_fai = Channel.fromPath(params.transcript_fai, checkIfExists: true)
 ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
 ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
+
+// Channels for extra inputs
+ch_goi = Channel.fromPath(params.goi, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
@@ -94,12 +102,18 @@ log.info hiclipheader()
 def summary = [:]
 summary['Output directory'] = params.outdir
 summary['Trace directory'] = params.tracedir
+if(workflow.repository) summary['Pipeline repository'] = workflow.repository
+if(workflow.revision) summary['Pipeline revision'] = workflow.revision
+summary['Pipeline directory'] = workflow.projectDir
+summary['Run name'] = workflow.runName
+summary['Profile'] = workflow.profile
+if(workflow.container) summary['Container'] = workflow.container
 // summary['Genome fasta'] = params.genome_fa
 // summary['Genome fasta index'] = params.genome_fai
-summary['Genome annotation'] = params.genome_gtf
-summary['Transcriptome fasta'] = params.transcript_fa
-summary['Transcriptome annotation'] = params.transcript_gtf
-summary['STAR genome'] = params.star_genome
+// summary['Genome annotation'] = params.genome_gtf
+// summary['Transcriptome fasta'] = params.transcript_fa
+// summary['Transcriptome annotation'] = params.transcript_gtf
+// summary['STAR genome'] = params.star_genome
 // summary['STAR transcriptome'] = params.star_transcript
 // summary['Deduplicate quickly'] = params.quickdedup
 // summary['Minimum intron length'] = params.intronmin
@@ -108,6 +122,7 @@ log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
 def settings = [:]
+settings['Organism'] = params.org
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
 settings['Minimum read length'] = params.min_readlength
@@ -115,9 +130,10 @@ settings['Premapping'] = params.premap
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
-settings['UMI separator'] = params.umi_separator
 settings['Deduplication method'] = params.dedup_method
+if(params.dedup_method != 'none') settings['UMI separator'] = params.umi_separator
 settings['Shuffled binding energy'] = params.shuffled_mfe
+if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
@@ -155,14 +171,15 @@ workflow {
     PROCESS HYBRIDS
     */
     DEDUPLICATE(GET_HYBRIDS.out.hybrids) // Remove PCR duplicates
+    
+    GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect()) // Get binding energies
 
-
-    // Get binding energies
-    // GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect())
 
     // // // Get clusters
-    // clusterhybrids(getbindingenergy.out)
+    // clusterhybrids(GET_BINDING_ENERGY.out)
 
+
+    if(params.goi) GET_CONTACT_MAPS(DEDUPLICATE.out.hybrids, ch_transcript_fai.collect(), ch_goi.collect())
     // // // Convert coordinates
     // // // Write hybrid BAM
     // convertcoordinates(clusterhybrids.out.combine(ch_transcript_gtf))

@@ -7,7 +7,7 @@ suppressPackageStartupMessages(library(tictoc))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(optparse))
 
-option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "character", help = "Hybrids"),
+option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "character", help = "Hybrids file"),
                 make_option(c("", "--fasta"), action = "store", type = "character", help = "Transcript fasta"),
                 make_option(c("", "--output"), action = "store", type = "character", help = "Output file"),
                 make_option(c("", "--nodes"), action = "store", type = "integer", default = 100, help = "Number of nodes to allocate [default: %default]"),

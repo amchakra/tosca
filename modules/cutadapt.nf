@@ -8,6 +8,7 @@ process CUTADAPT {
     publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true
 
     cpus 8
+    memory 32G
     time '24h'
 
     input:

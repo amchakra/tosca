@@ -7,7 +7,7 @@ process SPLIT_FASTQ {
     tag "${sample_id}"
     if(params.keep_intermediates) cache true
     
-    cpus 1
+    cpus 8
     time '24h'
 
     input:
