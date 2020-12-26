@@ -43,9 +43,13 @@ include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
-include { DEDUPLICATE } from './modules/deduplicate.nf'
-include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
-include { CLUSTER_HYBRIDS; clusterhybrids } from './modules/clusterhybrids.nf'
+
+include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
+
+// include { DEDUPLICATE } from './modules/deduplicate.nf'
+// include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
+include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS; clusterhybrids } from './modules/clusterhybrids.nf'
+include { CONVERT_COORDINATES } from './modules/convertcoordinates.nf'
 
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
@@ -57,8 +61,8 @@ include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 // include { clusterhybrids } from './modules/clusterhybrids.nf'
 // include { collapseclusters } from './modules/collapseclusters.nf'
 // include { clusterbindingenergy } from './modules/clusterbindingenergy.nf'
-include { CONVERT_COORDINATES } from './modules/convertcoordinates.nf'
-include { hybridbedtohybridbam } from './modules/hybridbedtohybridbam.nf'
+
+// include { hybridbedtohybridbam } from './modules/hybridbedtohybridbam.nf'
 
 // include { splitfastq } from './modules/splitfastq.nf'
 // include { convert_fastq_to_fasta } from './modules/convert_fastq_to_fasta.nf'
@@ -73,6 +77,7 @@ include { hybridbedtohybridbam } from './modules/hybridbedtohybridbam.nf'
 
 // General variables
 params.premap = true
+if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020') { params.virus = true }
 
 // Input variables
 // params.input='metadata.csv'
@@ -175,9 +180,16 @@ workflow {
     /* 
     PROCESS HYBRIDS
     */
-    DEDUPLICATE(GET_HYBRIDS.out.hybrids) // Remove PCR duplicates
-    GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect()) // Get binding energies
-    CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
+    PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa)
+
+    // DEDUPLICATE(GET_HYBRIDS.out.hybrids) // Remove PCR duplicates
+    // GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect()) // Get binding energies
+    // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
+
+    CONVERT_COORDINATES(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect(), ch_genome_fai.collect()) // Convert to genomic BAM for IGV
+    COLLAPSE_CLUSTERS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect())
+    // CONVERT_COORDINATES(CLUSTER_HYBRIDS.out.hybrids, ch_transcript_gtf.collect(), ch_genome_fai.collect()) // Convert to genomic BAM for IGV
+    // COLLAPSE_CLUSTERS(CLUSTER_HYBRIDS.out.hybrids, ch_transcript_gtf.collect())
 
     // // // Get clusters
     // clusterhybrids(GET_BINDING_ENERGY.out)
@@ -186,8 +198,8 @@ workflow {
     if(params.goi) GET_CONTACT_MAPS(DEDUPLICATE.out.hybrids, ch_transcript_fai.collect(), ch_goi.collect())
     // // // Convert coordinates
     // // // Write hybrid BAM
-    convertcoordinates(CLUSTER_HYBRIDS.out.hybrids.combine(ch_transcript_gtf))
-    hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
+    // convertcoordinates(CLUSTER_HYBRIDS.out.hybrids.combine(ch_transcript_gtf))
+    // hybridbedtohybridbam(convertcoordinates.out.combine(ch_genome_fai))
 
     // // // Collapse clusters
     // collapseclusters(clusterhybrids.out.combine(ch_transcript_gtf))

@@ -6,47 +6,25 @@ nextflow.enable.dsl=2
 process CONVERT_COORDINATES {
 
     tag "${sample_id}"
-    if(params.keep_intermediates) cache true
+    publishDir "${params.outdir}/bam", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '24h'
+    cpus 4
+    memory 16G
+    time '12h'
 
     input:
         tuple val(sample_id), path(hybrids)
         path(transcript_gtf)
+        path(genome_fai)
 
     output:
-        tuple val(sample_id), path("${sample_id}.intragenic_hybrids.bed.gz")
+        tuple val(sample_id), path("${sample_id}.intragenic.bed.gz"), emit: bed
+        tuple val(sample_id), path("${sample_id}.intragenic.bam"), path("${sample_id}.intragenic.bam.bai"), emit: bam
 
     script:
     """
-    #!/usr/bin/env Rscript
-
-    suppressPackageStartupMessages(library(optparse))
-    suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
-    suppressPackageStartupMessages(library(tictoc))
-
-    setDTthreads(8)
-
-    genes.gr <- rtracklayer::import.gff2("$transcript_gtf")
-
-    hybrids.dt <- fread("$hybrids")
-    seq.dt <- hybrids.dt[type == "intragenic"]
-    message(nrow(seq.dt[R_start < L_end]))
-    seq.dt[R_start < L_end, R_start := L_end + 1]    
-    seq.dt <- seq.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
-
-    # New method
-    message("Converting coordinates...")
-    tic()
-    f_out <- paste0("$sample_id", ".intragenic_hybrids.mfe.clusters.bed.gz")
-    ExportGenomicBED(seq.dt = seq.dt, genes.gr = genes.gr, sam_tag = TRUE, filename = f_out)
-    system(paste("pigz", f_out))
-    toc()
-
-    message("Completed!")
+    convert_coordinates.R --hybrids $hybrids -g $transcript_gtf -o ${sample_id}.intragenic.bed.gz
+    convert_hybrid_bed_to_bam.py ${sample_id}.intragenic.bed.gz $genome_fai
     """
 }
 

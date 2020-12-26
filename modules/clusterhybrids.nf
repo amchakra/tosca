@@ -16,7 +16,7 @@ process CLUSTER_HYBRIDS {
         tuple val(sample_id), path(hybrids)
 
     output:
-        tuple val(sample_id), path("${sample_id}.intragenic_hybrids.mfe.clusters.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.mfe.clusters.tsv.gz"), emit: hybrids
 
     script:
 
@@ -24,7 +24,31 @@ process CLUSTER_HYBRIDS {
     sample_size = params.sample_size
 
     """
-    cluster_hybrids.R --hybrids $hybrids -t ${task.cpus} -p $percent_overlap -s $sample_size -o ${sample_id}.intragenic_hybrids.mfe.clusters.tsv.gz
+    cluster_hybrids.R --hybrids $hybrids -t ${task.cpus} -p $percent_overlap -s $sample_size -o ${sample_id}.mfe.clusters.tsv.gz
+    """
+}
+
+process COLLAPSE_CLUSTERS {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/clusters", mode: 'copy', overwrite: true
+
+    cpus 4
+    memory 16G
+    time '12h'
+
+    input:
+        tuple val(sample_id), path(hybrids)
+        path(transcript_gtf)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.clusters.tsv.gz"), emit: tsv
+        tuple val(sample_id), path("${sample_id}.clusters.bed.gz"), emit: bed
+
+    script:
+
+    """
+    collapse_clusters.R --hybrids $hybrids -g $transcript_gtf -o ${sample_id}
     """
 }
 
