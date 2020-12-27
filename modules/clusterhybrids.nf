@@ -43,7 +43,7 @@ process COLLAPSE_CLUSTERS {
 
     output:
         tuple val(sample_id), path("${sample_id}.clusters.tsv.gz"), emit: tsv
-        tuple val(sample_id), path("${sample_id}.clusters.bed.gz"), emit: bed
+        tuple val(sample_id), path("${sample_id}.intragenic_clusters.bed.gz"), emit: bed
 
     script:
 

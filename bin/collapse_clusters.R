@@ -15,17 +15,18 @@ opt <- parse_args(opt_parser)
 genes.gr <- rtracklayer::import.gff2(opt$gtf)
 hybrids.dt <- fread(opt$hybrids)
 
+# Collapse clusters
 clusters.dt <- collapse_clusters(hybrids.dt)
 fwrite(clusters.dt, paste0(opt$output, ".clusters.tsv.gz"), sep = "\t")
 
-# Select intragenic only
-# Adjust ones where there is some s_overlap (e.g. clusters)
-clusters.dt <- clusters.dt[L_seqnames == R_seqnames]
-clusters.dt[R_start < L_end, R_start := L_end + 1]
+# Convert to genomic coordinates
 clusters.dt <- clusters.dt[grep("^rRNA", L_seqnames, invert = TRUE)] # Remove rRNA
 clusters.dt <- clusters.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
-setnames(clusters.dt, "cluster", "name") # Adjust for BED
+clusters.dt <- convert_coordinates(hybrids.dt = clusters.dt, genes.gr = genes.gr)
+fwrite(clusters.dt, paste0(opt$output, ".clusters.gc.tsv.gz"), sep = "\t")
 
-convert_coordinates(clusters.dt, genes.gr = genes.gr, filename = paste0(opt$output, ".clusters.bed.gz"), sam_tag = FALSE)
+# Export genomic bed
+intragenic.dt <- clusters.dt[L_seqnames == R_seqnames]
+export_genomic_bed(hybrids.dt = intragenic.dt, sam_tag = TRUE, filename = paste0(opt$output, ".intragenic_clusters.bed.gz"))
 
 message("Completed!")

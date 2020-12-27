@@ -18,12 +18,13 @@ process CONVERT_COORDINATES {
         path(genome_fai)
 
     output:
+        tuple val(sample_id), path("${sample_id}.gc.tsv.gz"), emit: hybrids
         tuple val(sample_id), path("${sample_id}.intragenic.bed.gz"), emit: bed
         tuple val(sample_id), path("${sample_id}.intragenic.bam"), path("${sample_id}.intragenic.bam.bai"), emit: bam
 
     script:
     """
-    convert_coordinates.R --hybrids $hybrids -g $transcript_gtf -o ${sample_id}.intragenic.bed.gz
+    convert_coordinates.R --hybrids $hybrids -g $transcript_gtf -o ${sample_id}
     convert_hybrid_bed_to_bam.py ${sample_id}.intragenic.bed.gz $genome_fai
     """
 }
