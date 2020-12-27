@@ -4,7 +4,7 @@
 ========================================================================================
                                     amchakra/tosca
 ========================================================================================
-hiCLIP analysis pipeline.
+hiCLIP/proximity ligation analysis pipeline.
  #### Homepage / Documentation
  https://github.com/amchakra/tosca
 ----------------------------------------------------------------------------------------
@@ -14,27 +14,7 @@ hiCLIP analysis pipeline.
 nextflow.enable.dsl=2
 
 // Parameters
-// Need to set these before module is loaded else not propagated
-params.keep_intermediates = true
-
-params.adapter = 'AGATCGGAAGAGC'
-params.min_quality = 10
-params.min_readlength = 16
-
-params.split_size = 100000
-
-params.evalue = 0.001
-params.maxhits = 100
-
-params.umi_separator = '_'
-params.dedup_method = 'directional'
-
-params.shuffled_mfe = false
-
-params.percent_overlap = 0.75
-params.sample_size = -1
-
-params.goi = false
+if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020') { params.virus = true }
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
@@ -46,10 +26,6 @@ include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
-
-// General variables
-params.premap = true
-if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020') { params.virus = true }
 
 // Genome variables
 params.genome_fai = params.genomes[ params.org ].genome_fai
@@ -149,6 +125,10 @@ workflow {
 
 workflow.onComplete {
 
-    log.info "\nPipeline complete!\n"
+    if (workflow.success) {
+        log.info "-\033[0;34m[Tosca]\033[0;32m Pipeline completed successfully\033[0m-\n"
+    } else {
+        log.info "-\033[0;34m[Tosca]\033[1;91m Pipeline completed with errors\033[0m\n"
+    }
 
 }
