@@ -24,8 +24,20 @@ process CLUSTER_HYBRIDS {
     sample_size = params.sample_size
 
     """
-    cluster_hybrids.R --hybrids $hybrids -t ${task.cpus} -p $percent_overlap -s $sample_size -o ${sample_id}.mfe.clusters.tsv.gz
+    #!/usr/bin/env Rscript
+
+    suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(parallel))
+
+    setDTthreads(${task.cpus})
+
+    # Load hybrids
+    hybrids.dt <- fread("$hybrids")
+    clusters.dt <- cluster_hybrids(hybrids.dt, percent_overlap = $percent_overlap, sample_size = $sample_size, cores = ${task.cpus})
+    fwrite(clusters.dt, "${sample_id}.mfe.clusters.tsv.gz", sep = "\t")
     """
+
 }
 
 process COLLAPSE_CLUSTERS {
@@ -39,16 +51,27 @@ process COLLAPSE_CLUSTERS {
 
     input:
         tuple val(sample_id), path(hybrids)
-        path(transcript_gtf)
+        // path(transcript_gtf)
 
     output:
-        tuple val(sample_id), path("${sample_id}.clusters.tsv.gz"), emit: tsv
-        tuple val(sample_id), path("${sample_id}.intragenic_clusters.bed.gz"), emit: bed
+        tuple val(sample_id), path("${sample_id}.clusters.tsv.gz"), emit: clusters
+        // tuple val(sample_id), path("${sample_id}.intragenic_clusters.bed.gz"), emit: bed
 
     script:
 
     """
-    collapse_clusters.R --hybrids $hybrids -g $transcript_gtf -o ${sample_id}
+    #!/usr/bin/env Rscript
+
+    suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(primavera))
+
+    hybrids.dt <- fread("$hybrids")
+
+    # Collapse clusters
+    clusters.dt <- collapse_clusters(hybrids.dt)
+    fwrite(clusters.dt, "${sample_id}.clusters.tsv.gz", sep = "\t")
+
+    message("Completed!")
     """
 }
 

@@ -45,11 +45,12 @@ include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 
 include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
+include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 
 // include { DEDUPLICATE } from './modules/deduplicate.nf'
 // include { GET_BINDING_ENERGY } from './modules/getbindingenergy.nf'
-include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS; clusterhybrids } from './modules/clusterhybrids.nf'
-include { CONVERT_COORDINATES } from './modules/convertcoordinates.nf'
+// include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS; clusterhybrids } from './modules/clusterhybrids.nf'
+// include { CONVERT_COORDINATES } from './modules/convertcoordinates.nf'
 
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
@@ -180,14 +181,19 @@ workflow {
     /* 
     PROCESS HYBRIDS
     */
-    PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa)
+    PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
 
-    // DEDUPLICATE(GET_HYBRIDS.out.hybrids) // Remove PCR duplicates
-    // GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, ch_transcript_fa.collect()) // Get binding energies
-    // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
+    /* 
+    EXPORT INTRAGENIC
+    */
+    EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
 
-    CONVERT_COORDINATES(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect(), ch_genome_fai.collect()) // Convert to genomic BAM for IGV
-    COLLAPSE_CLUSTERS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect())
+    // def cc = [:]
+    // cc['publish_dir'] = "test"
+    // CONVERT_COORDINATES("test2", PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect()) // Convert to genomic BAM for IGV
+
+    // CONVERT_COORDINATES(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect(), ch_genome_fai.collect()) // Convert to genomic BAM for IGV
+    // COLLAPSE_CLUSTERS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf.collect())
     // CONVERT_COORDINATES(CLUSTER_HYBRIDS.out.hybrids, ch_transcript_gtf.collect(), ch_genome_fai.collect()) // Convert to genomic BAM for IGV
     // COLLAPSE_CLUSTERS(CLUSTER_HYBRIDS.out.hybrids, ch_transcript_gtf.collect())
 
