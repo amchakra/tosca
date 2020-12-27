@@ -14,7 +14,7 @@ hiCLIP/proximity ligation analysis pipeline.
 nextflow.enable.dsl=2
 
 // Parameters
-if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020') { params.virus = true }
+if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020') { params.virus = true } else {params.virus = false }
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
@@ -23,7 +23,7 @@ include { CUTADAPT } from './modules/cutadapt.nf'
 include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
-include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
+include { PROCESS_HYBRIDS; PROCESS_HYBRIDS_VIRUS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
@@ -91,14 +91,10 @@ workflow {
     IDENTIFY HYBRIDS
     */
     if(params.premap) {
-
         PREMAP(CUTADAPT.out.fastq, ch_star_genome) // Filter spliced reads
         GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa) // Identify hybrids
-
     } else {
-
         GET_HYBRIDS(CUTADAPT.out.fastq, ch_transcript_fa) // Identify hybrids
-
     }
 
     /* 
@@ -109,17 +105,19 @@ workflow {
     /* 
     PROCESS HYBRIDS
     */
-    PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
-
-    /* 
-    EXPORT INTRAGENIC
-    */
-    EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
+    if(!params.virus) {
+        PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
+        EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
+        ch_hybrids = PROCESS_HYBRIDS.out.hybrids
+    } else {
+        PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa)
+        ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids
+    }
 
     /* 
     GET CONTACT MAPS
     */
-    if(params.goi) GET_CONTACT_MAPS(DEDUPLICATE.out.hybrids, ch_transcript_fai.collect(), ch_goi.collect())
+    if(params.goi) GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
 
 }
 
