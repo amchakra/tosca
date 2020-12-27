@@ -55,7 +55,7 @@ process MERGE_HYBRIDS {
     hybrids.list <- lapply(hybrids.files, fread)
     hybrids.dt <- rbindlist(hybrids.list, use.names = TRUE)
 
-    fwrite(hybrids.dt, file = paste0("$sample_id", ".hybrids.tsv.gz"), sep = "\t")
+    fwrite(hybrids.dt, file = "${sample_id}.hybrids.tsv.gz", sep = "\t")
     """
 
 }
