@@ -65,6 +65,7 @@ if len(sys.argv) == 3:
     os.rename(f_out + '.tmp', f_out)
     pysam.index(f_out)
 
+    os.remove(f_temp)
     print("Completed")
 
 else:
