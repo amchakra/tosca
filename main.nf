@@ -33,6 +33,7 @@ params.transcript_fa = params.genomes[ params.org ].transcript_fa
 params.transcript_fai = params.genomes[ params.org ].transcript_fai
 params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
 params.star_genome = params.genomes[ params.org ].star_genome
+params.regions_gtf = params.genomes[ params.org ].regions_gtf
 
 // Create channels for static files
 ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
@@ -40,6 +41,7 @@ ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
 ch_transcript_fai = Channel.fromPath(params.transcript_fai, checkIfExists: true)
 ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
 ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
+ch_regions_gtf = Channel.fromPath(params.regions_gtf, checkIfExists: true)
 
 // Channels for optional inputs
 if(params.goi) ch_goi = Channel.fromPath(params.goi, checkIfExists: true)
@@ -106,7 +108,7 @@ workflow {
     PROCESS HYBRIDS
     */
     if(!params.virus) {
-        PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
+        PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
         EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
         ch_hybrids = PROCESS_HYBRIDS.out.hybrids
     } else {
