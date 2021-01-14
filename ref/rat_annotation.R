@@ -99,6 +99,12 @@ invisible(file.remove(reduced.sel.genes.bed))
 invisible(file.remove(masked.fasta))
 invisible(file.remove(paste0(masked.fasta, ".fai")))
 
+# Remove everything after ::
+fa <- readDNAStringSet("rat_Ens100_Q_v3.10k_0.01score.fa.gz")
+names(fa) <- gsub("::.*", "", names(fa))
+invisible(file.remove("rat_Ens100_Q_v3.10k_0.01score.fa.gz"))
+writeXStringSet(rrna.ds, "rat_Ens100_Q_v3.10k_0.01score.fa.gz", append = TRUE, compress = TRUE)
+
 # Add rRNA
 writeXStringSet(rrna.ds, "rat_Ens100_Q_v3.10k_0.01score.fa.gz", append = TRUE, compress = TRUE)
 
