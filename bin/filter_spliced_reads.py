@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+
 # Script to filter our reads that map to annotated splice junctions
 # A. M. Chakrabarti
-# 9th October 2018
+# 9th October 2018; 24th December 2020
 
 import sys
 import pysam
+from subprocess import run
 
 # ==========
 # Filtering function
@@ -40,8 +43,17 @@ def FilterBam(bam_in, bam_out):
 # ==========
 
 if len(sys.argv) == 3:
-    bam_in = pysam.AlignmentFile(sys.argv[1], "rb")
-    bam_out = pysam.AlignmentFile(sys.argv[2], 'wb', template = bam_in)
+    f_in = sys.argv[1]
+    f_out = sys.argv[2] + '.unspliced.bam'
+    
+    # First filter to get unspliced bam
+    bam_in = pysam.AlignmentFile(f_in, "rb")
+    bam_out = pysam.AlignmentFile(f_out, 'wb', template = bam_in)
     FilterBam(bam_in, bam_out)
+
+    # System call to bedtools to convert to fastq
+    fastq_out = sys.argv[2] + '.unspliced.fastq.gz'
+    run(f'bedtools bamtofastq -i {f_out} -fq /dev/stdout | pigz > {fastq_out}', shell = True)
+
 else:
-    print("python RemoveSplicedReads.py <input_bam> <output_bam>")
+    print("filter_spliced_reads.py <input_bam> <output_stem>")

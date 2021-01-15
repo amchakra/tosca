@@ -3,35 +3,49 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process splitfastq {
+process SPLIT_FASTQ {
     tag "${sample_id}"
-    // publishDir "${params.outdir}/split", mode: 'copy', overwrite: true
-
-    cpus 1
+    if(params.keep_intermediates) cache true
+    
+    cpus 8
     time '24h'
 
     input:
         tuple val(sample_id), path(reads)
 
     output:
-        path("${sample_id}_*.fastq.gz")
+        path("${sample_id}_*.fastq.gz"), emit: fastq
 
-    shell:
+    script:
+
+    split_size = params.split_size * 4
+
+    cmd = "gunzip -c $reads | split -l $split_size --additional-suffix .fastq - ${sample_id}_ && pigz *.fastq"
+
+    if(params.verbose) { println ("[MODULE] CUTADAPT: " + cmd) }
+
     """
-    zcat $reads | split -l 400000 --additional-suffix .fastq - ${sample_id}_
-    pigz *.fastq
+    $cmd
     """
 
 }
 
-// workflow splitfastq {
+process FASTQ_TO_FASTA {
+    tag "${sample_id}"
+    if(params.keep_intermediates) cache true
 
-//     main:
-//         split_fastq()
-//         Channel
-//             .fromPath(split_fastq.out)
-//             .map { file -> tuple(file.baseName, file)}
-//             .set { data }
-//     emit: data
+    cpus 8
+    time '24h'
 
-// }
+    input:
+        tuple val(sample_id), path(reads)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.fasta"), emit: fasta
+
+    script:
+    """
+    reformat.sh in1=$reads out1=${sample_id}.fasta
+    """
+}
+

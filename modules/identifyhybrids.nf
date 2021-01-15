@@ -3,13 +3,10 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-params.evalue = params.evalue
-params.maxhits = params.maxhits
-
-process identifyhybrids {
+process IDENTIFY_HYBRIDS {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/hybrids/split/", mode: 'copy', overwrite: true
 
     time '24h'
     cpus = 8
@@ -19,15 +16,46 @@ process identifyhybrids {
         tuple val(sample_id), path(blast8), path(reads)
 
     output:
-        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz")
+        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
 
     script:
 
-    evalue = "$params.evalue"
-    maxhits = "$params.maxhits"
+    """
+    identify_hybrids.R -t ${task.cpus} -b $blast8 -f $reads -o ${sample_id}.hybrids.tsv.gz
+    """
+
+}
+
+process MERGE_HYBRIDS {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+
+    time '24h'
+
+    input:
+        tuple val(sample_id), path(hybrids)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
+
+    script:
+    
+    // zcat $hybrids | pigz > ${sample_id}.hybrids.tsv.gz
+    // This doesn't account for empty table files 
 
     """
-    Rscript --vanilla /camp/home/chakraa2/home/projects/flora/hiclip/blat/tosca/bin/identify_hybrids.R -t ${task.cpus} -b $blast8 -f $reads -o ${sample_id}.hybrids.tsv.gz
+    #!/usr/bin/env Rscript
+
+    suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(primavera))
+
+    # print("$hybrids")
+    hybrids.files <- strsplit("$hybrids", " ")[[1]]
+    hybrids.list <- lapply(hybrids.files, fread)
+    hybrids.dt <- rbindlist(hybrids.list, use.names = TRUE)
+
+    fwrite(hybrids.dt, file = "${sample_id}.hybrids.tsv.gz", sep = "\t")
     """
 
 }

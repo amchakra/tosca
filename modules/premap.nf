@@ -3,32 +3,66 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process premap {
+process STAR {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
+    if(params.keep_intermediates) publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
 
     cpus 8
+    memory 48G
     time '12h'
 
     input:
-        tuple val(sample_id), path(reads), path(star_genome_index)
+        tuple val(sample_id), path(reads)
+        file(star_genome_index)
     
     output:
-        tuple val(sample_id), path("${sample_id}.Aligned.sortedByCoord.out.bam")
+        tuple val(sample_id), path("${sample_id}.Aligned.sortedByCoord.out.bam"), path("${sample_id}.Aligned.sortedByCoord.out.bam.bai"), emit: bam
+        path("*.Log.final.out"), emit: log
 
-    shell:
-    """
-    STAR --runThreadN ${task.cpus} \
-        --genomeDir $star_genome_index --genomeLoad NoSharedMemory \
-        --readFilesIn $reads --readFilesCommand zcat \
-        --outFileNamePrefix ${sample_id}. \
-        --outFilterMultimapNmax 20 --outSAMmultNmax 1 \
-        --outSAMunmapped Within \
-        --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout \
-        --alignIntronMin 20 --alignIntronMax 100000 \
-        --outSAMattributes All --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 60000000000
+    script:
 
-    sambamba index -t ${task.cpus} ${sample_id}.Aligned.sortedByCoord.out.bam
+    args = " --runThreadN ${task.cpus} "
+    args += " --genomeDir $star_genome_index --genomeLoad NoSharedMemory " 
+    args += " --readFilesIn $reads --readFilesCommand gunzip -c "
+    args += " --outFileNamePrefix ${sample_id}. "
+    args += " --outSAMattributes All --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within " // need to keep unmapped for later filtering
+    args += " --outFilterMultimapNmax 20 --outSAMmultNmax 1 "
+    args += " --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout "
+    args += " --alignIntronMin 20 --alignIntronMax 100000 "
+    args += " --limitBAMsortRAM 60000000000"
+
+    cmd = "STAR $args && samtools index -@ ${task.cpus} ${sample_id}.Aligned.sortedByCoord.out.bam"
+
+    if(params.verbose) { println ("[MODULE] PREMAP: " + cmd) }
+    
     """
+    $cmd
+    """
+}
+
+process FILTER_SPLICED_READS {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
+
+    time '12h'
+
+    input:
+        tuple val(sample_id), path(bam), path(bai)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.unspliced.fastq.gz"), emit: fastq
+        path("*.filter_spliced_reads.log"), emit: log
+
+    script:
+
+    cmd = "filter_spliced_reads.py $bam ${sample_id} > ${sample_id}.filter_spliced_reads.log"
+
+    if(params.verbose) { println ("[MODULE] FILTERSPLICEDREADS: " + cmd) }
+
+    """
+    $cmd
+    """
+    
 }

@@ -1,15 +1,9 @@
-# Script to convert hybrid BED12 to BAM with additional tags
-# A. M. Chakrabarti
-# 9th May 2020
+#!/usr/bin/env python
 
 import sys
 import os
 import pysam
-
-# bam="name.bam"
-
-bam_in = pysam.AlignmentFile(sys.argv[1], "rb")
-bam_out = pysam.AlignmentFile(sys.argv[2], 'wb', template = bam_in)
+from subprocess import run
 
 def AddCluster(bam_in, bam_out):
 
@@ -46,18 +40,33 @@ def AddCluster(bam_in, bam_out):
 # Run
 # ==========
 
+# System call to bedtools to convert to BED12 to BAM
+
 if len(sys.argv) == 3:
 
-    bam_in = pysam.AlignmentFile(sys.argv[1], "rb")
-    bam_out = pysam.AlignmentFile(sys.argv[2], 'wb', template = bam_in)
+    f_in = sys.argv[1]
+    f_temp = f_in.replace('bed.gz', 'temp.bam')
+    f_out = f_in.replace('bed.gz', 'bam')
+    genome_fai = sys.argv[2]
+
+    print(f_in)
+    print(f_temp)
+    print(f_out)
+    print(genome_fai)
+
+    run(f'bedtools bedtobam -bed12 -i {f_in} -g {genome_fai} > {f_temp}', shell = True)
+
+    bam_in = pysam.AlignmentFile(f_temp, "rb")
+    bam_out = pysam.AlignmentFile(f_out, 'wb', template = bam_in)
 
     AddCluster(bam_in, bam_out)
 
-    pysam.sort("-o", sys.argv[2] + '.tmp', sys.argv[2])
-    os.rename(sys.argv[2] + '.tmp', sys.argv[2])
-    pysam.index(sys.argv[2])
+    pysam.sort("-o", f_out + '.tmp', f_out)
+    os.rename(f_out + '.tmp', f_out)
+    pysam.index(f_out)
 
+    os.remove(f_temp)
     print("Completed")
 
 else:
-    print("python ConvertToBAM.py <input_bam> <output_bam>")
+    print("python convert_hybridbed_to_bam.py <input_bed> <genome_fai>")
