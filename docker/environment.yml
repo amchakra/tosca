@@ -21,4 +21,19 @@ dependencies:
   - bioconda::viennarna=2.4.14
   - pysam
   - pandas
-  - r-base
+
+# R packages
+  - conda-forge::r-base
+  - conda-forge::r-devtools
+  - conda-forge::r-data.table
+  - conda-forge::r-r.utils
+  - conda-forge::r-ggplot2
+  - conda-forge::r-scales
+  - conda-forge::r-tictoc
+  - conda-forge::r-optparse
+  - conda-forge::r-rslurm
+  - conda-forge::r-cowplot
+  - conda-forge::r-ggthemes
+  - bioconda::bioconductor-rtracklayer
+  - bioconda::bioconductor-rbgl
+  - bioconda::bioconductor-graph
