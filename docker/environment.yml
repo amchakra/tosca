@@ -1,19 +1,21 @@
-name: ac-ehiclip-0.1
+name: tosca-0.2
 channels:
   - conda-forge
   - bioconda
   - defaults
 
 dependencies:
-  - pigz=2.3.4
-  - fastqc=0.11.8
-  - cutadapt=2.6
-  - bowtie2
-  - star=2.7.3a
-  - bedtools=2.28.0
-  - umi_tools=1.0.1
-  - ucsc-bedsort=377
-  - sambamba=0.7.1
-  - samtools=1.9
+  - conda-forge::python=3.7.3
+  - conda-forge::pigz=2.3.4
+  - bioconda::fastqc=0.11.9
+  - bioconda::cutadapt=3.0
+  - bioconda::bbmap=38.87
+  - bioconda::star=2.7.4a
+  - bioconda::pblat=2.5
+  - bioconda::bedtools=2.29.2
+  - bioconda::umi_tools=1.1.1
+  - bioconda::samtools=1.11
+  - bioconda::viennarna=2.4.14
   - pysam
+  - pandas
   - r-base
