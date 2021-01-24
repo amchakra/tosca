@@ -29,11 +29,12 @@ process IDENTIFY_HYBRIDS {
 process MERGE_HYBRIDS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     time '24h'
 
     input:
+        val(type)
         tuple val(sample_id), path(hybrids)
 
     output:

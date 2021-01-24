@@ -25,6 +25,7 @@ include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS; PROCESS_HYBRIDS_VIRUS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
+include { GET_ATLAS } from './workflows/getatlas.nf'
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
 // Genome variables
@@ -111,6 +112,12 @@ workflow {
         PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
         EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
         ch_hybrids = PROCESS_HYBRIDS.out.hybrids
+
+        /* 
+        GET ATLAS
+        */
+        GET_ATLAS(PROCESS_HYBRIDS.out.mfe, ch_transcript_gtf, ch_regions_gtf)
+
     } else {
         PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa)
         ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids
