@@ -25,6 +25,7 @@ include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS; PROCESS_HYBRIDS_VIRUS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
+include { GET_ATLAS } from './workflows/getatlas.nf'
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
 // Genome variables
@@ -76,6 +77,7 @@ if(params.dedup_method != 'none') settings['UMI separator'] = params.umi_separat
 settings['Shuffled binding energy'] = params.shuffled_mfe
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
+settings['Generate atlas'] = params.atlas
 if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-----------------------------------------------------------------"
@@ -111,6 +113,14 @@ workflow {
         PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
         EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
         ch_hybrids = PROCESS_HYBRIDS.out.hybrids
+
+        /* 
+        GET ATLAS
+        */
+        if(params.atlas) {
+            GET_ATLAS(PROCESS_HYBRIDS.out.mfe, ch_transcript_gtf, ch_regions_gtf)
+        }
+
     } else {
         PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa)
         ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids

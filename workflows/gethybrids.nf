@@ -36,9 +36,8 @@ workflow GET_HYBRIDS {
     ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
         .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
         .groupTuple(by: 0)
-        // .view()
 
-    MERGE_HYBRIDS(ch_merge_hybrids)
+    MERGE_HYBRIDS("hybrids", ch_merge_hybrids)
 
     emit:
     hybrids = MERGE_HYBRIDS.out.hybrids
