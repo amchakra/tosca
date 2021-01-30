@@ -8,7 +8,7 @@ process DEDUPLICATE {
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: false
 
-    memory '32G'
+    memory '64G'
     time '24h'
 
     input:
