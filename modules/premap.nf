@@ -31,6 +31,7 @@ process STAR {
     args += " --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout "
     args += " --alignIntronMin 20 --alignIntronMax 100000 "
     args += " --limitBAMsortRAM 60000000000"
+    args += " " + params.star_args
 
     cmd = "STAR $args && samtools index -@ ${task.cpus} ${sample_id}.Aligned.sortedByCoord.out.bam"
 
