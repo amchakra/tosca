@@ -8,6 +8,8 @@ process GET_NON_HYBRIDS {
     tag "${sample_id}"
     publishDir "${params.outdir}/nonhybrids", mode: 'copy', overwrite: true
 
+    cpus 4
+    memory 16G
     time '24h'
 
     input:
