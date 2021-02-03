@@ -32,6 +32,7 @@ process MERGE_HYBRIDS {
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     time '24h'
+    memory '32 G'
 
     input:
         val(type)
