@@ -50,11 +50,11 @@ process CLUSTER_HYBRIDS {
     # table(S4Vectors::elementNROWS(hybrids.list))
 
     message("Number of hybrids: ", nrow(hybrids.dt))
-    message("Removing rRNA-rRNA and very high incidence genes (>100,000)...")
+    message("Removing rRNA-rRNA and very high incidence genes (>100,00)...")
     atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rRNA_45S"][R_seqnames != "rRNA_45S"]
     atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rDNA"][R_seqnames != "rDNA"]
     atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != "rRNA_5S"][R_seqnames != "rRNA_5S"]
-    atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e5]
+    atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e4]
     atlas.hybrids.dt[, total_count := NULL]
     message("Number of hybrids remaining: ", nrow(atlas.hybrids.dt))
   
@@ -160,7 +160,7 @@ process CLUSTER_HYBRIDS_ATLAS {
     atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rRNA_45S"][R_seqnames != "rRNA_45S"]
     atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rDNA"][R_seqnames != "rDNA"]
     atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != "rRNA_5S"][R_seqnames != "rRNA_5S"]
-    atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e5]
+    atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e4]
     atlas.hybrids.dt[, total_count := NULL]
     message("Number of hybrids remaining: ", nrow(atlas.hybrids.dt))
   
