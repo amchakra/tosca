@@ -14,7 +14,7 @@ hiCLIP/proximity ligation analysis pipeline.
 nextflow.enable.dsl=2
 
 // Parameters
-if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020') { params.virus = true } else {params.virus = false }
+if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020' | params.org == 'IAV-WSN') { params.virus = true } else {params.virus = false }
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
