@@ -79,6 +79,7 @@ settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
 settings['Generate atlas'] = params.atlas
 if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
+if(params.goi) { settings['Bin size for contact maps'] = params.bin_size } 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-----------------------------------------------------------------"
 

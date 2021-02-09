@@ -21,8 +21,11 @@ process GET_CONTACT_MAPS {
         tuple val(sample_id), path("${sample_id}.*.binned_map.tsv.gz"), emit: binned_map
 
     script:
+
+    bin_size = params.bin_size
+
     """
-    get_contact_map.R --hybrids $hybrids --genes $genes --fai $fai --output ${sample_id}
+    get_contact_map.R --hybrids $hybrids --genes $genes --fai $fai --bin_size $bin_size --output ${sample_id}
     """
 
 }
