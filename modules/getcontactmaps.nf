@@ -18,7 +18,7 @@ process GET_CONTACT_MAPS {
 
     output:
         tuple val(sample_id), path("${sample_id}.*.mat.rds"), emit: map
-        tuple val(sample_id), path("${sample_id}.*.binned_map.tsv.gz"), emit: binned_map
+        tuple val(sample_id), path("${sample_id}.*_binned_map.tsv.gz"), emit: binned_map
 
     script:
 
