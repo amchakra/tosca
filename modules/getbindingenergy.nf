@@ -8,6 +8,7 @@ process GET_BINDING_ENERGY {
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
+    memory 16G
     time '24h'
 
     input:
