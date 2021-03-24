@@ -9,7 +9,7 @@ process GET_CONTACT_MAPS {
     publishDir "${params.outdir}/maps", mode: 'copy', overwrite: true
 
     time '24h'
-    memory '32 G'
+    memory '64 G'
 
     input:
         tuple val(sample_id), path(hybrids)
