@@ -29,6 +29,6 @@ workflow GET_ATLAS {
     CONVERT_COORDINATES("atlas", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for hybrids
     ANNOTATE_HYBRIDS("atlas", CONVERT_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate    
     EXPORT_GENOMIC_BED("atlas",  CONVERT_COORDINATES.out.hybrids)
-    CONVERT_BED_TO_BAM(EXPORT_HYBRID_GENOMIC_BED.out.bed, genome_fai.collect())
+    CONVERT_BED_TO_BAM(EXPORT_GENOMIC_BED.out.bed, genome_fai.collect())
 
 }
