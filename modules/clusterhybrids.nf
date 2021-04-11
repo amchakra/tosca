@@ -167,7 +167,7 @@ process CLUSTER_HYBRIDS_ATLAS {
     # Split into list for rslurm
     atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
 
-    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, sample_size = -1, cores = 8, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "4:00:00", mem = "64G"))
+    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, sample_size = -1, cores = 8, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
     status <- FALSE
     while(status == FALSE) {
 
