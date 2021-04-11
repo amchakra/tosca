@@ -37,7 +37,7 @@ process CLUSTER_HYBRIDS {
 
     # Load hybrids
     hybrids.dt <- fread("$hybrids")
-    setkey(hybrids, name)
+    setkey(hybrids.dt, name)
 
     # Filter hybrids
     message("Number of hybrids: ", nrow(hybrids.dt))
