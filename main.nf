@@ -119,7 +119,7 @@ workflow {
         GET ATLAS
         */
         if(params.atlas) {
-            GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf)
+            GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
         }
 
     } else {

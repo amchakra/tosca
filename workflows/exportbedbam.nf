@@ -11,7 +11,7 @@ workflow EXPORT_INTRAGENIC {
     take:
     hybrids         // channel: hybrids
     clusters        // channel: clusters
-    genome_fai      // channel: transcript_fa
+    genome_fai      // channel: genome_fa
 
     main:
     
