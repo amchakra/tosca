@@ -53,7 +53,7 @@ process CLUSTER_HYBRIDS {
     message("Number of hybrids to cluster: ", nrow(atlas.hybrids.dt))
 
     # Keep ones not clustered to add back in later
-    unclustered.hybrids.dt <- hybrids.dt[!name %in% atlas.hybrids.dt$name]
+    unclustered.hybrids.dt <- hybrids.dt[!name %in% atlas.hybrids.dt\$name]
     stopifnot(nrow(unclustered.hybrids.dt) + nrow(atlas.hybrids.dt) == nrow(hybrids.dt))
 
     # Split into list to parallelise
