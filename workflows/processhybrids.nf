@@ -21,7 +21,7 @@ workflow PROCESS_HYBRIDS {
     // GET_BINDING_ENERGY(hybrids, transcript_fa.collect()) // Get binding energies
 
     // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
-    CLUSTER_HYBRIDS(hybrids)
+    CLUSTER_HYBRIDS("hybrids", hybrids)
     COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
     
     CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
