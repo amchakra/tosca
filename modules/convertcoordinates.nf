@@ -30,8 +30,9 @@ process CONVERT_COORDINATES {
     # Load data
     genes.gr <- rtracklayer::import.gff2("$transcript_gtf")
     hybrids.dt <- fread("$hybrids")
-    hybrids.dt <- hybrids.dt[grep("^rRNA", L_seqnames, invert = TRUE)] # Remove rRNA
-    hybrids.dt <- hybrids.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
+    
+    # hybrids.dt <- hybrids.dt[grep("^rRNA", L_seqnames, invert = TRUE)] # Remove rRNA
+    # hybrids.dt <- hybrids.dt[grep("Mt", L_seqnames, invert = TRUE)] # Remove MT for now
 
     coord.dt <- convert_coordinates(hybrids.dt = hybrids.dt, genes.gr = genes.gr)
     fwrite(coord.dt, "${sample_id}.${type}.gc.tsv.gz", sep = "\t")
@@ -63,6 +64,7 @@ process EXPORT_GENOMIC_BED {
 
     hybrids.dt <- fread("$hybrids")
     intragenic.dt <- hybrids.dt[L_seqnames == R_seqnames]
+    intragenic.dt <- intragenic.dt[grep("^rRNA|^rDNA", L_seqnames, invert = TRUE)] # Remove rRNA
 
     export_genomic_bed(hybrids.dt = intragenic.dt, sam_tag = TRUE, filename = "${sample_id}.${type}.intragenic.bed.gz")
     """
