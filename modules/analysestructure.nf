@@ -3,7 +3,7 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process GET_BINDING_ENERGY {
+process ANALYSE_STRUCTURE {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
@@ -21,10 +21,11 @@ process GET_BINDING_ENERGY {
     script:
 
     args = ''
-    if ( params.shuffled_mfe ) args += '--shuffled_mfe'
+    if ( params.shuffled_mfe ) args += ' --shuffled_mfe '
+    if ( params.clusters_only) args += ' --clusters_only'
 
     """
-    get_binding_energy.R --hybrids $hybrids --fasta $transcript_fa --output ${sample_id}.hybrids.mfe.tsv.gz $args
+    analyse_structure.R --hybrids $hybrids --fasta $transcript_fa --output ${sample_id}.hybrids.mfe.tsv.gz $args
     """
 
 }

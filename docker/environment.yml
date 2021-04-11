@@ -19,6 +19,7 @@ dependencies:
   - bioconda::umi_tools=1.1.1
   - bioconda::samtools=1.11
   - bioconda::viennarna=2.4.14
+  - bioconda::ushuffle=1.2.2
   - pysam
   - pandas
 

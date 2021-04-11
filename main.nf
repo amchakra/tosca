@@ -25,6 +25,7 @@ include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS; PROCESS_HYBRIDS_VIRUS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
+include { ANALYSE_STRUCTURE } from './modules/analysestructure.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
 
@@ -74,9 +75,11 @@ settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
 settings['Deduplication method'] = params.dedup_method
 if(params.dedup_method != 'none') settings['UMI separator'] = params.umi_separator
-settings['Shuffled binding energy'] = params.shuffled_mfe
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
+settings['Analyse structure'] = params.analyse_structure
+if(params.analyse_structure) settings['Analyse cluster structures only'] = params.clusters_only
+if(params.analyse_structure) settings['Shuffled binding energy'] = params.shuffled_mfe
 settings['Generate atlas'] = params.atlas
 if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
 if(params.goi) { settings['Bin size for contact maps'] = params.bin_size } 
@@ -114,6 +117,10 @@ workflow {
         PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
         EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
         ch_hybrids = PROCESS_HYBRIDS.out.hybrids
+
+        if(params.analyse_structure) {
+            ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
+        }
 
         /* 
         GET ATLAS
