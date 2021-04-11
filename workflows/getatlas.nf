@@ -6,7 +6,7 @@ nextflow.enable.dsl=2
 include { MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
 include { ANNOTATE_HYBRIDS } from '../modules/annotatehybrids.nf'
 include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS } from '../modules/clusterhybrids.nf'
-include { CONVERT_COORDINATES; EXPORT_GENOMIC_BED } from '../modules/convertcoordinates.nf'
+include { CONVERT_COORDINATES; EXPORT_GENOMIC_BED; CONVERT_BED_TO_BAM } from '../modules/convertcoordinates.nf'
 
 workflow GET_ATLAS {
 
