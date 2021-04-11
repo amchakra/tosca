@@ -85,7 +85,7 @@ process CLUSTER_HYBRIDS {
     atlas.clusters.dt <- rbindlist(list(atlas.clusters.dt, unclustered.hybrids.dt), use.names = TRUE, fill = TRUE)
 
     stopifnot(nrow(atlas.clusters.dt) == nrow(hybrids.dt))
-    fwrite(clusters.dt, "${sample_id}.clusters.tsv.gz", sep = "\t")
+    fwrite(atlas.clusters.dt, "${sample_id}.clusters.tsv.gz", sep = "\t")
     """
 
 }
