@@ -18,7 +18,7 @@ process ANNOTATE_HYBRIDS {
         path(regions_gtf)
 
     output:
-        tuple val(sample_id), path("${sample_id}.annotated.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.gc.annotated.tsv.gz"), emit: hybrids
 
     script:
 
