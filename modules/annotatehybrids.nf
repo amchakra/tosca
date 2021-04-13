@@ -34,7 +34,7 @@ process ANNOTATE_HYBRIDS {
     regions.gr <- rtracklayer::import.gff2("$regions_gtf")
     hybrids.dt <- annotate_hybrids(hybrids.dt, regions.gr)
 
-    fwrite(hybrids.dt, "${sample_id}.annotated.tsv.gz", sep = "\t")
+    fwrite(hybrids.dt, "${sample_id}.gc.annotated.tsv.gz", sep = "\t")
     """
 
 }
