@@ -33,7 +33,7 @@ if(is.na(readLines(opt$blast8)[1])) {
 
     # Filter multi hits
     hybrids.dt <- rbindlist(hybrids.list)
-    if(nrow(hybrids.dt != 0) {
+    if(nrow(hybrids.dt != 0)) {
         valid.hybrids.dt <- filter_valid_hybrids(hybrids.dt)
     } else {
         valid.hybrids.dt <- data.table()
