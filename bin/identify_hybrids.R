@@ -33,7 +33,11 @@ if(is.na(readLines(opt$blast8)[1])) {
 
     # Filter multi hits
     hybrids.dt <- rbindlist(hybrids.list)
-    valid.hybrids.dt <- filter_valid_hybrids(hybrids.dt)
+    if(nrow(hybrids.dt != 0) {
+        valid.hybrids.dt <- filter_valid_hybrids(hybrids.dt)
+    } else {
+        valid.hybrids.dt <- data.table()
+    }
 
     fwrite(valid.hybrids.dt, file = opt$output, sep = "\t", col.names = TRUE)
 
