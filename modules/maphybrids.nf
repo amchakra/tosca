@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 
 process BLAT {
     tag "${sample_id}"
-    if(params.keep_intermediates) cache true
+    // if(params.keep_intermediates) cache true
 
     cpus 8
     memory '32 G'

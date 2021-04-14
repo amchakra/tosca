@@ -22,13 +22,12 @@ workflow PROCESS_HYBRIDS {
 
     // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
     CLUSTER_HYBRIDS("hybrids", hybrids)
-    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
-    
     CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
-    CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters
-
     ANNOTATE_HYBRIDS("hybrids", CONVERT_HYBRID_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate
-    ANNOTATE_CLUSTERS("clusters", CONVERT_CLUSTER_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate
+
+    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
+    CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters
+    ANNOTATE_CLUSTERS("clusters", CONVERT_CLUSTER_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate      
 
     emit:
     // mfe = GET_BINDING_ENERGY.out.hybrids

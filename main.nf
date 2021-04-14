@@ -57,6 +57,7 @@ summary['Trace directory'] = params.tracedir
 if(workflow.repository) summary['Pipeline repository'] = workflow.repository
 if(workflow.revision) summary['Pipeline revision'] = workflow.revision
 summary['Pipeline directory'] = workflow.projectDir
+summary['Working dir'] = workflow.workDir
 summary['Run name'] = workflow.runName
 summary['Profile'] = workflow.profile
 if(workflow.container) summary['Container'] = workflow.container
