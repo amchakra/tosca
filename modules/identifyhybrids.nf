@@ -57,6 +57,8 @@ process MERGE_HYBRIDS {
     hybrids.list <- lapply(hybrids.files, fread)
     hybrids.dt <- rbindlist(hybrids.list, use.names = TRUE)
 
+    if($type == "atlas") hybrids.dt$sample <- rep(basename(hybrids.files), S4Vectors::elementNROWS(hybrids.list))
+
     fwrite(hybrids.dt, file = "${sample_id}.hybrids.tsv.gz", sep = "\t")
     """
 
