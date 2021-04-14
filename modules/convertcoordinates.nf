@@ -6,7 +6,7 @@ nextflow.enable.dsl=2
 process CONVERT_COORDINATES {
 
     tag "${sample_id}"
-    if(params.keep_intermediates) publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     cpus 4
     memory 16G
