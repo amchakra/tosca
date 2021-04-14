@@ -11,7 +11,7 @@ option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "ch
                 make_option(c("", "--fasta"), action = "store", type = "character", help = "Transcript fasta"),
                 make_option(c("", "--output"), action = "store", type = "character", help = "Output file"),
                 make_option(c("", "--nodes"), action = "store", type = "integer", default = 100, help = "Number of nodes to allocate [default: %default]"),
-                make_option(c("", "--shuffled_mfe"), action = "store_true", type = "logical", help = "Calculate shuffled binding energy (100 iterations)", default = FALSE))
+                make_option(c("", "--shuffled_mfe"), action = "store_true", type = "logical", help = "Calculate shuffled binding energy (100 iterations)", default = FALSE),
                 make_option(c("", "--clusters_only"), action = "store_true", type = "logical", help = "Analyse structure for hybrids in clusters only", default = FALSE))
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
@@ -25,7 +25,7 @@ genome.dt <- data.table(gene_id = names(genome.fa),
 toc()
 
 hybrids.dt <- fread(opt$hybrids)
-setkey(hybrids, name)
+setkey(hybrids.dt, name)
 stopifnot(!any(duplicated(hybrids.dt$name))) # Check no duplicates
 
 # Get sequences
@@ -40,7 +40,7 @@ sel.hybrids.dt <- hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45
 sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
 sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
 
-if(opt$clusters_only) sel.hybrids.dt <- sel.hybrids.dt[!is.na(clusters)][clusters != "."]]
+if(opt$clusters_only) sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][cluster != "."]
 
 # Getting MFE and structure
 message("Analysing structure...")
