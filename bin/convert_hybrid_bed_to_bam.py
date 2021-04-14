@@ -21,9 +21,10 @@ def AddCluster(bam_in, bam_out):
         mfe = tags[-1]
         orientation = tags[-2]
         cluster = tags[-3]
+        sample = tags[-4]
         # print(cluster)
         
-        read.tags += [("CL", cluster), ("BE", mfe), ("RO", orientation)]
+        read.tags += [("ID", sample), ("CL", cluster), ("BE", mfe), ("RO", orientation)]
         read.query_name = tags[0] # Remove extra tags from name
 
         bam_out.write(read)
