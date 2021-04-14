@@ -25,10 +25,14 @@ workflow GET_ATLAS {
 
     MERGE_HYBRIDS("atlas", ch_all_hybrids)
     CLUSTER_HYBRIDS("atlas", MERGE_HYBRIDS.out.hybrids) // Get clusters
-    COLLAPSE_CLUSTERS("atlas", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
-    CONVERT_COORDINATES("atlas", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
-    ANNOTATE_HYBRIDS("atlas", CONVERT_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate    
-    EXPORT_GENOMIC_BED("atlas",  CONVERT_COORDINATES.out.hybrids)
+    // CONVERT_COORDINATES("atlas", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
+    // ANNOTATE_HYBRIDS("atlas", CONVERT_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate    
+    EXPORT_GENOMIC_BED("atlas",  CLUSTER_HYBRIDS.out.hybrids)
     CONVERT_BED_TO_BAM(EXPORT_GENOMIC_BED.out.bed, genome_fai.collect())
+
+    COLLAPSE_CLUSTERS("atlas/clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
+    CONVERT_COORDINATES("atlas/clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect())
+    ANNOTATE_HYBRIDS("atlas/clusters", CONVERT_COORDINATES.out.hybrids, regions_gtf.collect())
+    EXPORT_GENOMIC_BED("atlas/clusters",  CLUSTER_HYBRIDS.out.hybrids)
 
 }
