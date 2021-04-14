@@ -121,13 +121,15 @@ workflow {
 
         if(params.analyse_structure) {
             ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
+            ch_hybrids = ANALYSE_STRUCTURE.out.hybrids
         }
 
         /* 
         GET ATLAS
         */
         if(params.atlas) {
-            GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
+            // GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
+            GET_ATLAS(ch_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
         }
 
     } else {
