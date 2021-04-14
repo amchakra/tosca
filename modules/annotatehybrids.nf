@@ -18,7 +18,7 @@ process ANNOTATE_HYBRIDS {
         path(regions_gtf)
 
     output:
-        tuple val(sample_id), path("${sample_id}.gc.annotated.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.${type}.gc.annotated.tsv.gz"), emit: hybrids
 
     script:
 
@@ -34,7 +34,7 @@ process ANNOTATE_HYBRIDS {
     regions.gr <- rtracklayer::import.gff2("$regions_gtf")
     hybrids.dt <- annotate_hybrids(hybrids.dt, regions.gr)
 
-    fwrite(hybrids.dt, "${sample_id}.gc.annotated.tsv.gz", sep = "\t")
+    fwrite(hybrids.dt, "${sample_id}.${type}.gc.annotated.tsv.gz", sep = "\t")
     """
 
 }

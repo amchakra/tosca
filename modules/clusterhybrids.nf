@@ -17,7 +17,7 @@ process CLUSTER_HYBRIDS {
         tuple val(sample_id), path(hybrids)
 
     output:
-        tuple val(sample_id), path("${sample_id}.clustered.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.${type}.clustered.tsv.gz"), emit: hybrids
 
     script:
 
@@ -83,7 +83,7 @@ process CLUSTER_HYBRIDS {
     atlas.clusters.dt <- rbindlist(list(atlas.clusters.dt, unclustered.hybrids.dt), use.names = TRUE, fill = TRUE)
 
     stopifnot(nrow(atlas.clusters.dt) == nrow(hybrids.dt))
-    fwrite(atlas.clusters.dt, "${sample_id}.clustered.tsv.gz", sep = "\t")
+    fwrite(atlas.clusters.dt, "${sample_id}.${type}.clustered.tsv.gz", sep = "\t")
     """
 
 }
