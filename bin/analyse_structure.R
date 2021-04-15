@@ -70,7 +70,7 @@ structure.dt <- rbindlist(structure.list)
 hybrids.dt <- merge(hybrids.dt, structure.dt, by = "name")
 
 # Do shuffled depending on flag
-if(shuffled_mfe) {
+if(opt$shuffled_mfe) {
     sjob <- slurm_apply(get_shuffled_mfe, sel.hybrids.dt[, .(name, L_sequence, R_sequence)], 
                         jobname = sapply(strsplit(basename(opt$hybrids), "\\."), "[[", 1), 
                         nodes = opt$nodes, 
@@ -85,6 +85,8 @@ if(shuffled_mfe) {
     squeue.out <- system(paste("squeue -n", sjob$jobname), intern = TRUE) # Get contents of squeue for this job
     if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
     Sys.sleep(60)
+
+    }
 
     mfe.list <- get_slurm_out(sjob)
     cleanup_files(sjob) # Remove temporary files
