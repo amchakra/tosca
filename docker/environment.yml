@@ -19,6 +19,7 @@ dependencies:
   - bioconda::umi_tools=1.1.1
   - bioconda::samtools=1.11
   - bioconda::viennarna=2.4.14
+  - bioconda::ushuffle=1.2.2
   - pysam
   - pandas
 
@@ -34,6 +35,7 @@ dependencies:
   - conda-forge::r-rslurm
   - conda-forge::r-cowplot
   - conda-forge::r-ggthemes
+  - conda-forge::r-igraph
   - bioconda::bioconductor-rtracklayer
   - bioconda::bioconductor-rbgl
   - bioconda::bioconductor-graph

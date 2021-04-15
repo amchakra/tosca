@@ -6,17 +6,18 @@ nextflow.enable.dsl=2
 process CLUSTER_HYBRIDS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     cpus 8
     memory 32G
     time '24h'
 
     input:
+        val(type)
         tuple val(sample_id), path(hybrids)
 
     output:
-        tuple val(sample_id), path("${sample_id}.mfe.clusters.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.${type}.clustered.tsv.gz"), emit: hybrids
 
     script:
 
@@ -32,53 +33,57 @@ process CLUSTER_HYBRIDS {
     suppressPackageStartupMessages(library(rslurm))
 
     setDTthreads(${task.cpus})
-
-    # Load hybrids
-    # hybrids.dt <- fread("$hybrids")
-    # clusters.dt <- cluster_hybrids(hybrids.dt, percent_overlap = $percent_overlap, sample_size = $sample_size, cores = ${task.cpus})
-    # fwrite(clusters.dt, "${sample_id}.mfe.clusters.tsv.gz", sep = "\t")
-
-
-    # ==========
+    set.seed(42)
 
     # Load hybrids
     hybrids.dt <- fread("$hybrids")
+    setkey(hybrids.dt, name)
 
-    # hybrids.list <- split(hybrids.dt, by = c("L_seqnames", "R_seqnames"))
-    # message(length(hybrids.list), " gene pairs to cluster")
-    # message("Distribution of hybrids per gene pair:")
-    # table(S4Vectors::elementNROWS(hybrids.list))
-
+    # Filter hybrids
     message("Number of hybrids: ", nrow(hybrids.dt))
-    message("Removing rRNA-rRNA and very high incidence genes (>100,00)...")
-    atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rRNA_45S"][R_seqnames != "rRNA_45S"]
-    atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rDNA"][R_seqnames != "rDNA"]
-    atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != "rRNA_5S"][R_seqnames != "rRNA_5S"]
-    atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e4]
-    atlas.hybrids.dt[, total_count := NULL]
-    message("Number of hybrids remaining: ", nrow(atlas.hybrids.dt))
-  
-    # Split into list for rslurm
-    atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
+    message("Removing rRNA-rRNA")
+    atlas.hybrids.dt <- hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45S")]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
+    
+    message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
+    atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
 
-    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, sample_size = -1, cores = 8, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
+    # Subsample as indicated
+    if($sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt, $sample_size))]
+    message("Number of hybrids to cluster: ", nrow(atlas.hybrids.dt))
+
+    # Keep ones not clustered to add back in later
+    unclustered.hybrids.dt <- hybrids.dt[!name %in% atlas.hybrids.dt\$name]
+    stopifnot(nrow(unclustered.hybrids.dt) + nrow(atlas.hybrids.dt) == nrow(hybrids.dt))
+
+    # Split into list to parallelise
+    atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
+    message("Gene pairs to cluster: ", length(atlas.hybrids.list))
+
+    # atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = $percent_overlap, mc.cores = ${task.cpus})
+        
+    # Submit to cluster
+    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = $percent_overlap, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
     status <- FALSE
     while(status == FALSE) {
-
         squeue.out <- system(paste("squeue -n", sjob\$jobname), intern = TRUE) # Get contents of squeue for this job
         if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
         Sys.sleep(60)
-
     }
-    
-    clusters.list <- get_slurm_out(sjob)
+
+    atlas.clusters.list <- get_slurm_out(sjob)
     cleanup_files(sjob) 
 
-    # clusters.dt <- cluster_hybrids(atlas.hybrids.dt, percent_overlap = $percent_overlap, sample_size = $sample_size, cores = ${task.cpus})
-    clusters.dt <- rbindlist(clusters.list)
-    stopifnot(nrow(clusters.dt) == nrow(atlas.hybrids.dt))
+    atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
+    stopifnot(nrow(atlas.clusters.dt) == nrow(atlas.hybrids.dt))
 
-    fwrite(clusters.dt, "${sample_id}.mfe.clusters.tsv.gz", sep = "\t")
+    # Add back in unclustered
+    atlas.clusters.dt <- rbindlist(list(atlas.clusters.dt, unclustered.hybrids.dt), use.names = TRUE, fill = TRUE)
+
+    stopifnot(nrow(atlas.clusters.dt) == nrow(hybrids.dt))
+    fwrite(atlas.clusters.dt, "${sample_id}.${type}.clustered.tsv.gz", sep = "\t")
     """
 
 }
@@ -167,7 +172,7 @@ process CLUSTER_HYBRIDS_ATLAS {
     # Split into list for rslurm
     atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
 
-    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, sample_size = -1, cores = 8, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "4:00:00", mem = "64G"))
+    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
     status <- FALSE
     while(status == FALSE) {
 
@@ -177,14 +182,13 @@ process CLUSTER_HYBRIDS_ATLAS {
 
     }
     
-    clusters.list <- get_slurm_out(sjob)
+    atlas.clusters.list <- get_slurm_out(sjob)
     cleanup_files(sjob) 
 
-    # clusters.dt <- cluster_hybrids(atlas.hybrids.dt, percent_overlap = $percent_overlap, sample_size = $sample_size, cores = ${task.cpus})
-    clusters.dt <- rbindlist(clusters.list)
-    stopifnot(nrow(clusters.dt) == nrow(atlas.hybrids.dt))
+    atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
+    stopifnot(nrow(atlas.clusters.dt) == nrow(atlas.hybrids.dt))
 
-    fwrite(clusters.dt, "${sample_id}.mfe.clusters.tsv.gz", sep = "\t")
+    fwrite(clusters.dt, "${sample_id}.clusters.tsv.gz", sep = "\t")
     """
 
 }

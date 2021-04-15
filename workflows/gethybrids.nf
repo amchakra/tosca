@@ -6,6 +6,7 @@ nextflow.enable.dsl=2
 include { SPLIT_FASTQ; FASTQ_TO_FASTA } from '../modules/splitfastq.nf'
 include { BLAT; FILTER_BLAT } from '../modules/maphybrids.nf'
 include { IDENTIFY_HYBRIDS; MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
+include { DEDUPLICATE } from '../modules/deduplicate.nf'
 
 workflow GET_HYBRIDS {
 
@@ -38,9 +39,10 @@ workflow GET_HYBRIDS {
         .groupTuple(by: 0)
 
     MERGE_HYBRIDS("hybrids", ch_merge_hybrids)
+    DEDUPLICATE(MERGE_HYBRIDS.out.hybrids) // Remove PCR duplicates
 
     emit:
-    hybrids = MERGE_HYBRIDS.out.hybrids
+    hybrids = DEDUPLICATE.out.hybrids
 
 }
 

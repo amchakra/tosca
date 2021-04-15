@@ -45,7 +45,7 @@ process STAR {
 process FILTER_SPLICED_READS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
+    if(params.keep_intermediates) publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
 
     time '12h'
 
