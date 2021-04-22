@@ -8,8 +8,8 @@ process ANNOTATE_HYBRIDS {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
+    cpus 4
+    memory 16G
     time '24h'
 
     input:
