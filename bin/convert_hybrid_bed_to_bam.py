@@ -17,14 +17,15 @@ def AddCluster(bam_in, bam_out):
 
         # Get read name
         read_name = read.query_name
-        tags = read_name.split("_")
+        tags = read_name.split("|")
         mfe = tags[-1]
         orientation = tags[-2]
         cluster = tags[-3]
         sample = tags[-4]
+        id = tags[-5]
         # print(cluster)
-        
-        read.tags += [("ID", sample), ("CL", cluster), ("BE", mfe), ("RO", orientation)]
+
+        read.tags += [("ID", id), ("SA", sample), ("CL", cluster), ("BE", mfe), ("RO", orientation)]
         read.query_name = tags[0] # Remove extra tags from name
 
         bam_out.write(read)
