@@ -9,7 +9,7 @@ process BLAT {
 
     cpus 8
     memory '16 G'
-    time '24h'
+    time '4h'
 
     input:
         tuple val(sample_id), path(reads)
@@ -37,7 +37,7 @@ process FILTER_BLAT {
     if(params.keep_intermediates) publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
     
     memory '16 G'
-    time '24h'
+    time '4h'
 
     input:
         tuple val(sample_id), path(blast8)

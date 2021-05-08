@@ -10,7 +10,7 @@ process CONVERT_COORDINATES {
 
     cpus 4
     memory 16G
-    time '12h'
+    time '1h'
 
     input:
         val(type)
@@ -46,7 +46,7 @@ process EXPORT_GENOMIC_BED {
 
     cpus 4
     memory 16G
-    time '12h'
+    time '1h'
 
     input:
         val(type)
@@ -78,7 +78,7 @@ process CONVERT_BED_TO_BAM {
 
     cpus 4
     memory 16G
-    time '12h'
+    time '1h'
 
     input:
         tuple val(sample_id), path(bed)

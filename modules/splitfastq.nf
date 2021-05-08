@@ -8,7 +8,7 @@ process SPLIT_FASTQ {
     // if(params.keep_intermediates) cache true
     
     cpus 8
-    time '24h'
+    time '1h'
 
     input:
         tuple val(sample_id), path(reads)
@@ -35,7 +35,7 @@ process FASTQ_TO_FASTA {
     // if(params.keep_intermediates) cache true
 
     cpus 8
-    time '24h'
+    time '1h'
 
     input:
         tuple val(sample_id), path(reads)

@@ -8,7 +8,7 @@ process IDENTIFY_HYBRIDS {
     tag "${sample_id}"
     // publishDir "${params.outdir}/hybrids/split/", mode: 'copy', overwrite: true
 
-    time '24h'
+    time '4h'
     cpus = 8
     memory '64 G'
 
@@ -31,7 +31,7 @@ process MERGE_HYBRIDS {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    time '24h'
+    time '1h'
     memory '32 G'
 
     input:

@@ -10,7 +10,7 @@ process GET_NON_HYBRIDS {
 
     cpus 4
     memory 16G
-    time '24h'
+    time '1h'
 
     input:
         tuple val(sample_id), path(hybrids), path(reads)

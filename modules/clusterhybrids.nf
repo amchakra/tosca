@@ -10,7 +10,7 @@ process CLUSTER_HYBRIDS {
 
     cpus 8
     memory 32G
-    time '24h'
+    time '4h'
 
     input:
         val(type)
@@ -95,7 +95,7 @@ process COLLAPSE_CLUSTERS {
 
     cpus 4
     memory 16G
-    time '12h'
+    time '1h'
 
     input:
         val(type)

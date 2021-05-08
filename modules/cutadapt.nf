@@ -9,7 +9,7 @@ process CUTADAPT {
 
     cpus 8
     memory 16G
-    time '24h'
+    time '1h'
 
     input:
         tuple val(sample_id), path(reads)

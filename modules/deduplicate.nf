@@ -9,7 +9,7 @@ process DEDUPLICATE {
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: false
 
     memory '64G'
-    time '24h'
+    time '6h'
 
     input:
         tuple val(sample_id), path(hybrids)

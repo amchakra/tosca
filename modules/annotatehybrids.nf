@@ -10,7 +10,7 @@ process ANNOTATE_HYBRIDS {
 
     cpus 4
     memory 16G
-    time '24h'
+    time '1h'
 
     input:
         val(type)

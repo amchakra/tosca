@@ -9,7 +9,7 @@ process ANALYSE_STRUCTURE {
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
     memory 16G
-    time '24h'
+    time '12h'
 
     input:
         tuple val(sample_id), path(hybrids)
