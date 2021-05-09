@@ -10,7 +10,7 @@ process CLUSTER_HYBRIDS {
 
     cpus 8
     memory 32G
-    time '4h'
+    time '12h'
 
     input:
         val(type)
