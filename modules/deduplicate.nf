@@ -16,6 +16,7 @@ process DEDUPLICATE {
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.dedup.tsv.gz"), emit: hybrids
+        path("*.dedup.log"), emit: log
 
     script:
 
