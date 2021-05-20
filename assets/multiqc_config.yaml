@@ -17,6 +17,8 @@ custom_data:
         section_name: 'Hybrid identification'
         description: 'The hybrid identification metrics for each experiment'
         plot_type: 'bargraph'
+        pconfig:
+            id: 'hybrid_identification'
     intrainter:
         parent_id: hybrids
         parent_name: 'Hybrids'
@@ -24,6 +26,8 @@ custom_data:
         section_name: 'Intra-inter hybrids'
         description: 'The intra- inter- metrics for each experiment'
         plot_type: 'bargraph'
+        pconfig:
+            id: 'intrainter'
     regions:
         parent_id: hybrids
         parent_name: 'Hybrids'
@@ -31,6 +35,8 @@ custom_data:
         section_name: 'Hybrid arm regions'
         description: 'The hybrid arm regions for each experiment'
         plot_type: 'bargraph'
+        pconfig:
+            id: 'regions'
     links:
         parent_id: hybrids
         parent_name: 'Hybrids'
@@ -38,6 +44,8 @@ custom_data:
         section_name: 'Links'
         description: 'The regions linked by hybrid arms for each experiment'
         plot_type: 'bargraph'
+        pconfig:
+            id: 'links'
     intragenic_regions:
         parent_id: hybrids
         parent_name: 'Hybrids'
@@ -45,6 +53,8 @@ custom_data:
         section_name: 'Intragenic mRNA hybrid regions'
         description: 'The intragenic mRNA (and lncRNA) hybrid arm regions for each experiment'
         plot_type: 'bargraph'
+        pconfig:
+            id: 'intragenic_regions'
     duplexes:
         parent_id: duplexes
         parent_name: 'Duplexes'
@@ -52,13 +62,17 @@ custom_data:
         section_name: 'Number of duplexes'
         description: 'The number of duplexes for each experiment'
         plot_type: 'bargraph'
-    # cluster_counts:
-    #     parent_id: duplexes
-    #     parent_name: 'Duplexes'
-    #     file_format: 'tsv'
-    #     section_name: 'Cluster sizes'
-    #     description: 'The number of hybrids/duplexes for each experiment'
-    #     plot_type: 'beeswarm'
+        pconfig:
+            id: 'duplexes'
+        
+custom_plot_config:
+    intrainter:
+        intergenic:
+            'color' : '#1b9e77'
+        intragenic-genomic:
+            'color' : '#d95f02'
+        intragenic-reverse:
+            'color' : '#7570b3'
 
 sp:
     hybrid_identification:
