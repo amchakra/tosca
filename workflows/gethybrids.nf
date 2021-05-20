@@ -43,6 +43,7 @@ workflow GET_HYBRIDS {
 
     emit:
     hybrids = DEDUPLICATE.out.hybrids
+    dedup_log = DEDUPLICATE.out.log
 
 }
 

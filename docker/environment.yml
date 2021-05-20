@@ -20,6 +20,7 @@ dependencies:
   - bioconda::samtools=1.11
   - bioconda::viennarna=2.4.14
   - bioconda::ushuffle=1.2.2
+  - bioconda::multiqc=1.10.1
   - pysam
   - pandas
 

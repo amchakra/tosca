@@ -28,6 +28,7 @@ include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 include { ANALYSE_STRUCTURE } from './modules/analysestructure.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
 include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
+include { MAKE_REPORT } from './workflows/makereport.nf'
 
 // Genome variables
 params.genome_fai = params.genomes[ params.org ].genome_fai
@@ -47,6 +48,9 @@ ch_regions_gtf = Channel.fromPath(params.regions_gtf, checkIfExists: true)
 
 // Channels for optional inputs
 if(params.goi) ch_goi = Channel.fromPath(params.goi, checkIfExists: true)
+
+// Channel for MultiQC config
+ch_multiqc_config = Channel.fromPath(params.multiqc_config, checkIfExists: true)
 
 // Show header
 log.info hiclipheader()
@@ -141,6 +145,11 @@ workflow {
     GET CONTACT MAPS
     */
     if(params.goi) GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
+
+    /* 
+    MAKE REPORT
+    */
+    MAKE_REPORT(GET_HYBRIDS.out.dedup_logs, GET_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_multiqc_config)
 
 }
 
