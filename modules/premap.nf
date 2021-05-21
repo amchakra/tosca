@@ -8,8 +8,8 @@ process STAR {
     tag "${sample_id}"
     if(params.keep_intermediates) publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 48G
+    cpus '8'
+    memory '48G'
     time '2h'
 
     input:
