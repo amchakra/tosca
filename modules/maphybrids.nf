@@ -21,7 +21,10 @@ process BLAT {
     script:
 
     args = " -threads=${task.cpus} "
-    args += " -stepSize=5 -tileSize=11 -minScore=15 -out=blast8 "
+    args += " -stepSize=" + params.step_size 
+    args += " -tileSize=" + params.tile_size
+    args += " -minScore=" + params.min_score 
+    args += " -out=blast8 "
     args += " -dots=1000000 "
 
     """
