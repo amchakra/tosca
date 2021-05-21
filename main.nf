@@ -149,7 +149,7 @@ workflow {
     /* 
     MAKE REPORT
     */
-    MAKE_REPORT(GET_HYBRIDS.out.dedup_logs, GET_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_multiqc_config)
+    MAKE_REPORT(GET_HYBRIDS.out.dedup_log, GET_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_multiqc_config)
 
 }
 
