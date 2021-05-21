@@ -62,19 +62,19 @@ process CLUSTER_HYBRIDS {
     atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
     message("Gene pairs to cluster: ", length(atlas.hybrids.list))
 
-    # atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = $percent_overlap, mc.cores = ${task.cpus})
+    atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = $percent_overlap, mc.cores = ${task.cpus})
         
     # Submit to cluster
-    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = $percent_overlap, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
-    status <- FALSE
-    while(status == FALSE) {
-        squeue.out <- system(paste("squeue -n", sjob\$jobname), intern = TRUE) # Get contents of squeue for this job
-        if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
-        Sys.sleep(60)
-    }
+    #sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = $percent_overlap, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
+    #status <- FALSE
+    #while(status == FALSE) {
+    #    squeue.out <- system(paste("squeue -n", sjob\$jobname), intern = TRUE) # Get contents of squeue for this job
+    #    if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
+    #    Sys.sleep(60)
+    #}
 
-    atlas.clusters.list <- get_slurm_out(sjob)
-    cleanup_files(sjob) 
+    #atlas.clusters.list <- get_slurm_out(sjob)
+    #cleanup_files(sjob) 
 
     atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
     stopifnot(nrow(atlas.clusters.dt) == nrow(atlas.hybrids.dt))

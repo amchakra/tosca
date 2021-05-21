@@ -35,7 +35,7 @@ hybrid_identification.dt <- merge(hybrid_identification.dt, premap.dt, by = "sam
 hybrid_identification.dt[, nonhybrid := unspliced - ambiguous - multi_overlap - single]
 hybrid_identification.dt <- hybrid_identification.dt[, .(sample, spliced, nonhybrid, ambiguous, multi_overlap, single)]
 
-stopifnot(all(rowSums(hybrid_identification.dt[, -1]) == premap.dt$total))
+stopifnot(all(rowSums(hybrid_identification.dt[, -1]) %in% premap.dt$total)) # order might be different
 
 fwrite(hybrid_identification.dt, "hybrid_identification.tsv", sep = "\t")
 

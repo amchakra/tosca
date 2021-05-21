@@ -17,5 +17,6 @@ workflow PREMAP {
 
     emit:
     fastq = FILTER_SPLICED_READS.out.fastq
+    logs = FILTER_SPLICED_READS.out.log
 
 }

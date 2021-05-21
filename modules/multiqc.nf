@@ -7,7 +7,7 @@ ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists
 
 
 process TOSCA_QC {
-    tag "${workflow.runName}"
+    // tag "${workflow.runName}"
 
     cpus 1
     memory '16 G'
@@ -16,6 +16,7 @@ process TOSCA_QC {
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
 
     input:
+    path(filter_spliced_reads_logs)
     path(dedup_logs)
     path(raw_hybrids)
     path(hybrids)
@@ -32,7 +33,7 @@ process TOSCA_QC {
 }
 
 process MULTIQC {
-    tag "${workflow.runName}"
+    // tag "${workflow.runName}"
 
     cpus 1
     memory '16 G'
@@ -61,7 +62,7 @@ process MULTIQC {
     custom_config_file = "--config ${params.multiqc_config}"
 
     """
-    multiqc -f $rtitle $rfilename $custom_config_file .
+    multiqc -f -p $rtitle $rfilename $custom_config_file .
     """
 
 }

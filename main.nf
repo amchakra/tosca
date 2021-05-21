@@ -149,7 +149,8 @@ workflow {
     /* 
     MAKE REPORT
     */
-    MAKE_REPORT(GET_HYBRIDS.out.dedup_log, GET_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_multiqc_config)
+    MAKE_REPORT(PREMAP.out.logs.collect(), GET_HYBRIDS.out.logs.collect(), GET_HYBRIDS.out.raw_hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.clusters.collect{it[1]}, ch_multiqc_config)
+
 
 }
 

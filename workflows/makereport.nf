@@ -8,6 +8,7 @@ include { TOSCA_QC; MULTIQC } from '../modules/multiqc.nf'
 workflow MAKE_REPORT {
 
     take:
+    filter_spliced_reads_logs
     dedup_logs
     raw_hybrids
     hybrids
@@ -15,7 +16,7 @@ workflow MAKE_REPORT {
     multiqc_config
 
     main:
-    TOSCA_QC(dedup_logs, raw_hybrids, hybrids, clusters)
+    TOSCA_QC(filter_spliced_reads_logs, dedup_logs, raw_hybrids, hybrids, clusters)
     MULTIQC(multiqc_config, TOSCA_QC.out)
 
 }
