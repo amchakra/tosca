@@ -7,7 +7,7 @@ ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists
 
 
 process TOSCA_QC {
-    // tag "${workflow.runName}"
+    tag "${workflow.runName}"
 
     cpus 1
     memory '16 G'
@@ -33,7 +33,7 @@ process TOSCA_QC {
 }
 
 process MULTIQC {
-    // tag "${workflow.runName}"
+    tag "${workflow.runName}"
 
     cpus 1
     memory '16 G'
