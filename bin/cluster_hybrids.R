@@ -4,6 +4,8 @@ suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(primavera))
 suppressPackageStartupMessages(library(parallel))
+suppressPackageStartupMessages(library(rslurm))
+
 
 option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "character", help = "Hybrids data.table"),
             make_option(c("", "--type"), action = "store", type = "character", help = "Type of hybrids data.table"),
