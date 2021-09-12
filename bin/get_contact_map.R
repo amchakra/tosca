@@ -31,7 +31,7 @@ for(i in seq_along(genes)) {
         saveRDS(mat, file = paste0(opt$output, ".", goi, ".mat.rds"))
 
         # Bin matrix and normalise
-        if(opt$bin_size > 1) {
+        if(opt$bin_size == 1) {
             binned.mat <- mat
         } else {
             binned.mat <- bin_matrix(mat, bin.size = opt$bin_size)
