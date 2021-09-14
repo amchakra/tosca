@@ -22,7 +22,7 @@ set.seed(42)
 
 # ==========
 
-find_hybrid_overlaps2 <- function(hybrids.dt, percent_overlap, verbose = FALSE) {
+find_hybrid_overlaps2 <- function(hybrids.dt, percent_overlap, verbose = TRUE) {
   hybrids.dt <- primavera::reorient_hybrids(hybrids.dt)
 
   # Create BEDPE and get overlaps
@@ -83,7 +83,7 @@ find_hybrid_overlaps2 <- function(hybrids.dt, percent_overlap, verbose = FALSE) 
 
 # ==========
 
-cluster_hybrids2 <- function(hybrids.dt, percent_overlap = 0.75, verbose = FALSE) {
+cluster_hybrids2 <- function(hybrids.dt, percent_overlap = 0.75, verbose = TRUE) {
   hybrids.bedpe.dt <- find_hybrid_overlaps2(hybrids.dt, percent_overlap = percent_overlap, verbose = verbose)
 
   if (nrow(hybrids.bedpe.dt) == 0) {
