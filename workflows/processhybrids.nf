@@ -37,6 +37,8 @@ workflow PROCESS_HYBRIDS {
 
 }
 
+include { CLUSTER_HYBRIDS_VIRUS as CLUSTER_HYBRIDS_VIRUS } from '../modules/clusterhybrids.nf'
+
 workflow PROCESS_HYBRIDS_VIRUS {
 
     take:
@@ -46,7 +48,7 @@ workflow PROCESS_HYBRIDS_VIRUS {
 
     main:
     
-    CLUSTER_HYBRIDS("hybrids", hybrids)
+    CLUSTER_HYBRIDS_VIRUS("hybrids", hybrids)
     CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
 
     COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters

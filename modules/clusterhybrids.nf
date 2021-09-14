@@ -39,6 +39,42 @@ process CLUSTER_HYBRIDS {
 
 }
 
+process CLUSTER_HYBRIDS_VIRUS {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
+
+    cpus 8
+    memory 32G
+    time '12h'
+
+    input:
+        val(type)
+        tuple val(sample_id), path(hybrids)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.${type}.clustered.tsv.gz"), emit: hybrids
+
+    script:
+
+    percent_overlap = params.percent_overlap
+    sample_size = params.sample_size
+
+    args = ""
+    if(workflow.profile.contains("crick")) { args += " --slurm" }
+
+    """
+    cluster_hybrids_virus.R \
+        --sample ${sample_id} \
+        --hybrids ${hybrids} \
+        --type ${type} \
+        --percent_overlap ${percent_overlap} \
+        --sample_size ${sample_size} \
+        ${args}
+    """
+
+}
+
 // process CLUSTER_HYBRIDS {
 
 //     tag "${sample_id}"
@@ -158,73 +194,73 @@ process COLLAPSE_CLUSTERS {
     """
 }
 
-process CLUSTER_HYBRIDS_ATLAS {
+// process CLUSTER_HYBRIDS_ATLAS {
 
-    tag "${sample_id}"
-    publishDir "${params.outdir}/atlas", mode: 'copy', overwrite: true
+//     tag "${sample_id}"
+//     publishDir "${params.outdir}/atlas", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '24h'
+//     cpus 8
+//     memory 32G
+//     time '24h'
 
-    input:
-        tuple val(sample_id), path(hybrids)
+//     input:
+//         tuple val(sample_id), path(hybrids)
 
-    output:
-        tuple val(sample_id), path("${sample_id}.mfe.clusters.tsv.gz"), emit: hybrids
+//     output:
+//         tuple val(sample_id), path("${sample_id}.mfe.clusters.tsv.gz"), emit: hybrids
 
-    script:
+//     script:
 
-    percent_overlap = params.percent_overlap
-    sample_size = params.sample_size
+//     percent_overlap = params.percent_overlap
+//     sample_size = params.sample_size
 
-    """
-    #!/usr/bin/env Rscript
+//     """
+//     #!/usr/bin/env Rscript
 
-    suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
-    suppressPackageStartupMessages(library(parallel))
-    suppressPackageStartupMessages(library(rslurm))
+//     suppressPackageStartupMessages(library(data.table))
+//     suppressPackageStartupMessages(library(primavera))
+//     suppressPackageStartupMessages(library(parallel))
+//     suppressPackageStartupMessages(library(rslurm))
 
-    setDTthreads(${task.cpus})
+//     setDTthreads(${task.cpus})
 
-    # Load hybrids
-    hybrids.dt <- fread("$hybrids")
+//     # Load hybrids
+//     hybrids.dt <- fread("$hybrids")
 
-    # hybrids.list <- split(hybrids.dt, by = c("L_seqnames", "R_seqnames"))
-    # message(length(hybrids.list), " gene pairs to cluster")
-    # message("Distribution of hybrids per gene pair:")
-    # table(S4Vectors::elementNROWS(hybrids.list))
+//     # hybrids.list <- split(hybrids.dt, by = c("L_seqnames", "R_seqnames"))
+//     # message(length(hybrids.list), " gene pairs to cluster")
+//     # message("Distribution of hybrids per gene pair:")
+//     # table(S4Vectors::elementNROWS(hybrids.list))
 
-    message("Number of hybrids: ", nrow(hybrids.dt))
-    message("Removing rRNA-rRNA and very high incidence genes (>100,000)...")
-    atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rRNA_45S"][R_seqnames != "rRNA_45S"]
-    atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rDNA"][R_seqnames != "rDNA"]
-    atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != "rRNA_5S"][R_seqnames != "rRNA_5S"]
-    atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e4]
-    atlas.hybrids.dt[, total_count := NULL]
-    message("Number of hybrids remaining: ", nrow(atlas.hybrids.dt))
+//     message("Number of hybrids: ", nrow(hybrids.dt))
+//     message("Removing rRNA-rRNA and very high incidence genes (>100,000)...")
+//     atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rRNA_45S"][R_seqnames != "rRNA_45S"]
+//     atlas.hybrids.dt <- hybrids.dt[L_seqnames != "rDNA"][R_seqnames != "rDNA"]
+//     atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != "rRNA_5S"][R_seqnames != "rRNA_5S"]
+//     atlas.hybrids.dt <- atlas.hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)][total_count < 1e4]
+//     atlas.hybrids.dt[, total_count := NULL]
+//     message("Number of hybrids remaining: ", nrow(atlas.hybrids.dt))
   
-    # Split into list for rslurm
-    atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
+//     # Split into list for rslurm
+//     atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
 
-    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
-    status <- FALSE
-    while(status == FALSE) {
+//     sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids, percent_overlap = 0.75, jobname = sapply(strsplit(basename("$hybrids"), "\\\\."), "[[", 1), nodes = 100, cpus_per_node = 8, slurm_options = list(time = "12:00:00", mem = "64G"))
+//     status <- FALSE
+//     while(status == FALSE) {
 
-        squeue.out <- system(paste("squeue -n", sjob\$jobname), intern = TRUE) # Get contents of squeue for this job
-        if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
-        Sys.sleep(60)
+//         squeue.out <- system(paste("squeue -n", sjob\$jobname), intern = TRUE) # Get contents of squeue for this job
+//         if(length(squeue.out) == 1) status <- TRUE # i.e. only the header left
+//         Sys.sleep(60)
 
-    }
+//     }
     
-    atlas.clusters.list <- get_slurm_out(sjob)
-    cleanup_files(sjob) 
+//     atlas.clusters.list <- get_slurm_out(sjob)
+//     cleanup_files(sjob) 
 
-    atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
-    stopifnot(nrow(atlas.clusters.dt) == nrow(atlas.hybrids.dt))
+//     atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
+//     stopifnot(nrow(atlas.clusters.dt) == nrow(atlas.hybrids.dt))
 
-    fwrite(clusters.dt, "${sample_id}.clusters.tsv.gz", sep = "\t")
-    """
+//     fwrite(clusters.dt, "${sample_id}.clusters.tsv.gz", sep = "\t")
+//     """
 
-}
+// }
