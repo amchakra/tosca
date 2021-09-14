@@ -42,14 +42,18 @@ workflow PROCESS_HYBRIDS_VIRUS {
     take:
     hybrids         // channel: hybrids
     transcript_fa   // channel: transcript_fa
+    transcript_gtf  // channel: transcript_gtf
 
     main:
     
-    DEDUPLICATE(hybrids) // Remove PCR duplicates
-    GET_BINDING_ENERGY(DEDUPLICATE.out.hybrids, transcript_fa.collect()) // Get binding energies
+    CLUSTER_HYBRIDS("hybrids", hybrids)
+    CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
+
+    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
+    CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters 
 
     emit:
-    dedup = DEDUPLICATE.out.hybrids
-    hybrids = GET_BINDING_ENERGY.out.hybrids
+    hybrids = CONVERT_HYBRID_COORDINATES.out.hybrids
+    clusters = CONVERT_CLUSTER_COORDINATES.out.hybrids
 
 }

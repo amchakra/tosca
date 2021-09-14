@@ -138,9 +138,9 @@ workflow {
         }
 
     } else {
-        // PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa)
-        // ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids
-        ch_hybrids = GET_HYBRIDS.out.hybrids
+        PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
+        ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids
+        // ch_hybrids = GET_HYBRIDS.out.hybrids
     }
 
     /* 
