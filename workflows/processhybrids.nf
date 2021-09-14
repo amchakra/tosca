@@ -49,9 +49,9 @@ workflow PROCESS_HYBRIDS_VIRUS {
     main:
     
     CLUSTER_HYBRIDS_VIRUS("hybrids", hybrids)
-    CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
+    CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS_VIRUS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
 
-    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
+    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS_VIRUS.out.hybrids) // Collapse clusters
     CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters 
 
     emit:
