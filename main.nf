@@ -139,6 +139,7 @@ workflow {
 
     } else {
         PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
+        EXPORT_INTRAGENIC(PROCESS_HYBRIDS_VIRUS.out.hybrids, PROCESS_HYBRIDS_VIRUS.out.clusters, ch_transcript_fai) // transcript_fai = genome_fai
         ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids
         // ch_hybrids = GET_HYBRIDS.out.hybrids
     }
