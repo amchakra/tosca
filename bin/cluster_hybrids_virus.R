@@ -153,7 +153,7 @@ message("Gene pairs to cluster: ", length(atlas.hybrids.list))
 if(opt$slurm) {
 
     # Submit to cluster
-    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids_virus, percent_overlap = opt$percent_overlap, jobname = sapply(strsplit(basename(opt$hybrids), "\\."), "[[", 1), nodes = 100, cpus_per_node = 1, slurm_options = list(time = "12:00:00", mem = "64G"))
+    sjob <- slurm_map(atlas.hybrids.list, f = cluster_hybrids2, percent_overlap = opt$percent_overlap, jobname = sapply(strsplit(basename(opt$hybrids), "\\."), "[[", 1), nodes = 100, cpus_per_node = 1, slurm_options = list(time = "12:00:00", mem = "64G"))
     status <- FALSE
     while(status == FALSE) {
         squeue.out <- system(paste("squeue -n", sjob$jobname), intern = TRUE) # Get contents of squeue for this job
