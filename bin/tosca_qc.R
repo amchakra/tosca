@@ -5,6 +5,8 @@ suppressPackageStartupMessages(library(data.table))
 # Get hybrid identificaiton metrics
 # ==========
 
+message("Getting hybrid identification metrics...")
+
 # Get input and spliced reads
 premap.logs <- list.files(".", pattern = "filter_spliced_reads.log$", full.names = TRUE)
 premap.dt <- lapply(seq_along(premap.logs), function(i) {
@@ -43,6 +45,8 @@ fwrite(hybrid_identification.dt, "hybrid_identification.tsv", sep = "\t")
 # Get intra-inter, genomic-reverse
 # ==========
 
+message("Getting intra-inter, genomic-reverse metrics...")
+
 hybrids.files <- list.files(".", pattern = ".hybrids.gc.annotated.tsv.gz$", full.names = TRUE)
 hybrids.list <- lapply(hybrids.files, fread)
 hybrids.dt <- rbindlist(hybrids.list, use.names = TRUE)
@@ -57,6 +61,8 @@ fwrite(intrainter.dt, "intrainter.tsv", sep = "\t")
 # ==========
 # Get arm regions
 # ==========
+
+message("Getting arm region metrics...")
 
 regions <- c("rRNA", "tRNA", "ncRNA", "UTR5", "CDS", "intron", "UTR3", "intergenic")
 
@@ -83,6 +89,8 @@ fwrite(regions.dt, "regions.tsv", sep = "\t")
 # Get links
 # ==========
 
+message("Getting link metrics...")
+
 mRNA <- c("CDS", "intron", "UTR3", "UTR5")
 links.dt <- hybrids.dt
 
@@ -101,6 +109,8 @@ fwrite(links.dt, "links.tsv", sep = "\t")
 # ==========
 # Get intragenic mRNA regions
 # ==========
+
+message("Getting intragenic mRNA region metrics...")
 
 regions <- c("ncRNA", "UTR5", "CDS", "intron", "UTR3")
 
@@ -128,6 +138,8 @@ fwrite(intragenic_regions.dt, "intragenic_regions.tsv", sep = "\t")
 # ==========
 # Get clusters
 # ==========
+
+message("Getting cluster metrics...")
 
 clusters.files <- list.files(".", pattern = ".clusters.gc.annotated.tsv.gz$", full.names = TRUE)
 clusters.list <- lapply(clusters.files, fread)

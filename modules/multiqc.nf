@@ -9,8 +9,8 @@ ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists
 process TOSCA_QC {
     tag "${workflow.runName}"
 
-    cpus 1
-    memory '16 G'
+    cpus 4
+    memory '32 G'
     time '1h'
 
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
