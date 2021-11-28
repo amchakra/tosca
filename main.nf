@@ -66,6 +66,7 @@ summary['Run name'] = workflow.runName
 summary['Profile'] = workflow.profile
 if(workflow.container) summary['Container'] = workflow.container
 if(params.keep_intermediates) summary['Keep intermediates'] = params.keep_intermediates
+if(!params.keep_cache) summary['Keep cache'] = params.keep_cache
 log.info summary.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-\033[2m---------------------------------------------------------------\033[0m-"
 
