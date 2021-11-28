@@ -8,7 +8,7 @@ process BLAT {
     if(!params.keep_cache) cache false
 
     cpus 8
-    memory '16 G'
+    memory '32 G'
     time '4h'
 
     input:
