@@ -9,7 +9,7 @@ process BLAT {
 
     cpus 8
     memory '32 G'
-    time '4h'
+    time '8h'
 
     input:
         tuple val(sample_id), path(reads)
