@@ -7,9 +7,9 @@ process CUTADAPT {
     tag "${sample_id}"
     // publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory '16 G'
-    time '1h'
+    // cpus 8
+    // memory '16 G'
+    // time '1h'
 
     input:
         tuple val(sample_id), path(reads)

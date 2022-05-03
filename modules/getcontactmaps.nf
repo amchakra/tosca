@@ -8,8 +8,8 @@ process GET_CONTACT_MAPS {
     tag "${sample_id}"
     publishDir "${params.outdir}/maps", mode: 'copy', overwrite: true
 
-    time '6h'
-    memory '64 G'
+    // time '6h'
+    // memory '64 G'
 
     input:
         tuple val(sample_id), path(hybrids)

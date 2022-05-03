@@ -8,9 +8,9 @@ process GET_NON_HYBRIDS {
     tag "${sample_id}"
     publishDir "${params.outdir}/nonhybrids", mode: 'copy', overwrite: true
 
-    cpus 4
-    memory 16G
-    time '1h'
+    // cpus 4
+    // memory 16G
+    // time '1h'
 
     input:
         tuple val(sample_id), path(hybrids), path(reads)

@@ -7,8 +7,8 @@ process SPLIT_FASTQ {
     tag "${sample_id}"
     if(!params.keep_cache) cache false
     
-    cpus 8
-    time '1h'
+    // cpus 8
+    // time '1h'
 
     input:
         tuple val(sample_id), path(reads)

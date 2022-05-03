@@ -8,9 +8,9 @@ process CLUSTER_HYBRIDS {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '12h'
+    // cpus 8
+    // memory 32G
+    // time '12h'
 
     input:
         val(type)
@@ -44,9 +44,9 @@ process CLUSTER_HYBRIDS_VIRUS {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '12h'
+    // cpus 8
+    // memory 32G
+    // time '12h'
 
     input:
         val(type)
@@ -165,9 +165,9 @@ process COLLAPSE_CLUSTERS {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 4
-    memory 16G
-    time '1h'
+    // cpus 4
+    // memory 16G
+    // time '1h'
 
     input:
         val(type)

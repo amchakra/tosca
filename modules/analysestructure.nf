@@ -8,8 +8,8 @@ process ANALYSE_STRUCTURE {
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
-    memory 16G
-    time '12h'
+    // memory 16G
+    // time '12h'
 
     input:
         tuple val(sample_id), path(hybrids)

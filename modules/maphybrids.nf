@@ -7,9 +7,9 @@ process BLAT {
     tag "${sample_id}"
     if(!params.keep_cache) cache false
 
-    cpus 8
-    memory '32 G'
-    time '8h'
+    // cpus 8
+    // memory '32 G'
+    // time '8h'
 
     input:
         tuple val(sample_id), path(reads)
@@ -39,8 +39,8 @@ process FILTER_BLAT {
     tag "${sample_id}"
     if(params.keep_intermediates) publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
     
-    memory '16 G'
-    time '4h'
+    // memory '16 G'
+    // time '4h'
 
     input:
         tuple val(sample_id), path(blast8)

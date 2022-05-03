@@ -8,9 +8,9 @@ process CONVERT_COORDINATES {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 4
-    memory 16G
-    time '1h'
+    // cpus 4
+    // memory 16G
+    // time '1h'
 
     input:
         val(type)
@@ -44,9 +44,9 @@ process EXPORT_GENOMIC_BED {
     tag "${sample_id}"
     publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
-    cpus 4
-    memory 16G
-    time '1h'
+    // cpus 4
+    // memory 16G
+    // time '1h'
 
     input:
         val(type)
@@ -76,9 +76,9 @@ process CONVERT_BED_TO_BAM {
     tag "${sample_id}"
     publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
-    cpus 4
-    memory 16G
-    time '1h'
+    // cpus 4
+    // memory 16G
+    // time '1h'
 
     input:
         tuple val(sample_id), path(bed)

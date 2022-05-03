@@ -8,8 +8,8 @@ process DEDUPLICATE {
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: false
 
-    memory '64G'
-    time '6h'
+    // memory '64G'
+    // time '6h'
 
     input:
         tuple val(sample_id), path(hybrids)
