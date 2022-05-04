@@ -47,7 +47,7 @@ process FILTER_SPLICED_READS {
     tag "${sample_id}"
     if(params.keep_intermediates) publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
 
-    time '2h'
+    // time '2h'
 
     input:
         tuple val(sample_id), path(bam), path(bai)
