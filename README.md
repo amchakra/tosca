@@ -1,4 +1,4 @@
-# Tosca - Proximity ligation data analysis
+# _Tosca_ - proximity ligation data analysis
 
 ## Table of contents
 
@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Tosca is a Nextflow pipeline for the analysis of [hiCLIP]() or proximity ligation (e.g. [PARIS](), [SPLASH](), [COMRADES]()) sequencing data. It is containerised using Docker to ensure ease of installation. It is optimised for use on high-performance computing (HPC) clusters.
+Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com/articles/nature14280) or proximity ligation (e.g. [PARIS](https://doi.org/10.1016/j.cell.2016.04.028), [SPLASH](https://doi.org/10.1016/j.molcel.2016.04.028), [COMRADES](https://doi.org/10.1038/s41592-018-0121-0)) sequencing data. It is containerised using Docker to ensure ease of installation. It is optimised for use on high-performance computing (HPC) clusters.
 
 ## Pipeline summary
 
@@ -20,11 +20,12 @@ Tosca is a Nextflow pipeline for the analysis of [hiCLIP]() or proximity ligatio
 4. UMI-based deduplication ([`toscatools`]() and modified [`UMI-tools`](https://umi-tools.readthedocs.io/en/latest/))
 5. Hybrid clustering ([`toscatools`]())
 6. Annotation ([`toscatools`]())
-7. Visualisation ([`toscatools`]())
+7. Duplex and structure analysis and binding energy characterisation ([`toscatools`]()) 
+8. Visualisation ([`toscatools`]())
     1. BAM
     2. BED
     3. Contact matrices
-8. QC ([`MultiQC`]())
+9. QC ([`MultiQC`](https://multiqc.info/))
 
 ## Quick start (testing)
 
@@ -89,7 +90,7 @@ nextflow run amchakra/tosca -r main \
 
 ### Genome parameters
 
-Either `--genomedir`and `--org` or all of the other reference files need to be specified
+Either `--genomedir` and `--org` or all of the other reference files need to be specified
 
 - `--genomedir` specifies the genome reference directory
 - `--org` specifies the organism (options are: `human`, `mouse`, `rat`)
@@ -121,7 +122,7 @@ Either `--genomedir`and `--org` or all of the other reference files need to be s
 
 ### Hybrid identification and characterisation
 
-- `--dedup_method` specifies the UMI deduplication method (options are: `none`, `unique`, `percentile`, `cluster`, `adjacency`. `directional`)
+- `--dedup_method` specifies the UMI deduplication method (options are: `none`, `unique`, `percentile`, `cluster`, `adjacency`, `directional`)
     - default: `directional`
 - `--umi_separator` specifies the UMI separator in the FASTQ read name
     - default: `_`
