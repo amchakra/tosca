@@ -145,4 +145,5 @@ Either `--genomedir` and `--org` or all of the other reference files need to be 
 ### Optional pipeline mudules
 
 - `--skip_premap` skips premapping to the genome and filtering of spliced reads
+- `--skip_atlas` skips generation of an atlas by combining all the samples
 - `--skip_qc` skips generation of QC plots and MultiQC report

@@ -74,6 +74,7 @@ def settings = [:]
 settings['Organism'] = params.org
 if(params.virus) settings['Virus'] = params.virus
 if(params.skip_qc) { settings['Skip QC'] = params.skip_qc } 
+if(params.skio_atlas) { settings['Skip atlas generation'] = params.skip_atlas }
 if(params.skip_premap) { settings['Skip premapping'] = params.skip_qc } 
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
@@ -89,7 +90,7 @@ settings['Clustering overlap'] = params.percent_overlap
 settings['Analyse structure'] = params.analyse_structure
 if(params.analyse_structure) settings['Analyse cluster structures only'] = params.clusters_only
 if(params.analyse_structure) settings['Shuffled binding energy'] = params.shuffled_mfe
-settings['Generate atlas'] = params.atlas
+
 if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
 if(params.goi) { settings['Bin size for contact maps'] = params.bin_size } 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
@@ -135,7 +136,7 @@ workflow {
         /* 
         GET ATLAS
         */
-        if(params.atlas) {
+        if(!params.skip_atlas) {
             // GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
             GET_ATLAS(ch_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
         }
