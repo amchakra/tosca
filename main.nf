@@ -27,7 +27,7 @@ include { PROCESS_HYBRIDS; PROCESS_HYBRIDS_VIRUS } from './workflows/processhybr
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 include { ANALYSE_STRUCTURE } from './modules/analysestructure.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
-include { GET_CONTACT_MAPS } from './modules/getcontactmaps.nf'
+include { GET_CONTACT_MAPS; GET_ARCS } from './modules/getvisualisations.nf'
 include { MAKE_REPORT } from './workflows/makereport.nf'
 
 // Genome variables
@@ -92,6 +92,7 @@ if(params.analyse_structure) settings['Shuffled binding energy'] = params.shuffl
 
 if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
 if(params.goi) { settings['Bin size for contact maps'] = params.bin_size } 
+if(params.goi) { settings['Breaks for arcs'] = params.breaks } 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-----------------------------------------------------------------"
 
@@ -126,6 +127,7 @@ workflow {
         PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
         EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
         ch_hybrids = PROCESS_HYBRIDS.out.hybrids
+        ch_clusters = PROCESS_HYBRIDS.out.clusters
 
         if(params.analyse_structure) {
             ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
@@ -148,9 +150,14 @@ workflow {
     }
 
     /* 
-    GET CONTACT MAPS
+    GET VISUALISATIONS
     */
-    if(params.goi) GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
+    if(params.goi) {
+
+        GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
+        GET_ARCS(ch_clusters, ch_goi.collect())
+
+    }
 
     /* 
     MAKE REPORT
