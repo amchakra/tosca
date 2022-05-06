@@ -73,6 +73,7 @@ log.info "-\033[2m--------------------------------------------------------------
 def settings = [:]
 settings['Organism'] = params.org
 if(params.virus) settings['Virus'] = params.virus
+if(params.skip_qc) { settings['Skip QC'] = params.skip_qc } 
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
 settings['Minimum read length'] = params.min_readlength
@@ -153,7 +154,7 @@ workflow {
     /* 
     MAKE REPORT
     */
-    if(!params.virus) {
+    if(!params.skip_qc) {
         MAKE_REPORT(PREMAP.out.logs.collect(), GET_HYBRIDS.out.logs.collect(), GET_HYBRIDS.out.raw_hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.clusters.collect{it[1]}, ch_multiqc_config)
     }
 
