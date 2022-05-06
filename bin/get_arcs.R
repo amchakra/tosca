@@ -20,7 +20,7 @@ for(i in seq_along(genes)) {
 
     cluster.dt <- fread(opt$clusters)
 
-    if(!nrow(hybrid.dt) == 0) {
+    if(!nrow(cluster.dt) == 0) {
 
         # Get breaks
         p <- as.numeric(unlist(strsplit(opt$breaks, ",")))
@@ -31,7 +31,7 @@ for(i in seq_along(genes)) {
         setorder(bp.dt, colour)
 
         # Generate colour scheme
-        cols <- tableau_seq_gradient_pal('Blue')(seq(0, 1, length = length(p) - 1))
+        cols <- ggthemes::tableau_seq_gradient_pal('Blue')(seq(0, 1, length = length(p) - 1))
         cols.dt <- rbindlist(lapply(cols, function(x) data.table(paste(as.vector(col2rgb(x)), collapse = "\t"))))
         cols.dt[, `:=` (colour = "color:", annotation = paste("Count quantile", 1:(length(p) - 1)))]
         setcolorder(cols.dt, c("colour", "V1", "annotation"))
