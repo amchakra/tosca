@@ -33,7 +33,7 @@ process GET_CONTACT_MAPS {
 process GET_ARCS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/maps", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample_id), path(clusters)
