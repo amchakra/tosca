@@ -74,6 +74,7 @@ def settings = [:]
 settings['Organism'] = params.org
 if(params.virus) settings['Virus'] = params.virus
 if(params.skip_qc) { settings['Skip QC'] = params.skip_qc } 
+if(params.skip_premap) { settings['Skip premapping'] = params.skip_qc } 
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
 settings['Minimum read length'] = params.min_readlength
@@ -106,7 +107,7 @@ workflow {
     /* 
     IDENTIFY HYBRIDS
     */
-    if(params.premap) {
+    if(!params.skip_premap) {
         PREMAP(CUTADAPT.out.fastq, ch_star_genome) // Filter spliced reads
         GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa) // Identify hybrids
     } else {

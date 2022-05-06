@@ -106,8 +106,6 @@ Either `--genomedir` and `--org` or all of the other reference files need to be 
 
 - `--split_size` specifies number of reads per FASTQ file when splitting for parallelised alignment
     - default: `100000`
-- `--premap` specifies whether or not to performing premapping and filter spliced reads
-    - default: `true`
 - `--star_args` specifies optional additional STAR aligmnent parameters
 - `--step_size` specifies pblat step size
     - default: `5`
@@ -143,3 +141,8 @@ Either `--genomedir` and `--org` or all of the other reference files need to be 
 
 - `--goi` is a plain text file with one gene of interest per line to be visualised
 - `--bin_size` specifies the size of each bin when generating the contact map matrices
+
+### Optional pipeline mudules
+
+- `--skip_premap` skips premapping to the genome and filtering of spliced reads
+- `--skip_qc` skips generation of QC plots and MultiQC report
