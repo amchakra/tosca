@@ -79,7 +79,6 @@ if(params.skip_premap) { settings['Skip premapping'] = params.skip_qc }
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
 settings['Minimum read length'] = params.min_readlength
-settings['Premapping'] = params.premap
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
