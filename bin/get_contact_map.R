@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(primavera))
+suppressPackageStartupMessages(library(toscatools))
 suppressPackageStartupMessages(library(optparse))
 
 option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "character", help = "Hybrids file"),

@@ -50,7 +50,7 @@ process MERGE_HYBRIDS {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(toscatools))
 
     # print("$hybrids")
     hybrids.files <- strsplit("$hybrids", " ")[[1]]

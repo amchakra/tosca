@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(primavera))
+suppressPackageStartupMessages(library(toscatools))
 suppressPackageStartupMessages(library(rslurm))
 suppressPackageStartupMessages(library(tictoc))
 suppressPackageStartupMessages(library(parallel))

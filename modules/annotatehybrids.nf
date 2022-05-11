@@ -26,7 +26,7 @@ process ANNOTATE_HYBRIDS {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(toscatools))
 
     setDTthreads(${task.cpus})
 

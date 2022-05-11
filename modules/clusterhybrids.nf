@@ -182,7 +182,7 @@ process COLLAPSE_CLUSTERS {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(toscatools))
 
     hybrids.dt <- fread("$hybrids")
 

@@ -25,7 +25,7 @@ process CONVERT_COORDINATES {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(toscatools))
 
     # Load data
     genes.gr <- rtracklayer::import.gff2("$transcript_gtf")
@@ -60,7 +60,7 @@ process EXPORT_GENOMIC_BED {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(toscatools))
 
     hybrids.dt <- fread("$hybrids")
     intragenic.dt <- hybrids.dt[L_seqnames == R_seqnames]
