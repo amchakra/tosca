@@ -37,7 +37,9 @@ for(i in seq_along(genes)) {
             binned.mat <- bin_matrix(mat, bin.size = opt$bin_size)
         }
 
-        binned.dt <- data.table(reshape2::melt(binned.mat))
+        # binned.dt <- data.table(reshape2::melt(binned.mat))
+        binned.dt <- melt(as.data.table(binned.mat)[, rn := 1:.N], id.vars = "rn")
+        binned.dt[, `:=` variable := as.integer(gsub("^V", "", as.character(variable)))]
         binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
         binned.dt <- binned.dt[value != 0]
 
