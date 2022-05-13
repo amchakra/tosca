@@ -25,7 +25,8 @@ process CLUSTER_HYBRIDS {
     sample_size = params.sample_size
 
     args = ""
-    if(workflow.profile.contains("crick")) { args += " --slurm" }
+    // if(workflow.profile.contains("crick")) { args += " --slurm" }
+    if(params.slurm) { args += " --slurm" }
 
     """
     cluster_hybrids.R \
