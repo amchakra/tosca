@@ -36,26 +36,3 @@ workflow PROCESS_HYBRIDS {
     clusters = ANNOTATE_CLUSTERS.out.hybrids
 
 }
-
-include { CLUSTER_HYBRIDS_VIRUS as CLUSTER_HYBRIDS_VIRUS } from '../modules/clusterhybrids.nf'
-
-workflow PROCESS_HYBRIDS_VIRUS {
-
-    take:
-    hybrids         // channel: hybrids
-    transcript_fa   // channel: transcript_fa
-    transcript_gtf  // channel: transcript_gtf
-
-    main:
-    
-    CLUSTER_HYBRIDS_VIRUS("hybrids", hybrids)
-    CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS_VIRUS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
-
-    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS_VIRUS.out.hybrids) // Collapse clusters
-    CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters 
-
-    emit:
-    hybrids = CONVERT_HYBRID_COORDINATES.out.hybrids
-    clusters = CONVERT_CLUSTER_COORDINATES.out.hybrids
-
-}

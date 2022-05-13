@@ -13,9 +13,6 @@ hiCLIP/proximity ligation analysis pipeline.
 // Define DSL2
 nextflow.enable.dsl=2
 
-// Parameters
-if(params.org == 'rSARS-CoV-2' | params.org == 'SARS-CoV-2-England-2-2020' | params.org == 'IAV-WSN' | params.org == 'IAV-WSN-human' | params.org == 'IAV-WSN-cow') { params.virus = true } else {params.virus = false }
-
 // Processes
 include { hiclipheader } from './modules/utils.nf'
 include { METADATA } from './modules/metadata.nf'
@@ -23,7 +20,7 @@ include { CUTADAPT } from './modules/cutadapt.nf'
 include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
-include { PROCESS_HYBRIDS; PROCESS_HYBRIDS_VIRUS } from './workflows/processhybrids.nf'
+include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 include { ANALYSE_STRUCTURE } from './modules/analysestructure.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
@@ -123,30 +120,22 @@ workflow {
     /* 
     PROCESS HYBRIDS
     */
-    if(!params.virus) {
-        PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
-        EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
-        ch_hybrids = PROCESS_HYBRIDS.out.hybrids
-        ch_clusters = PROCESS_HYBRIDS.out.clusters
+    PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
+    EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
+    ch_hybrids = PROCESS_HYBRIDS.out.hybrids
+    ch_clusters = PROCESS_HYBRIDS.out.clusters
 
-        if(params.analyse_structure) {
-            ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
-            ch_hybrids = ANALYSE_STRUCTURE.out.hybrids
-        }
+    if(params.analyse_structure) {
+        ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
+        ch_hybrids = ANALYSE_STRUCTURE.out.hybrids
+    }
 
-        /* 
-        GET ATLAS
-        */
-        if(!params.skip_atlas) {
-            // GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
-            GET_ATLAS(ch_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
-        }
-
-    } else {
-        PROCESS_HYBRIDS_VIRUS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf)
-        EXPORT_INTRAGENIC(PROCESS_HYBRIDS_VIRUS.out.hybrids, PROCESS_HYBRIDS_VIRUS.out.clusters, ch_transcript_fai) // transcript_fai = genome_fai
-        ch_hybrids = PROCESS_HYBRIDS_VIRUS.out.hybrids
-        // ch_hybrids = GET_HYBRIDS.out.hybrids
+    /* 
+    GET ATLAS
+    */
+    if(!params.skip_atlas) {
+        // GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
+        GET_ATLAS(ch_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
     }
 
     /* 
