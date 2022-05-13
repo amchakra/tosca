@@ -69,7 +69,6 @@ log.info "-\033[2m--------------------------------------------------------------
 
 def settings = [:]
 settings['Organism'] = params.org
-if(params.virus) settings['Virus'] = params.virus
 if(params.skip_qc) { settings['Skip QC'] = params.skip_qc } 
 if(params.skip_atlas) { settings['Skip atlas generation'] = params.skip_atlas }
 if(params.skip_premap) { settings['Skip premapping'] = params.skip_qc } 
