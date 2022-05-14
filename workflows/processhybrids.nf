@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 
 // include { GET_BINDING_ENERGY } from '../modules/getbindingenergy.nf'
 include { ANNOTATE_HYBRIDS as ANNOTATE_HYBRIDS; ANNOTATE_HYBRIDS as ANNOTATE_CLUSTERS } from '../modules/annotatehybrids.nf'
-include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS } from '../modules/clusterhybrids.nf'
+include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS; CLUSTER_HYBRIDS_1 } from '../modules/clusterhybrids.nf'
 include { CONVERT_COORDINATES as CONVERT_HYBRID_COORDINATES; CONVERT_COORDINATES as CONVERT_CLUSTER_COORDINATES } from '../modules/convertcoordinates.nf'
 
 workflow PROCESS_HYBRIDS {
@@ -22,6 +22,7 @@ workflow PROCESS_HYBRIDS {
 
     // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
     CLUSTER_HYBRIDS("hybrids", hybrids)
+    CLUSTER_HYBRIDS_1("hybrids", hybrids)
     CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
     ANNOTATE_HYBRIDS("hybrids", CONVERT_HYBRID_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate
 

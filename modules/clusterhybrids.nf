@@ -73,3 +73,76 @@ process COLLAPSE_CLUSTERS {
     message("Completed!")
     """
 }
+
+process CLUSTER_HYBRIDS_1 {
+
+    tag "${sample_id}"
+    publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
+
+    cpus 8
+    memory 32G
+    time '12h'
+
+    input:
+        val(type)
+        tuple val(sample_id), path(hybrids)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.*.rds"), emit: rds
+
+    script:
+
+    percent_overlap = params.percent_overlap
+    sample_size = params.sample_size
+    chunk_number = 100
+
+    """
+    #!/usr/bin/env Rscript
+
+    suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(toscatools))
+    suppressPackageStartupMessages(library(parallel))
+
+    setDTthreads(opt$threads)
+    set.seed(42)
+
+    # Load hybrids
+    hybrids.dt <- fread("$hybrids")
+    setkey(hybrids.dt, name)
+
+    # Filter hybrids
+    message("Number of hybrids: ", nrow(hybrids.dt))
+    message("Removing rRNA-rRNA")
+    atlas.hybrids.dt <- hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45S")]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
+
+    message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
+    atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
+
+    # Subsample as indicated
+    if("$sample_size" != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt, "$sample_size"))]
+    message("Number of hybrids to cluster: ", nrow(atlas.hybrids.dt))
+
+    # Keep ones not clustered to add back in later
+    unclustered.hybrids.dt <- hybrids.dt[!name %in% atlas.hybrids.dt\$name]
+    stopifnot(nrow(unclustered.hybrids.dt) + nrow(atlas.hybrids.dt) == nrow(hybrids.dt))
+
+    # Split into list to parallelise
+    atlas.hybrids.list <- split(atlas.hybrids.dt, by = c("L_seqnames", "R_seqnames"))
+    message("Gene pairs to cluster: ", length(atlas.hybrids.list))
+
+    # Split into chunks and write out
+    # TODO: add check if more chunks than length of list
+
+    atlas.hybrids.list.chunks <- split(atlas.hybrids.list, ceiling(seq_along(atlas.hybrids.list)/"$chunk_number"))
+
+    lapply(seq_len("$chunks_number") function(i) {
+
+        saveRDS(atlas.hybrids.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds"))
+
+    })
+
+
+}
