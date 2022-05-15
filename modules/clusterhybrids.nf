@@ -3,7 +3,7 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process CLUSTER_HYBRIDS {
+process CLUSTER_HYBRIDS_SLURM {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
@@ -17,7 +17,7 @@ process CLUSTER_HYBRIDS {
         tuple val(sample_id), path(hybrids)
 
     output:
-        tuple val(sample_id), path("${sample_id}.${type}.clustered.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.${type}.slurm.clustered.tsv.gz"), emit: hybrids
 
     script:
 
@@ -74,14 +74,14 @@ process COLLAPSE_CLUSTERS {
     """
 }
 
-process CLUSTER_HYBRIDS_1 {
+process CHUNK_HYBRIDS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '12h'
+    // cpus 8
+    // memory 32G
+    // time '1h'
 
     input:
         val(type)
@@ -94,7 +94,7 @@ process CLUSTER_HYBRIDS_1 {
     script:
 
     sample_size = params.sample_size
-    chunk_number = 100
+    chunk_number = params.chunk_number
 
     """
     #!/usr/bin/env Rscript
@@ -136,26 +136,27 @@ process CLUSTER_HYBRIDS_1 {
     message("Gene pairs to cluster: ", length(atlas.hybrids.list))
 
     # Split into chunks and write out
-    # TODO: add check if more chunks than length of list
-
-    atlas.hybrids.list.chunks <- split(atlas.hybrids.list, cut(seq_along(atlas.hybrids.list), $chunk_number, label = FALSE))
-
-    lapply(seq_len($chunk_number), function(i) {
-
-        saveRDS(atlas.hybrids.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds"))
-
-    })
+    if($chunk_number > length(atlas.hybrids.list)) {
+        atlas.hybrids.list.chunks <-  split(atlas.hybrids.list, cut(seq_along(atlas.hybrids.list), length(atlas.hybrids.list), label = FALSE))
+        lapply(seq_len(length(atlas.hybrids.list)), function(i) { saveRDS(atlas.hybrids.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
+    } else if($chunk_number > 1) {
+        atlas.hybrids.list.chunks <- split(atlas.hybrids.list, cut(seq_along(atlas.hybrids.list), $chunk_number, label = FALSE))
+        lapply(seq_len($chunk_number), function(i) { saveRDS(atlas.hybrids.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
+    } else {
+        atlas.hybrids.list.chunks <- atlas.hybrids.list
+        saveRDS(atlas.hybrids.list.chunks, paste0("${sample_id}", "_", 1, ".rds"))
+    }
     """
 }
 
-process CLUSTER_HYBRIDS_2 {
+process IDENTIFY_CLUSTERS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '12h'
+    // cpus 8
+    // memory 32G
+    // time '12h'
 
     input:
         val(type)
@@ -187,14 +188,14 @@ process CLUSTER_HYBRIDS_2 {
     """
 }
 
-process CLUSTER_HYBRIDS_3 {
+process MERGE_CLUSTERS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 8
-    memory 32G
-    time '12h'
+    // cpus 8
+    // memory 32G
+    // time '1h'
 
     input:
         val(type)

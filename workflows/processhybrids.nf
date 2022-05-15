@@ -5,7 +5,8 @@ nextflow.enable.dsl=2
 
 // include { GET_BINDING_ENERGY } from '../modules/getbindingenergy.nf'
 include { ANNOTATE_HYBRIDS as ANNOTATE_HYBRIDS; ANNOTATE_HYBRIDS as ANNOTATE_CLUSTERS } from '../modules/annotatehybrids.nf'
-include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS; CLUSTER_HYBRIDS_1; CLUSTER_HYBRIDS_2; CLUSTER_HYBRIDS_3 } from '../modules/clusterhybrids.nf'
+include { CLUSTER_HYBRIDS_SLURM; COLLAPSE_CLUSTERS } from '../modules/clusterhybrids.nf'
+include { CLUSTER_HYBRIDS } from '../subworkflows/clusterhybrids.nf'
 include { CONVERT_COORDINATES as CONVERT_HYBRID_COORDINATES; CONVERT_COORDINATES as CONVERT_CLUSTER_COORDINATES } from '../modules/convertcoordinates.nf'
 
 workflow PROCESS_HYBRIDS {
@@ -21,15 +22,11 @@ workflow PROCESS_HYBRIDS {
     // GET_BINDING_ENERGY(hybrids, transcript_fa.collect()) // Get binding energies
 
     // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
-    CLUSTER_HYBRIDS("hybrids", hybrids)
-    CLUSTER_HYBRIDS_1("hybrids", hybrids)
-    ch_c2 = CLUSTER_HYBRIDS_1.out.rds.flatten().map { file -> tuple(file.simpleName, file) }
-    CLUSTER_HYBRIDS_2("hybrids", ch_c2)
-    ch_c3 = CLUSTER_HYBRIDS_2.out.tsv.map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-        .groupTuple(by: 0)
-    ch_c3j = hybrids.join(CLUSTER_HYBRIDS_1.out.tsv).join(ch_c3).view()
-    CLUSTER_HYBRIDS_3("hybrids", ch_c3j)
+    if(params.cluster_old) {
+        CLUSTER_HYBRIDS_SLURM("hybrids", hybrids)
+    }
 
+    CLUSTER_HYBRIDS("hybrids", hybrids)
     CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
     ANNOTATE_HYBRIDS("hybrids", CONVERT_HYBRID_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate
 
