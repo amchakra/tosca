@@ -10,7 +10,7 @@ option_list <- list(make_option(c("", "--clusters"), action = "store", type = "c
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
-
+clusters.dt <- fread(opt$clusters)
 genes <- readLines(opt$genes) # Currently just one
 
 for(i in seq_along(genes)) {
@@ -18,7 +18,7 @@ for(i in seq_along(genes)) {
     goi <- genes[i]
     message(goi)
 
-    cluster.dt <- fread(opt$clusters)
+    cluster.dt <- clusters.dt[L_seqnames == R_seqnames][L_seqnames == goi]
 
     if(!nrow(cluster.dt) == 0) {
 
