@@ -45,7 +45,11 @@ ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 ch_regions_gtf = Channel.fromPath(params.regions_gtf, checkIfExists: true)
 
 // Channels for optional inputs
-if(params.goi) ch_goi = Channel.fromPath(params.goi, checkIfExists: true)
+if(params.goi) {
+    ch_goi = Channel.fromPath(params.goi, checkIfExists: true) 
+} else {
+    ch_goi = Channel.empty()
+}
 
 // Channel for MultiQC config
 ch_multiqc_config = Channel.fromPath(params.multiqc_config, checkIfExists: true)
@@ -123,7 +127,7 @@ workflow {
     PROCESS HYBRIDS
     */
     PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
-    EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
+    // EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
     ch_hybrids = PROCESS_HYBRIDS.out.hybrids
     ch_clusters = PROCESS_HYBRIDS.out.clusters
 
@@ -143,7 +147,7 @@ workflow {
     /* 
     GET VISUALISATIONS
     */
-    GET_VISUALISATIONS(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai, ch_transcript_fai)
+    GET_VISUALISATIONS(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai, ch_transcript_fai, ch_goi)
 
     // if(params.goi) {
 

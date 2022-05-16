@@ -27,14 +27,14 @@ workflow GET_VISUALISATIONS {
 
     if(params.goi) {
 
-        GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
-        GET_ARCS(ch_clusters, ch_goi.collect())
+        GET_CONTACT_MAPS(hybrids, transcript_fai.collect(), goi.collect())
+        GET_ARCS(clusters, goi.collect())
 
     }
 
     emit:
     hybrid_bed = EXPORT_HYBRID_GENOMIC_BED.out.bed
-    hybrid_bam = CONVERT_BED_TO_BAM.out.bam
+    hybrid_bam = EXPORT_GENOMIC_BAM.out.bam
     cluster_bed = EXPORT_CLUSTERS_GENOMIC_BED.out.bed
 
 }

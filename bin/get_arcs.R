@@ -20,30 +20,60 @@ for(i in seq_along(genes)) {
 
     cluster.dt <- clusters.dt[L_seqnames == R_seqnames][L_seqnames == goi]
 
-    if(!nrow(cluster.dt) == 0) {
+    if(opt$breaks == "none") {
 
-        # Get breaks
-        p <- as.numeric(unlist(strsplit(opt$breaks, ",")))
+        if(nrow(cluster.dt > 0)) {
 
-        # Create arcs
-        cluster.dt[, colour := cut(count, breaks = quantile(count, probs = p), include.lowest = TRUE, labels = 0:(length(p) - 2))]
-        bp.dt <- cluster.dt[, .(L_genomic_seqnames, L_genomic_start, L_genomic_end, R_genomic_start, R_genomic_end, colour)]
-        setorder(bp.dt, colour)
+            # Create arcs
+            cluster.dt[, colour := 0]
+            bp.dt <- cluster.dt[, .(L_genomic_seqnames, L_genomic_start, L_genomic_end, R_genomic_start, R_genomic_end, colour)]
+            setorder(bp.dt, colour)   
 
-        # Generate colour scheme
-        cols <- ggthemes::tableau_seq_gradient_pal('Blue')(seq(0, 1, length = length(p) - 1))
-        cols.dt <- rbindlist(lapply(cols, function(x) data.table(paste(as.vector(col2rgb(x)), collapse = "\t"))))
-        cols.dt[, `:=` (colour = "color:", annotation = paste("Count quantile", 1:(length(p) - 1)))]
-        setcolorder(cols.dt, c("colour", "V1", "annotation"))
+            # Generate colour scheme
+            cols <- "#08306b"
+            cols.dt <- rbindlist(lapply(cols, function(x) data.table(paste(as.vector(col2rgb(x)), collapse = "\t"))))
+            cols.dt[, `:=` (colour = "color:", annotation = "Count quantile 1")]
+            setcolorder(cols.dt, c("colour", "V1", "annotation"))
 
-        # Write out
-        fname <- paste0(opt$output, ".", gsub(":", "_", goi), ".bp")
-        fwrite(cols.dt, sep = "\t", col.names = FALSE, quote = FALSE, file = fname)
-        fwrite(bp.dt, sep = "\t", col.names = FALSE, file = fname, append = TRUE)
+            # Write out
+            fname <- paste0(opt$output, ".", gsub(":", "_", goi), ".bp")
+            fwrite(cols.dt, sep = "\t", col.names = FALSE, quote = FALSE, file = fname)
+            fwrite(bp.dt, sep = "\t", col.names = FALSE, file = fname, append = TRUE)
+
+        } else {
+
+            message("No clusters")
+
+        }
 
     } else {
 
-        message("No clusters")
+        if(nrow(cluster.dt > 0)) {
+
+            # Get breaks
+            p <- as.numeric(unlist(strsplit(opt$breaks, ",")))
+
+            # Create arcs
+            cluster.dt[, colour := cut(count, breaks = quantile(count, probs = p), include.lowest = TRUE, labels = 0:(length(p) - 2))]
+            bp.dt <- cluster.dt[, .(L_genomic_seqnames, L_genomic_start, L_genomic_end, R_genomic_start, R_genomic_end, colour)]
+            setorder(bp.dt, colour)
+
+            # Generate colour scheme
+            cols <- ggthemes::tableau_seq_gradient_pal('Blue')(seq(0, 1, length = length(p) - 1))
+            cols.dt <- rbindlist(lapply(cols, function(x) data.table(paste(as.vector(col2rgb(x)), collapse = "\t"))))
+            cols.dt[, `:=` (colour = "color:", annotation = paste("Count quantile", 1:(length(p) - 1)))]
+            setcolorder(cols.dt, c("colour", "V1", "annotation"))
+
+            # Write out
+            fname <- paste0(opt$output, ".", gsub(":", "_", goi), ".bp")
+            fwrite(cols.dt, sep = "\t", col.names = FALSE, quote = FALSE, file = fname)
+            fwrite(bp.dt, sep = "\t", col.names = FALSE, file = fname, append = TRUE)
+
+        } else {
+
+            message("No clusters")
+
+        }
 
     }
 
