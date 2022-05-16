@@ -28,7 +28,7 @@ workflow ANALYSE_STRUCTURES {
         CALCULATE_SHUFFLED_ENERGIES(type, CHUNK_SEQUENCES.out.rds
                                            .flatten()
                                            .map { file -> tuple(file.simpleName, file) })
-        MERGE_SHUFFLED(type, MERGE_STRUCTURES.out.hybrids.join(CALCULATE_STRUCTURES.out.tsv
+        MERGE_SHUFFLED(type, MERGE_STRUCTURES.out.hybrids.join(CALCULATE_SHUFFLED_ENERGIES.out.tsv
                                                            .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
                                                            .groupTuple(by: 0)))
 

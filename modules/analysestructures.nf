@@ -130,7 +130,7 @@ process CALCULATE_STRUCTURES {
 
     structure.list <- parallel::mclapply(seq_len(nrow(sel.hybrids.dt)), function(i) {
 
-        analyse_structure(name = sel.hybrids.dt\$name[i], L_sequence = sel.hybrids.dt\$L_sequence[i], R_sequence = sel.hybrids.dt\$L_sequence[i])
+        analyse_structure(name = sel.hybrids.dt\$name[i], L_sequence = sel.hybrids.dt\$L_sequence[i], R_sequence = sel.hybrids.dt\$R_sequence[i])
     
     }, mc.cores = ${task.cpus})
 
@@ -171,7 +171,7 @@ process CALCULATE_SHUFFLED_ENERGIES {
 
     shuffled.list <- parallel::mclapply(seq_len(nrow(sel.hybrids.dt)), function(i) {
 
-        get_shuffled_mfe(name = sel.hybrids.dt\$name[i], L_sequence = sel.hybrids.dt\$L_sequence[i], R_sequence = sel.hybrids.dt\$L_sequence[i])
+        get_shuffled_mfe(name = sel.hybrids.dt\$name[i], L_sequence = sel.hybrids.dt\$L_sequence[i], R_sequence = sel.hybrids.dt\$R_sequence[i])
     
     }, mc.cores = ${task.cpus})
 
@@ -212,8 +212,9 @@ process MERGE_STRUCTURES {
     structures.list <- lapply(structures.files, fread)
     structures.dt <- rbindlist(structures.list, use.names = TRUE, fill = TRUE)
 
-    hybrids.dt <- merge(hybrids.dt, structures.dt, by = "name", all.x = TRUE)
-    fwrite(hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.tsv.gz"), sep = "\t")
+    structures.hybrids.dt <- merge(hybrids.dt, structures.dt, by = "name", all.x = TRUE)
+    stopifnot(nrow(structures.hybrids.dt) == nrow(hybrids.dt))
+    fwrite(structures.hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.tsv.gz"), sep = "\t")
 
     """
 
@@ -249,8 +250,9 @@ process MERGE_SHUFFLED {
     shuffled.list <- lapply(shuffled.files, fread)
     shuffled.dt <- rbindlist(shuffled.list, use.names = TRUE, fill = TRUE)
 
-    hybrids.dt <- merge(hybrids.dt, shuffled.dt, by = "name", all.x = TRUE)
-    fwrite(hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.shuffled.tsv.gz"), sep = "\t")
+    shuffled.hybrids.dt <- merge(hybrids.dt, shuffled.dt, by = "name", all.x = TRUE)
+    stopifnot(nrow(shuffled.hybrids.dt) == nrow(hybrids.dt))
+    fwrite(shuffled.hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.shuffled.tsv.gz"), sep = "\t")
 
     """
 
