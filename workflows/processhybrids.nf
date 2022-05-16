@@ -37,23 +37,21 @@ workflow PROCESS_HYBRIDS {
 
     if(params.analyse_structures) {
 
-        ANALYSE_STRUCTURES(ANNOTATE_HYBRIDS.out.hybrids, transcript_fa)
+        ANALYSE_STRUCTURES("hybrids", ANNOTATE_HYBRIDS.out.hybrids, transcript_fa.collect())
         
-        emit:
-        hybrids = ANALYSE_STRUCTURES.out.hybrids
-        clusters = ANNOTATE_CLUSTERS.out.hybrids
+        output_hybrids = ANALYSE_STRUCTURES.out.hybrids
+        output_clusters = ANNOTATE_CLUSTERS.out.hybrids
     
     } else {
 
-        emit:
-        hybrids = ANNOTATE_HYBRIDS.out.hybrids
-        clusters = ANNOTATE_CLUSTERS.out.hybrids
+        output_hybrids = ANNOTATE_HYBRIDS.out.hybrids
+        output_clusters = ANNOTATE_CLUSTERS.out.hybrids
     }
 
-    // emit:
+    emit:
     // mfe = GET_BINDING_ENERGY.out.hybrids
     // clustered = CLUSTER_HYBRIDS.out.hybrids
-
-
+    hybrids = output_hybrids
+    clusters = output_clusters
 
 }

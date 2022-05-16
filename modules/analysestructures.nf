@@ -62,20 +62,17 @@ process CHUNK_SEQUENCES {
 
     # Load genome
     message("Loading genome...")
-    genome.fa <- Biostrings::readDNAStringSet(opt$fasta)
+    genome.fa <- Biostrings::readDNAStringSet("$transcript_fa")
     genome.dt <- data.table(gene_id = names(genome.fa),
                             sequence = as.character(genome.fa))
 
-    hybrids.dt <- fread(opt\$hybrids)
+    hybrids.dt <- fread("$hybrids")
     setkey(hybrids.dt, name)
     stopifnot(!any(duplicated(hybrids.dt\$name))) # Check no duplicates
 
     # Get sequences
     message("Getting sequences...")
-    tic()
     hybrids.dt <- get_sequence(hybrids.dt = hybrids.dt, genome.dt = genome.dt)
-    toc()
-
     stopifnot(!any(is.na(c(hybrids.dt\$L_sequence, hybrids.dt\$R_sequence))))
 
     # Remove rRNA
@@ -83,18 +80,18 @@ process CHUNK_SEQUENCES {
     sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
     sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
 
-    # if(clusters_only == "true") sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][cluster != "."] # Some are "" if unclustered as too many
-    if(clusters_only == "true") sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][grep("^C", cluster)]
+    # if($clusters_only == "true") sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][cluster != "."] # Some are "" if unclustered as too many
+    if("$clusters_only" == "true") sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][grep("^C", cluster)]
 
     structure.dt <- sel.hybrids.dt[, .(name, L_sequence, R_sequence)]
 
     if($chunk_number > nrow(structure.dt)) {
         structure.list.chunks <- split(structure.dt, cut(seq_len(nrow(structure.dt)), nrow(structure.dt), label = FALSE))
-        lapply(seq_len(nrow(structure.dt)), function(i) { saveRDS(atlas.hybrids.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
+        lapply(seq_len(nrow(structure.dt)), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
     }
     if($chunk_number > 1) {
         structure.list.chunks <- split(structure.dt, cut(seq_len(nrow(structure.dt)), $chunk_number, label = FALSE))
-        lapply(seq_len($chunk_number), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, "structure.rds")) })
+        lapply(seq_len($chunk_number), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".structure.rds")) })
     } else {
         structure.list.chunks <- structure.dt
         saveRDS(structure.list.chunks, paste0("${sample_id}", "_", 1, ".structure.rds"))
@@ -138,7 +135,7 @@ process CALCULATE_STRUCTURES {
     }, mc.cores = ${task.cpus})
 
     structure.dt <- rbindlist(structure.list, use.names = TRUE)
-    fwrite(atlas.clusters.dt, paste0("${sample_id}", ".structures.tsv.gz"), sep = "\t")
+    fwrite(structure.dt, paste0("${sample_id}", ".structures.tsv.gz"), sep = "\t")
 
     """
 
@@ -179,7 +176,7 @@ process CALCULATE_SHUFFLED_ENERGIES {
     }, mc.cores = ${task.cpus})
 
     shuffled.dt <- rbindlist(shuffled.list, use.names = TRUE)
-    fwrite(atlas.clusters.dt, paste0("${sample_id}", ".shuffled.tsv.gz"), sep = "\t")
+    fwrite(shuffled.dt, paste0("${sample_id}", ".shuffled.tsv.gz"), sep = "\t")
 
     """
 
@@ -198,7 +195,7 @@ process MERGE_STRUCTURES {
         tuple val(sample_id), path(hybrids), path(structures)
 
     output:
-       tuple val(sample_id), path("${sample_id}.${type}.gc.annotated.mfe.tsv.gz"), emit: tsv
+       tuple val(sample_id), path("${sample_id}.${type}.gc.annotated.mfe.tsv.gz"), emit: hybrids
 
     script:
 
@@ -216,7 +213,7 @@ process MERGE_STRUCTURES {
     structures.dt <- rbindlist(structures.list, use.names = TRUE, fill = TRUE)
 
     hybrids.dt <- merge(hybrids.dt, structures.dt, by = "name", all.x = TRUE)
-    fwrite(atlas.clusters.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.tsv.gz"), sep = "\t")
+    fwrite(hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.tsv.gz"), sep = "\t")
 
     """
 
@@ -235,7 +232,7 @@ process MERGE_SHUFFLED {
         tuple val(sample_id), path(hybrids), path(shuffled)
 
     output:
-       tuple val(sample_id), path("${sample_id}.${type}.gc.annotated.mfe.shuffled.tsv.gz"), emit: tsv
+       tuple val(sample_id), path("${sample_id}.${type}.gc.annotated.mfe.shuffled.tsv.gz"), emit: hybrids
 
     script:
 
@@ -253,7 +250,7 @@ process MERGE_SHUFFLED {
     shuffled.dt <- rbindlist(shuffled.list, use.names = TRUE, fill = TRUE)
 
     hybrids.dt <- merge(hybrids.dt, shuffled.dt, by = "name", all.x = TRUE)
-    fwrite(atlas.clusters.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.shuffled.tsv.gz"), sep = "\t")
+    fwrite(hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.shuffled.tsv.gz"), sep = "\t")
 
     """
 

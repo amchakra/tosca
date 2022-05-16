@@ -85,10 +85,10 @@ settings['Clustering chunk number'] = params.chunk_number
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
 settings['Analyse structures'] = params.analyse_structures
-if(params.analyse_structure) settings['Analyse cluster structures only'] = params.clusters_only
-if(params.analyse_structure) settings['Shuffled binding energy'] = params.shuffled_mfe
+if(params.analyse_structures) settings['Analyse clusters only'] = params.clusters_only
+if(params.analyse_structures) settings['Analyse shuffled energies'] = params.shuffled_energies
 
-if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
+if(params.goi) { settings['Genes for contact maps'] = params.goi }
 if(params.goi) { settings['Bin size for contact maps'] = params.bin_size } 
 if(params.goi) { settings['Breaks for arcs'] = params.breaks } 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")

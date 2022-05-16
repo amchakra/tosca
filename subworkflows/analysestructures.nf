@@ -15,7 +15,7 @@ workflow ANALYSE_STRUCTURES {
 
     main:
 
-    CHUNK_SEQUENCES(type, hybrids)
+    CHUNK_SEQUENCES(type, hybrids, transcript_fa)
     CALCULATE_STRUCTURES(type, CHUNK_SEQUENCES.out.rds
                                            .flatten()
                                            .map { file -> tuple(file.simpleName, file) })
@@ -23,23 +23,35 @@ workflow ANALYSE_STRUCTURES {
                                                            .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
                                                            .groupTuple(by: 0)))
 
-    if(params.shuffled_mfe) {
+    if(params.shuffled_energies) {
 
         CALCULATE_SHUFFLED_ENERGIES(type, CHUNK_SEQUENCES.out.rds
                                            .flatten()
                                            .map { file -> tuple(file.simpleName, file) })
-        MERGE_SHUFFLED(type, MERGE_STRUCTURES.out.tsv.join(CALCULATE_STRUCTURES.out.tsv
+        MERGE_SHUFFLED(type, MERGE_STRUCTURES.out.hybrids.join(CALCULATE_STRUCTURES.out.tsv
                                                            .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
                                                            .groupTuple(by: 0)))
 
-        emit:
-        hybrids = MERGE_SHUFFLED.out.hybrids
+        output = MERGE_SHUFFLED.out.hybrids
 
     } else {
     
-        emit:
-        hybrids = MERGE_STRUCTURES.out.hybrids
+        output = MERGE_STRUCTURES.out.hybrids
 
     }
+
+    emit:
+    
+    hybrids = output
+
+    // if(params.shuffled_mfe) {
+
+    //     hybrids = MERGE_SHUFFLED.out.hybrids
+
+    // } else {
+
+    //     hybrids = MERGE_STRUCTURES.out.hybrids
+
+    // }
 
 }
