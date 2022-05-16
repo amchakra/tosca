@@ -3,7 +3,7 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-process ANALYSE_STRUCTURE {
+process ANALYSE_STRUCTURE_SLURM {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true

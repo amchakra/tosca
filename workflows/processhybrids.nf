@@ -8,6 +8,7 @@ include { ANNOTATE_HYBRIDS as ANNOTATE_HYBRIDS; ANNOTATE_HYBRIDS as ANNOTATE_CLU
 include { CLUSTER_HYBRIDS_SLURM; COLLAPSE_CLUSTERS } from '../modules/clusterhybrids.nf'
 include { CLUSTER_HYBRIDS } from '../subworkflows/clusterhybrids.nf'
 include { CONVERT_COORDINATES as CONVERT_HYBRID_COORDINATES; CONVERT_COORDINATES as CONVERT_CLUSTER_COORDINATES } from '../modules/convertcoordinates.nf'
+include { ANALYSE_STRUCTURES } from '../subworkflows/analysestructures.nf'
 
 workflow PROCESS_HYBRIDS {
 
@@ -34,10 +35,25 @@ workflow PROCESS_HYBRIDS {
     CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters
     ANNOTATE_CLUSTERS("clusters", CONVERT_CLUSTER_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate      
 
-    emit:
+    if(params.analyse_structures) {
+
+        ANALYSE_STRUCTURES(ANNOTATE_HYBRIDS.out.hybrids, transcript_fa)
+        
+        emit:
+        hybrids = ANALYSE_STRUCTURES.out.hybrids
+        clusters = ANNOTATE_CLUSTERS.out.hybrids
+    
+    } else {
+
+        emit:
+        hybrids = ANNOTATE_HYBRIDS.out.hybrids
+        clusters = ANNOTATE_CLUSTERS.out.hybrids
+    }
+
+    // emit:
     // mfe = GET_BINDING_ENERGY.out.hybrids
     // clustered = CLUSTER_HYBRIDS.out.hybrids
-    hybrids = ANNOTATE_HYBRIDS.out.hybrids
-    clusters = ANNOTATE_CLUSTERS.out.hybrids
+
+
 
 }

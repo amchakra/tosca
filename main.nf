@@ -22,7 +22,7 @@ include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
 include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
-include { ANALYSE_STRUCTURE } from './modules/analysestructure.nf'
+include { ANALYSE_STRUCTURE_SLURM } from './modules/analysestructures.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
 include { GET_CONTACT_MAPS; GET_ARCS } from './modules/getvisualisations.nf'
 include { MAKE_REPORT } from './workflows/makereport.nf'
@@ -84,7 +84,7 @@ if(params.slurm) settings['Use SLURM'] = params.slurm
 settings['Clustering chunk number'] = params.chunk_number
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
-settings['Analyse structure'] = params.analyse_structure
+settings['Analyse structures'] = params.analyse_structures
 if(params.analyse_structure) settings['Analyse cluster structures only'] = params.clusters_only
 if(params.analyse_structure) settings['Shuffled binding energy'] = params.shuffled_mfe
 
@@ -126,10 +126,10 @@ workflow {
     ch_hybrids = PROCESS_HYBRIDS.out.hybrids
     ch_clusters = PROCESS_HYBRIDS.out.clusters
 
-    if(params.analyse_structure) {
-        ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
-        ch_hybrids = ANALYSE_STRUCTURE.out.hybrids
-    }
+    // if(params.analyse_structure) {
+    //     ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
+    //     ch_hybrids = ANALYSE_STRUCTURE.out.hybrids
+    // }
 
     /* 
     GET ATLAS
