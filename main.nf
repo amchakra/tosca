@@ -21,10 +21,11 @@ include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
-include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
+// include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
 include { ANALYSE_STRUCTURE_SLURM } from './modules/analysestructures.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
-include { GET_CONTACT_MAPS; GET_ARCS } from './modules/getvisualisations.nf'
+// include { GET_CONTACT_MAPS; GET_ARCS } from './modules/getvisualisations.nf'
+include { GET_VISUALISATIONS } from './workflows/getvisualisations.nf'
 include { MAKE_REPORT } from './workflows/makereport.nf'
 
 // Genome variables
@@ -142,12 +143,14 @@ workflow {
     /* 
     GET VISUALISATIONS
     */
-    if(params.goi) {
+    GET_VISUALISATIONS(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai, ch_transcript_fai)
 
-        GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
-        GET_ARCS(ch_clusters, ch_goi.collect())
+    // if(params.goi) {
 
-    }
+    //     GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
+    //     GET_ARCS(ch_clusters, ch_goi.collect())
+
+    // }
 
     /* 
     MAKE REPORT
