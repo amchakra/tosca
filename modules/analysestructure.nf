@@ -33,7 +33,7 @@ process ANALYSE_STRUCTURE {
 process CHUNK_SEQUENCES {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     // memory 16G
     // time '12h'
@@ -106,7 +106,7 @@ process CHUNK_SEQUENCES {
 process CALCULATE_STRUCTURES {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     // memory 16G
     // time '12h'
@@ -133,7 +133,7 @@ process CALCULATE_STRUCTURES {
 
     structure.list <- parallel::mclapply(seq_len(nrow(sel.hybrids.dt)), function(i) {
 
-        analyse_structure(name = sel.hybrids.dt$name[i], L_sequence = sel.hybrids.dt$L_sequence[i], R_sequence = sel.hybrids.dt$L_sequence[i])
+        analyse_structure(name = sel.hybrids.dt\$name[i], L_sequence = sel.hybrids.dt\$L_sequence[i], R_sequence = sel.hybrids.dt\$L_sequence[i])
     
     }, mc.cores = ${task.cpus})
 
@@ -147,7 +147,7 @@ process CALCULATE_STRUCTURES {
 process CALCULATE_SHUFFLED_ENERGIES {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
+    // publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     // memory 16G
     // time '12h'
@@ -157,7 +157,7 @@ process CALCULATE_SHUFFLED_ENERGIES {
         tuple val(sample_id), path(rds)
 
     output:
-       tuple val(sample_id), path("${sample_id}.structures.tsv.gz"), emit: tsv
+       tuple val(sample_id), path("${sample_id}.shuffled.tsv.gz"), emit: tsv
 
     script:
 
@@ -174,7 +174,7 @@ process CALCULATE_SHUFFLED_ENERGIES {
 
     shuffled.list <- parallel::mclapply(seq_len(nrow(sel.hybrids.dt)), function(i) {
 
-        get_shuffled_mfe(name = sel.hybrids.dt$name[i], L_sequence = sel.hybrids.dt$L_sequence[i], R_sequence = sel.hybrids.dt$L_sequence[i])
+        get_shuffled_mfe(name = sel.hybrids.dt\$name[i], L_sequence = sel.hybrids.dt\$L_sequence[i], R_sequence = sel.hybrids.dt\$L_sequence[i])
     
     }, mc.cores = ${task.cpus})
 
