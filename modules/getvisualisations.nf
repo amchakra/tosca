@@ -8,10 +8,6 @@ process EXPORT_GENOMIC_BED {
     tag "${sample_id}"
     publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
-    // cpus 4
-    // memory 16G
-    // time '1h'
-
     input:
         val(type)
         tuple val(sample_id), path(hybrids)
@@ -40,9 +36,6 @@ process EXPORT_GENOMIC_BAM {
     tag "${sample_id}"
     publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
-    // cpus 4
-    // memory 16G
-    // time '1h'
 
     input:
         tuple val(sample_id), path(bed)
@@ -62,9 +55,6 @@ process GET_CONTACT_MAPS {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/maps", mode: 'copy', overwrite: true
-
-    // time '6h'
-    // memory '64 G'
 
     input:
         tuple val(sample_id), path(hybrids)
