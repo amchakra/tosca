@@ -3,7 +3,7 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-include { CHUNK_SEQUENCES; CALCULATE_STRUCTURES; CALCULATE_SHUFFLED_ENERGIES; MERGE_STRUCTURES; MERGE_SHUFFLED } from '../modules/analysestructures.nf'
+include { CHUNK_SEQUENCES; CALCULATE_STRUCTURES; CALCULATE_SHUFFLED_ENERGIES; MERGE_STRUCTURES; MERGE_SHUFFLED_ENERGIES } from '../modules/analysestructures.nf'
 
 workflow ANALYSE_STRUCTURES {
 
@@ -28,11 +28,11 @@ workflow ANALYSE_STRUCTURES {
         CALCULATE_SHUFFLED_ENERGIES(type, CHUNK_SEQUENCES.out.rds
                                            .flatten()
                                            .map { file -> tuple(file.simpleName, file) })
-        MERGE_SHUFFLED(type, MERGE_STRUCTURES.out.hybrids.join(CALCULATE_SHUFFLED_ENERGIES.out.tsv
-                                                           .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
-                                                           .groupTuple(by: 0)))
+        MERGE_SHUFFLED_ENERGIES(type, MERGE_STRUCTURES.out.hybrids.join(CALCULATE_SHUFFLED_ENERGIES.out.tsv
+                                                                  .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+                                                                  .groupTuple(by: 0)))
 
-        output = MERGE_SHUFFLED.out.hybrids
+        output = MERGE_SHUFFLED_ENERGIES.out.hybrids
 
     } else {
     

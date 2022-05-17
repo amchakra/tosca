@@ -220,7 +220,7 @@ process MERGE_STRUCTURES {
 
 }
 
-process MERGE_SHUFFLED {
+process MERGE_SHUFFLED_ENERGIES {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
