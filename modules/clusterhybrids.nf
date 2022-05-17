@@ -8,10 +8,6 @@ process CLUSTER_HYBRIDS_SLURM {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    // cpus 8
-    // memory 32G
-    // time '12h'
-
     input:
         val(type)
         tuple val(sample_id), path(hybrids)
@@ -25,7 +21,6 @@ process CLUSTER_HYBRIDS_SLURM {
     sample_size = params.sample_size
 
     args = ""
-    // if(workflow.profile.contains("crick")) { args += " --slurm" }
     if(params.slurm) { args += " --slurm" }
 
     """
@@ -44,10 +39,6 @@ process COLLAPSE_CLUSTERS {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // cpus 4
-    // memory 16G
-    // time '1h'
 
     input:
         val(type)
@@ -77,11 +68,6 @@ process COLLAPSE_CLUSTERS {
 process CHUNK_HYBRIDS {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
-
-    // cpus 8
-    // memory 32G
-    // time '1h'
 
     input:
         val(type)
@@ -152,11 +138,6 @@ process CHUNK_HYBRIDS {
 process IDENTIFY_CLUSTERS {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/${type}_test", mode: 'copy', overwrite: true
-
-    // cpus 8
-    // memory 32G
-    // time '12h'
 
     input:
         val(type)
@@ -192,10 +173,6 @@ process MERGE_CLUSTERS {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // cpus 8
-    // memory 32G
-    // time '1h'
 
     input:
         val(type)

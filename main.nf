@@ -21,10 +21,8 @@ include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
-include { EXPORT_INTRAGENIC } from './workflows/exportbedbam.nf'
-include { ANALYSE_STRUCTURE } from './modules/analysestructure.nf'
+include { GET_VISUALISATIONS } from './workflows/getvisualisations.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
-include { GET_CONTACT_MAPS; GET_ARCS } from './modules/getvisualisations.nf'
 include { MAKE_REPORT } from './workflows/makereport.nf'
 
 // Genome variables
@@ -44,7 +42,11 @@ ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 ch_regions_gtf = Channel.fromPath(params.regions_gtf, checkIfExists: true)
 
 // Channels for optional inputs
-if(params.goi) ch_goi = Channel.fromPath(params.goi, checkIfExists: true)
+if(params.goi) {
+    ch_goi = Channel.fromPath(params.goi, checkIfExists: true) 
+} else {
+    ch_goi = Channel.empty()
+}
 
 // Channel for MultiQC config
 ch_multiqc_config = Channel.fromPath(params.multiqc_config, checkIfExists: true)
@@ -84,11 +86,11 @@ if(params.slurm) settings['Use SLURM'] = params.slurm
 settings['Clustering chunk number'] = params.chunk_number
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
-settings['Analyse structure'] = params.analyse_structure
-if(params.analyse_structure) settings['Analyse cluster structures only'] = params.clusters_only
-if(params.analyse_structure) settings['Shuffled binding energy'] = params.shuffled_mfe
+settings['Analyse structures'] = params.analyse_structures
+if(params.analyse_structures) settings['Analyse clusters only'] = params.clusters_only
+if(params.analyse_structures) settings['Analyse shuffled energies'] = params.shuffled_energies
 
-if(params.goi) { settings['Genes for contact maps'] = params.goi } else { settings['Genes for contact maps'] = "none" }
+if(params.goi) { settings['Genes of interest'] = params.goi }
 if(params.goi) { settings['Bin size for contact maps'] = params.bin_size } 
 if(params.goi) { settings['Breaks for arcs'] = params.breaks } 
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
@@ -122,32 +124,18 @@ workflow {
     PROCESS HYBRIDS
     */
     PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
-    EXPORT_INTRAGENIC(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai)
-    ch_hybrids = PROCESS_HYBRIDS.out.hybrids
-    ch_clusters = PROCESS_HYBRIDS.out.clusters
-
-    if(params.analyse_structure) {
-        ANALYSE_STRUCTURE(PROCESS_HYBRIDS.out.hybrids, ch_transcript_fa.collect())
-        ch_hybrids = ANALYSE_STRUCTURE.out.hybrids
-    }
 
     /* 
     GET ATLAS
     */
     if(!params.skip_atlas) {
-        // GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
-        GET_ATLAS(ch_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
+        GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
     }
 
     /* 
     GET VISUALISATIONS
     */
-    if(params.goi) {
-
-        GET_CONTACT_MAPS(ch_hybrids, ch_transcript_fai.collect(), ch_goi.collect())
-        GET_ARCS(ch_clusters, ch_goi.collect())
-
-    }
+    GET_VISUALISATIONS(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai, ch_transcript_fai, ch_goi)
 
     /* 
     MAKE REPORT

@@ -6,11 +6,6 @@ nextflow.enable.dsl=2
 process IDENTIFY_HYBRIDS {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/hybrids/split/", mode: 'copy', overwrite: true
-
-    // time '4h'
-    // cpus = 8
-    // memory '64 G'
 
     input:
         tuple val(sample_id), path(blast8), path(reads)
@@ -30,9 +25,6 @@ process MERGE_HYBRIDS {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // time '1h'
-    // memory '32 G'
 
     input:
         val(type)
