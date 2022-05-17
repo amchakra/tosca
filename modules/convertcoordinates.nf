@@ -8,10 +8,6 @@ process CONVERT_COORDINATES {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    // cpus 4
-    // memory 16G
-    // time '1h'
-
     input:
         val(type)
         tuple val(sample_id), path(hybrids)
@@ -37,4 +33,5 @@ process CONVERT_COORDINATES {
     coord.dt <- convert_coordinates(hybrids.dt = hybrids.dt, genes.gr = genes.gr)
     fwrite(coord.dt, "${sample_id}.${type}.gc.tsv.gz", sep = "\t")
     """
+    
 }

@@ -8,9 +8,6 @@ process ANALYSE_STRUCTURE_SLURM {
     tag "${sample_id}"
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true
 
-    // memory 16G
-    // time '12h'
-
     input:
         tuple val(sample_id), path(hybrids)
         path(transcript_fa)
@@ -33,10 +30,6 @@ process ANALYSE_STRUCTURE_SLURM {
 process CHUNK_SEQUENCES {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // memory 16G
-    // time '12h'
 
     input:
         val(type)
@@ -103,10 +96,6 @@ process CHUNK_SEQUENCES {
 process CALCULATE_STRUCTURES {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // memory 16G
-    // time '12h'
 
     input:
         val(type)
@@ -144,10 +133,6 @@ process CALCULATE_STRUCTURES {
 process CALCULATE_SHUFFLED_ENERGIES {
 
     tag "${sample_id}"
-    // publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // memory 16G
-    // time '12h'
 
     input:
         val(type)
@@ -187,9 +172,6 @@ process MERGE_STRUCTURES {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    // memory 16G
-    // time '12h'
-
     input:
         val(type)
         tuple val(sample_id), path(hybrids), path(structures)
@@ -224,9 +206,6 @@ process MERGE_SHUFFLED_ENERGIES {
 
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
-
-    // memory 16G
-    // time '12h'
 
     input:
         val(type)
