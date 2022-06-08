@@ -90,9 +90,9 @@ nextflow run amchakra/tosca -r main \
 
 ### Genome parameters
 
-Either `--genomedir` and `--org` or all of the other reference files need to be specified
+Either `--genomesdir` and `--org` or all of the other reference files need to be specified
 
-- `--genomedir` specifies the genome reference directory
+- `--genomesdir` specifies the genome reference directory
 - `--org` specifies the organism (options are: `human`, `mouse`, `rat`)
 - `--genome_fa` specifies the genome FASTA
 - `--genome_fai` specifies the genome FASTA index
@@ -102,8 +102,14 @@ Either `--genomedir` and `--org` or all of the other reference files need to be 
 - `--transcript_fai` specifies the pseudo-transcriptome FASTA index
 - `--transcript_gtf` specifies the pseudo-transcriptome annotation GTF
 
-### Alignment parameters
+### Read trimming and alignment parameters
 
+- `--adapter` specifies the adapter sequence for Cutadapt
+    - default: `AGATCGGAAGAGC`
+- `--min_quality` specifies the minimum quality score for Cutadapt
+    - default: `10`
+- `--min_readlength` specifiies the minimum read length after trimming for Cutadapt
+    - default: `16`
 - `--split_size` specifies number of reads per FASTQ file when splitting for parallelised alignment
     - default: `100000`
 - `--star_args` specifies optional additional STAR aligmnent parameters
@@ -124,6 +130,8 @@ Either `--genomedir` and `--org` or all of the other reference files need to be 
     - default: `directional`
 - `--umi_separator` specifies the UMI separator in the FASTQ read name
     - default: `_`
+- `--chunk_number` specifies the number of chunks into which to split the hybrid files for parallelised processing
+    - default: `100`
 - `--percent_overlap` specifies the minimum percentage that one of the two hybrid arms need to overlap to be counted as overlapping
     - default: `0.75`
 - `--sample_size` specifies the sample size to subsample hybrids reads per gene prior to clustering
@@ -141,6 +149,9 @@ Either `--genomedir` and `--org` or all of the other reference files need to be 
 
 - `--goi` is a plain text file with one gene of interest per line to be visualised
 - `--bin_size` specifies the size of each bin when generating the contact map matrices
+    - default: `100`
+- `--breaks` specifies the breaks for grouping the arcs by colour
+    - default: `0,0.3,0.8,1`
 
 ### Optional pipeline mudules
 
