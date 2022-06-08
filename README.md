@@ -24,7 +24,8 @@ Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com
 8. Visualisation ([`toscatools`]())
     1. BAM
     2. BED
-    3. Contact matrices
+    3. Arc plots
+    4. Contact matrices
 9. QC ([`MultiQC`](https://multiqc.info/))
 
 ## Quick start (testing)
@@ -74,7 +75,7 @@ sample3,/path/to/file3.fastq.gz
 ```
 nextflow run amchakra/tosca -r main \
 --input samplesheet.csv \
---genomedir /path/to/reference \
+--genomesdir /path/to/reference \
 --org human
 ```
 
