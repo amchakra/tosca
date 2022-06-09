@@ -40,7 +40,7 @@ nextflow pull amchakra/tosca -r main
 3. Run the provided test dataset:
 
 ```
-nextflow run amchakra/tosca -c test
+nextflow run amchakra/tosca -r main -profile test
 ```
 
 4. Review the results
