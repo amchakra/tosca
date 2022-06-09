@@ -37,11 +37,11 @@ if(params.org && params.genomesdir) {
 
 } else {
 
-    if(!params.genome_fai) { exit 1 "${params.genome_fai} is not specified." } 
-    if(!params.transcript_fa) { exit 1 "${params.transcript_fa} is not specified." } 
-    if(!params.transcript_fai) { exit 1 "${params.transcript_fai} is not specified." } 
-    if(!params.transcript_gtf) { exit 1 "${params.transcript_gtf} is not specified." } 
-    if(!params.regions_gtf) { exit 1 "${params.regions_gtf} is not specified." } 
+    if(!params.genome_fai) { exit 1 "--genome_fai is not specified." } 
+    if(!params.transcript_fa) { exit 1 "--transcript_fa is not specified." } 
+    if(!params.transcript_fai) { exit 1 "--transcript_fai is not specified." } 
+    if(!params.transcript_gtf) { exit 1 "--transcript_gtf is not specified." } 
+    if(!params.regions_gtf) { exit 1 "--regions_gtf is not specified." } 
 
 }
 
