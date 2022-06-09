@@ -26,12 +26,25 @@ include { GET_ATLAS } from './workflows/getatlas.nf'
 include { MAKE_REPORT } from './workflows/makereport.nf'
 
 // Genome variables
-params.genome_fai = params.genomes[ params.org ].genome_fai
-params.transcript_fa = params.genomes[ params.org ].transcript_fa
-params.transcript_fai = params.genomes[ params.org ].transcript_fai
-params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
-params.star_genome = params.genomes[ params.org ].star_genome
-params.regions_gtf = params.genomes[ params.org ].regions_gtf
+if(params.org && params.genomesdir) {
+
+    params.genome_fai = params.genomes[ params.org ].genome_fai
+    params.transcript_fa = params.genomes[ params.org ].transcript_fa
+    params.transcript_fai = params.genomes[ params.org ].transcript_fai
+    params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
+    params.star_genome = params.genomes[ params.org ].star_genome
+    params.regions_gtf = params.genomes[ params.org ].regions_gtf
+
+} else {
+
+    if(!params.genome_fai) { exit 1 "${params.genome_fai} is not specified." } 
+    if(!params.transcript_fa) { exit 1 "${params.transcript_fa} is not specified." } 
+    if(!params.transcript_fai) { exit 1 "${params.transcript_fai} is not specified." } 
+    if(!params.transcript_gtf) { exit 1 "${params.transcript_gtf} is not specified." } 
+    if(!params.regions_gtf) { exit 1 "${params.regions_gtf} is not specified." } 
+
+}
+
 
 // Create channels for static files
 ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
