@@ -48,6 +48,9 @@ fwrite(hybrid_identification.dt, "hybrid_identification.tsv", sep = "\t")
 message("Getting intra-inter, genomic-reverse metrics...")
 
 hybrids.files <- list.files(".", pattern = ".hybrids.gc.annotated.tsv.gz$", full.names = TRUE)
+if(length(hybrids.files) == 0) hybrids.files <- list.files(".", pattern = ".hybrids.gc.annotated.mfe.tsv.gz$", full.names = TRUE) # If analyse_structures
+if(length(hybrids.files) == 0) hybrids.files <- list.files(".", pattern = ".hybrids.gc.annotated.mfe.shuffled.tsv.gz$", full.names = TRUE) # If shuffled_mfe
+
 hybrids.list <- lapply(hybrids.files, fread)
 hybrids.dt <- rbindlist(hybrids.list, use.names = TRUE)
 hybrids.dt$sample <- rep(tstrsplit(basename(hybrids.files), "\\.")[[1]], S4Vectors::elementNROWS(hybrids.list))

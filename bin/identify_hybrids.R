@@ -2,7 +2,7 @@
 
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(primavera))
+suppressPackageStartupMessages(library(toscatools))
 suppressPackageStartupMessages(library(parallel))
 
 option_list <- list(make_option(c("-b", "--blast8"), action = "store", type = "character", help = "Blat blast8"),

@@ -1,0 +1,3 @@
+sample,fastq
+arf1_high,https://raw.githubusercontent.com/amchakra/tosca/main/testdata/arf1_stau1_high.fastq.gz
+arf1_low,https://raw.githubusercontent.com/amchakra/tosca/main/testdata/arf1_stau1_low.fastq.gz

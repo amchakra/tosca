@@ -8,10 +8,6 @@ process ANNOTATE_HYBRIDS {
     tag "${sample_id}"
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
-    cpus 4
-    memory 16G
-    time '1h'
-
     input:
         val(type)
         tuple val(sample_id), path(hybrids)
@@ -26,7 +22,7 @@ process ANNOTATE_HYBRIDS {
     #!/usr/bin/env Rscript
 
     suppressPackageStartupMessages(library(data.table))
-    suppressPackageStartupMessages(library(primavera))
+    suppressPackageStartupMessages(library(toscatools))
 
     setDTthreads(${task.cpus})
 

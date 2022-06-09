@@ -1,7 +1,7 @@
 # You can use this file to create a conda environment for this pipeline:
 # conda env create -f environment.yml
 
-name: tosca-0.2
+name: tosca-1.0.0
 channels:
   - conda-forge
   - bioconda
@@ -10,6 +10,7 @@ channels:
 dependencies:
   - conda-forge::python=3.7.3
   - conda-forge::pigz=2.3.4
+  - conda-forge::pandas=1.2.0 
   - bioconda::fastqc=0.11.9
   - bioconda::cutadapt=3.0
   - bioconda::bbmap=38.87
@@ -21,22 +22,22 @@ dependencies:
   - bioconda::viennarna=2.4.14
   - bioconda::ushuffle=1.2.2
   - bioconda::multiqc=1.10.1
-  - pysam
-  - pandas
+  - bioconda::pysam=0.16.0.1
 
 # R packages
-  - conda-forge::r-base
-  - conda-forge::r-devtools
-  - conda-forge::r-data.table
-  - conda-forge::r-r.utils
-  - conda-forge::r-ggplot2
-  - conda-forge::r-scales
-  - conda-forge::r-tictoc
-  - conda-forge::r-optparse
-  - conda-forge::r-rslurm
-  - conda-forge::r-cowplot
-  - conda-forge::r-ggthemes
-  - conda-forge::r-igraph
-  - bioconda::bioconductor-rtracklayer
-  - bioconda::bioconductor-rbgl
-  - bioconda::bioconductor-graph
+  - conda-forge::r-base=4.0.3
+  - conda-forge::r-devtools=2.3.2
+  - conda-forge::r-data.table=1.13.6
+  - conda-forge::r-r.utils=2.10.1
+  - conda-forge::r-ggplot2=3.3.3
+  - conda-forge::r-scales=1.1.1
+  - conda-forge::r-tictoc=1.0
+  - conda-forge::r-optparse=1.6.6
+  - conda-forge::r-rslurm=0.6.1
+  - conda-forge::r-cowplot=1.1.1
+  - conda-forge::r-ggthemes=4.2.0
+  - conda-forge::r-igraph=1.2.6
+  - bioconda::bioconductor-genomicalignments=1.26.0
+  - bioconda::bioconductor-rtracklayer=1.50.0
+  - bioconda::bioconductor-rbgl=1.66.0
+  - bioconda::bioconductor-graph=1.68.0

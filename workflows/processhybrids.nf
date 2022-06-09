@@ -3,59 +3,48 @@
 // Define DSL2
 nextflow.enable.dsl=2
 
-// include { GET_BINDING_ENERGY } from '../modules/getbindingenergy.nf'
 include { ANNOTATE_HYBRIDS as ANNOTATE_HYBRIDS; ANNOTATE_HYBRIDS as ANNOTATE_CLUSTERS } from '../modules/annotatehybrids.nf'
-include { CLUSTER_HYBRIDS; COLLAPSE_CLUSTERS } from '../modules/clusterhybrids.nf'
+include { CLUSTER_HYBRIDS_SLURM; COLLAPSE_CLUSTERS } from '../modules/clusterhybrids.nf'
+include { CLUSTER_HYBRIDS } from '../subworkflows/clusterhybrids.nf'
 include { CONVERT_COORDINATES as CONVERT_HYBRID_COORDINATES; CONVERT_COORDINATES as CONVERT_CLUSTER_COORDINATES } from '../modules/convertcoordinates.nf'
+include { ANALYSE_STRUCTURES } from '../subworkflows/analysestructures.nf'
 
 workflow PROCESS_HYBRIDS {
 
     take:
-    hybrids         // channel: hybrids
-    transcript_fa   // channel: transcript_fa
-    transcript_gtf  // channel: transcript_gtf
-    regions_gtf     // channel: regions_gtf
+        hybrids         // channel: hybrids
+        transcript_fa   // channel: transcript_fa
+        transcript_gtf  // channel: transcript_gtf
+        regions_gtf     // channel: regions_gtf
 
     main:
-    
-    // GET_BINDING_ENERGY(hybrids, transcript_fa.collect()) // Get binding energies
+        if(params.cluster_old) {
+            CLUSTER_HYBRIDS_SLURM("hybrids", hybrids)
+        }
 
-    // CLUSTER_HYBRIDS(GET_BINDING_ENERGY.out.hybrids) // Get clusters
-    CLUSTER_HYBRIDS("hybrids", hybrids)
-    CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
-    ANNOTATE_HYBRIDS("hybrids", CONVERT_HYBRID_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate
+        CLUSTER_HYBRIDS("hybrids", hybrids)
+        CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
+        ANNOTATE_HYBRIDS("hybrids", CONVERT_HYBRID_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate
 
-    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
-    CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters
-    ANNOTATE_CLUSTERS("clusters", CONVERT_CLUSTER_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate      
+        COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS.out.hybrids) // Collapse clusters
+        CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters
+        ANNOTATE_CLUSTERS("clusters", CONVERT_CLUSTER_COORDINATES.out.hybrids, regions_gtf.collect()) // Annotate      
 
-    emit:
-    // mfe = GET_BINDING_ENERGY.out.hybrids
-    // clustered = CLUSTER_HYBRIDS.out.hybrids
-    hybrids = ANNOTATE_HYBRIDS.out.hybrids
-    clusters = ANNOTATE_CLUSTERS.out.hybrids
+        if(params.analyse_structures) {
 
-}
+            ANALYSE_STRUCTURES("hybrids", ANNOTATE_HYBRIDS.out.hybrids, transcript_fa.collect())
+            
+            output_hybrids = ANALYSE_STRUCTURES.out.hybrids
+            output_clusters = ANNOTATE_CLUSTERS.out.hybrids
+        
+        } else {
 
-include { CLUSTER_HYBRIDS_VIRUS as CLUSTER_HYBRIDS_VIRUS } from '../modules/clusterhybrids.nf'
-
-workflow PROCESS_HYBRIDS_VIRUS {
-
-    take:
-    hybrids         // channel: hybrids
-    transcript_fa   // channel: transcript_fa
-    transcript_gtf  // channel: transcript_gtf
-
-    main:
-    
-    CLUSTER_HYBRIDS_VIRUS("hybrids", hybrids)
-    CONVERT_HYBRID_COORDINATES("hybrids", CLUSTER_HYBRIDS_VIRUS.out.hybrids, transcript_gtf.collect()) // Get genomic coordinates for hybrids
-
-    COLLAPSE_CLUSTERS("clusters", CLUSTER_HYBRIDS_VIRUS.out.hybrids) // Collapse clusters
-    CONVERT_CLUSTER_COORDINATES("clusters", COLLAPSE_CLUSTERS.out.clusters, transcript_gtf.collect()) // Get genomic coordinates for clusters 
+            output_hybrids = ANNOTATE_HYBRIDS.out.hybrids
+            output_clusters = ANNOTATE_CLUSTERS.out.hybrids
+        }
 
     emit:
-    hybrids = CONVERT_HYBRID_COORDINATES.out.hybrids
-    clusters = CONVERT_CLUSTER_COORDINATES.out.hybrids
+        hybrids = output_hybrids
+        clusters = output_clusters
 
 }

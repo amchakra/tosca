@@ -4,11 +4,10 @@
 nextflow.enable.dsl=2
 
 process SPLIT_FASTQ {
+
     tag "${sample_id}"
     if(!params.keep_cache) cache false
-    
-    cpus 8
-    time '1h'
+
 
     input:
         tuple val(sample_id), path(reads)
@@ -20,17 +19,14 @@ process SPLIT_FASTQ {
 
     split_size = params.split_size * 4
 
-    cmd = "gunzip -c $reads | split -l $split_size --additional-suffix .fastq - ${sample_id}_ && pigz *.fastq"
-
-    if(params.verbose) { println ("[MODULE] CUTADAPT: " + cmd) }
-
     """
-    $cmd
+    gunzip -c $reads | split -l $split_size --additional-suffix .fastq - ${sample_id}_ && pigz *.fastq
     """
 
 }
 
 process FASTQ_TO_FASTA {
+
     tag "${sample_id}"
     if(!params.keep_cache) cache false
 
@@ -47,5 +43,6 @@ process FASTQ_TO_FASTA {
     """
     reformat.sh in1=$reads out1=${sample_id}.fasta
     """
+
 }
 

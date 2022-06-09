@@ -2,7 +2,7 @@
 
 suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(primavera))
+suppressPackageStartupMessages(library(toscatools))
 suppressPackageStartupMessages(library(parallel))
 suppressPackageStartupMessages(library(rslurm))
 
