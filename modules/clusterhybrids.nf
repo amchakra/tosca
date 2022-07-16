@@ -109,7 +109,7 @@ process CHUNK_HYBRIDS {
     atlas.hybrids.dt <- atlas.hybrids.dt[total_count > 1]
 
     # Subsample as indicated
-    if($sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt, $sample_size))]
+    if($sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt), $sample_size)]
     message("Number of hybrids to cluster: ", nrow(atlas.hybrids.dt))
 
     # Keep ones not clustered to add back in later
