@@ -105,7 +105,8 @@ process CHUNK_HYBRIDS {
     atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
 
     message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
-    atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
+    # atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
+    atlas.hybrids.dt <- atlas.hybrids.dt[total_count > 1]
 
     # Subsample as indicated
     if($sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt, $sample_size))]
