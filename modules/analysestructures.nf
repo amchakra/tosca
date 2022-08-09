@@ -194,7 +194,7 @@ process MERGE_STRUCTURES {
     structures.dt <- rbindlist(structures.list, use.names = TRUE, fill = TRUE)
 
     structures.hybrids.dt <- merge(hybrids.dt, structures.dt, by = "name", all.x = TRUE)
-    stopifnot(nrow(structures.hybrids.dt) == nrow(hybrids.dt))
+    # stopifnot(nrow(structures.hybrids.dt) == nrow(hybrids.dt))
     fwrite(structures.hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.tsv.gz"), sep = "\t")
 
     """
