@@ -81,8 +81,7 @@ process CHUNK_SEQUENCES {
     if($chunk_number > nrow(structure.dt)) {
         structure.list.chunks <- split(structure.dt, cut(seq_len(nrow(structure.dt)), nrow(structure.dt), label = FALSE))
         lapply(seq_len(nrow(structure.dt)), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
-    }
-    if($chunk_number > 1) {
+    } else if($chunk_number > 1) {
         structure.list.chunks <- split(structure.dt, cut(seq_len(nrow(structure.dt)), $chunk_number, label = FALSE))
         lapply(seq_len($chunk_number), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".structure.rds")) })
     } else {
