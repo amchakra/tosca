@@ -153,7 +153,7 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
 - `--breaks` specifies the breaks for grouping the arcs by colour
     - default: `0,0.3,0.8,1`
 
-### Optional pipeline mudules
+### Optional pipeline modules
 
 - `--skip_premap` skips premapping to the genome and filtering of spliced reads
 - `--skip_atlas` skips generation of an atlas by combining all the samples
