@@ -1,0 +1,25 @@
+name: tosca-test
+
+on: workflow_dispatch
+
+jobs:
+  test-tosca-pipeline:
+    runs-on: ubuntu-latest
+    container: amchakrabarti/tosca:1.0.0
+    strategy:
+      matrix:
+        nxf_ver: [21.10.3, '']
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Nextflow
+        run: |
+          export NXF_VER=${{ matrix.nxf_ver }}
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/  
+
+      - name: Run test pipeline
+        run: |
+          nextflow run ${GITHUB_WORKSPACE}/main.nf -profile github
+
+    
