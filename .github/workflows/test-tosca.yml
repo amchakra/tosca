@@ -6,14 +6,14 @@ jobs:
   test-tosca-pipeline:
     runs-on: ubuntu-latest
     container: amchakrabarti/tosca:1.0.0
-    
+
     steps:
       - uses: actions/checkout@v3
       
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/  
+          mv nextflow /usr/local/bin/  
 
       - name: Run test pipeline
         run: |
