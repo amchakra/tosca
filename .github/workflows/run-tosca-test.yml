@@ -7,12 +7,12 @@ on:
 jobs:
   test-tosca-pipeline:
     runs-on: ubuntu-latest
+    container: amchakrabarti/tosca:1.0.0
     strategy:
       matrix:
         nxf_ver: [21.10.3, '']
     steps:
       - uses: actions/checkout@v3
-      - container: amchakrabarti/tosca:1.0.0
       
       - name: Install Nextflow
         run: |
