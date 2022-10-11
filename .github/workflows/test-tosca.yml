@@ -6,7 +6,7 @@ jobs:
   test-tosca-pipeline:
     runs-on: ubuntu-latest
     container: amchakrabarti/tosca:1.0.0
-    strategy:
+    
     steps:
       - uses: actions/checkout@v3
       
