@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com/articles/nature14280) or proximity ligation (e.g. [PARIS](https://doi.org/10.1016/j.cell.2016.04.028), [SPLASH](https://doi.org/10.1016/j.molcel.2016.04.028), [COMRADES](https://doi.org/10.1038/s41592-018-0121-0)) sequencing data. It is containerised using Docker to ensure ease of installation. It is optimised for use on high-performance computing (HPC) clusters.
+Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com/articles/nature14280) or proximity ligation (e.g. [PARIS](https://doi.org/10.1016/j.cell.2016.04.028), [SPLASH](https://doi.org/10.1016/j.molcel.2016.04.028), [COMRADES](https://doi.org/10.1038/s41592-018-0121-0)) sequencing data. It is containerised using Docker to ensure ease of installation. It is optimised for use on high-performance computing (HPC) clusters, but can also run locally depending on the size of the data set.
 
 ## Pipeline summary
 
@@ -78,12 +78,17 @@ sample3,/path/to/file3.fastq.gz
 
 ```
 nextflow run amchakra/tosca -r main \
+-profile singularity \
 --input samplesheet.csv \
 --genomesdir /path/to/reference \
 --org human
 ```
 
 ## Pipeline parameters
+
+### Profiles
+
+- `-profile` can be used to specify `test`, `docker`, `singularity` and `crick` depending on the system being used and resources available. Others can be found at [nf-core](https://github.com/nf-core/configs).
 
 ### General parameters
 
