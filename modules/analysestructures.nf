@@ -80,9 +80,8 @@ process CHUNK_SEQUENCES {
 
     if($chunk_number > nrow(structure.dt)) {
         structure.list.chunks <- split(structure.dt, cut(seq_len(nrow(structure.dt)), nrow(structure.dt), label = FALSE))
-        lapply(seq_len(nrow(structure.dt)), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
-    }
-    if($chunk_number > 1) {
+        lapply(seq_len(nrow(structure.dt)), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".structure.rds")) })
+    } else if($chunk_number > 1) {
         structure.list.chunks <- split(structure.dt, cut(seq_len(nrow(structure.dt)), $chunk_number, label = FALSE))
         lapply(seq_len($chunk_number), function(i) { saveRDS(structure.list.chunks[[i]], paste0("${sample_id}", "_", i, ".structure.rds")) })
     } else {
@@ -195,7 +194,7 @@ process MERGE_STRUCTURES {
     structures.dt <- rbindlist(structures.list, use.names = TRUE, fill = TRUE)
 
     structures.hybrids.dt <- merge(hybrids.dt, structures.dt, by = "name", all.x = TRUE)
-    stopifnot(nrow(structures.hybrids.dt) == nrow(hybrids.dt))
+    # stopifnot(nrow(structures.hybrids.dt) == nrow(hybrids.dt))
     fwrite(structures.hybrids.dt, paste0("${sample_id}", ".", "${type}", ".gc.annotated.mfe.tsv.gz"), sep = "\t")
 
     """

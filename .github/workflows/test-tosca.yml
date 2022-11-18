@@ -1,0 +1,21 @@
+name: tosca-test
+
+on: workflow_dispatch
+
+jobs:
+  test-tosca-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          mv nextflow /usr/local/bin/  
+
+      - name: Run test pipeline
+        run: |
+          nextflow run ${GITHUB_WORKSPACE}/main.nf -profile github
+
+    

@@ -1,5 +1,11 @@
 # _Tosca_ - proximity ligation data analysis
 
+_Tosca_ is presented and described further in our preprint:
+
+**[A computationally-enhanced hiCLIP atlas reveals Staufen1 RNA binding features and links 3’ UTR structure to RNA metabolism](https://doi.org/10.1101/2022.06.13.495933)**.
+
+Anob M. Chakrabarti, Ira A. Iosub, Flora C. Y. Lee, Jernej Ule, Nicholas M. Luscombe. _bioRxiv_ (2022).
+
 ## Table of contents
 
 1. [Introduction](#introduction)
@@ -7,10 +13,11 @@
 3. [Quick start (testing)](#quick-start-testing)
 4. [Quick start (running)](#quick-start-running)
 5. [Pipeline parameters](#pipeline-parameters)
+6. [Pipeline outputs](#pipeline-outputs)
 
 ## Introduction
 
-Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com/articles/nature14280) or proximity ligation (e.g. [PARIS](https://doi.org/10.1016/j.cell.2016.04.028), [SPLASH](https://doi.org/10.1016/j.molcel.2016.04.028), [COMRADES](https://doi.org/10.1038/s41592-018-0121-0)) sequencing data. It is containerised using Docker to ensure ease of installation. It is optimised for use on high-performance computing (HPC) clusters.
+Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com/articles/nature14280) or proximity ligation (e.g. [PARIS](https://doi.org/10.1016/j.cell.2016.04.028), [SPLASH](https://doi.org/10.1016/j.molcel.2016.04.028), [COMRADES](https://doi.org/10.1038/s41592-018-0121-0)) sequencing data. It is containerised using Docker to ensure ease of installation. It is optimised for use on high-performance computing (HPC) clusters, but can also run locally depending on the size of the data set.
 
 ## Pipeline summary
 
@@ -40,7 +47,11 @@ nextflow pull amchakra/tosca -r main
 3. Run the provided test dataset:
 
 ```
-nextflow run amchakra/tosca -r main -profile test
+nextflow run amchakra/tosca -r main -profile test,docker
+```
+or
+```
+nextflow run amchakra/tosca -r main -profile test,singularity
 ```
 
 4. Review the results
@@ -74,12 +85,17 @@ sample3,/path/to/file3.fastq.gz
 
 ```
 nextflow run amchakra/tosca -r main \
+-profile singularity \
 --input samplesheet.csv \
 --genomesdir /path/to/reference \
 --org human
 ```
 
 ## Pipeline parameters
+
+### Profiles
+
+- `-profile` can be used to specify `test`, `docker`, `singularity` and `crick` depending on the system being used and resources available. Others can be found at [nf-core](https://github.com/nf-core/configs).
 
 ### General parameters
 
@@ -153,8 +169,51 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
 - `--breaks` specifies the breaks for grouping the arcs by colour
     - default: `0,0.3,0.8,1`
 
-### Optional pipeline mudules
+### Optional pipeline modules
 
 - `--skip_premap` skips premapping to the genome and filtering of spliced reads
 - `--skip_atlas` skips generation of an atlas by combining all the samples
 - `--skip_qc` skips generation of QC plots and MultiQC report
+
+## Pipeline outputs
+
+Tosca outputs results in a number of subfolders:
+
+```
+.
+├── mapped
+├── hybrids
+├── clusters
+├── igv
+├── maps
+├── nonhybrids
+└── pipeline_info
+```
+
+### Files
+
+- `mapped` contains all the partial read alignments used for calculating valid hybrids:
+    - `*.blast8.gz` 
+- `hybrids` contains files that have the identified hybrids as TSV files:
+    - `*.hybrids.tsv.gz` contains all the hybrids
+    - `*.hybrids.dedup.tsv.gz` contains the deduplicated hybrids
+    - `*.hybrids.clustered.tsv.gz` contains the deduplicated hybrids with clusters calculated that identify the unique duplexes/RNA structure they represent
+    - `*.hybrids.gc.tsv.gz` contains the deduplicated hybrids with genomic coordinates calculated
+    - `*.hybrids.gc.annotated.tsv.gz` contains the deduplicated hybrids with genomic coordinates, gene, region and biotypes calculated.
+- `clusters` contains files that have the identified clusters as TSV files:
+    - `*.clusters.tsv.gz` contains all the collapsed clusters
+    - `*.clusters.gc.tsv.gz` contains the collapsed clusters with genomic coordinates calculated
+    - `*.clusters.gc.annotated.tsv.gz` contains the collapsed clusters with genomic coordinates, gene, region and biotypes calculated.
+- `igv` contains files than can be used to visualise the results in IGV:
+    - `*.bam` contains all the hybrids in BAM format. Optional flags can be used to colour/group by experiment, hybrid cluster, read orientation, and hybridisation energy
+    - `*.bed` contains the clusters (i.e. unique duplexes) in BED format
+    - `*.bp` contains arc representations of the clusters coloured by number
+- `maps` contains contact map files (if genes of interest have been specified):
+    - `*.mat.rds` is an R matrix with the raw contact map matrix
+    - `*.{bin_size}_binned.map.tsv.gz` is the matrix in long format binned using {bin_size}
+- `nonhybrids` contains those sequencing reads that did not contain a hybrid:
+    - `*.nonhybrid.fastq.gz`
+- `pipeline_info` contains the execution reports, traces and timelines generated by Nextflow:
+    - `execution_report.html`
+    - `execution_timeline.html`
+    - `execution_trace.txt`
