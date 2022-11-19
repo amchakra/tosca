@@ -110,6 +110,6 @@ if(!any(grepl(",", genes))) {
 
 } else {
 
-    message("--genes cannot be a mix of intra-transcript and inter-transcript yet."
+    message("--genes cannot be a mix of intra-transcript and inter-transcript yet.")
 
 }
