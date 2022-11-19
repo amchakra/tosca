@@ -124,7 +124,7 @@ process CHUNK_HYBRIDS {
 
     # Split into chunks and write out
     if($chunk_number > length(atlas.hybrids.list)) {
-        atlas.hybrids.list.chunks <-  split(atlas.hybrids.list, cut(seq_along(atlas.hybrids.list), length(atlas.hybrids.list), label = FALSE))
+        atlas.hybrids.list.chunks <-  split(atlas.hybrids.list, seq_along(atlas.hybrids.list))
         lapply(seq_len(length(atlas.hybrids.list)), function(i) { saveRDS(atlas.hybrids.list.chunks[[i]], paste0("${sample_id}", "_", i, ".rds")) })
     } else if($chunk_number > 1) {
         atlas.hybrids.list.chunks <- split(atlas.hybrids.list, cut(seq_along(atlas.hybrids.list), $chunk_number, label = FALSE))
