@@ -12,43 +12,104 @@ option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "ch
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
+genes <- readLines(opt$genes)
 
-genes <- readLines(opt$genes) # Currently just one
+# Intra-transcript maps
 
-for(i in seq_along(genes)) {
+if(!any(grepl(",", genes))) {
 
-    goi <- genes[i]
-    message(goi)
+    for(i in seq_along(genes)) {
 
-    fai.dt <- fread(opt$fai, select = 1:2, col.names = c("gene", "length"))
-    genome.size <- as.integer(fai.dt[gene == goi]$length)
-    hybrid.dt <- fread(opt$hybrids)
-    hybrid.dt <- hybrid.dt[type == "intragenic"][L_seqnames == goi]
+        goi <- genes[i]
+        message(goi)
 
-    if(!nrow(hybrid.dt) == 0) {
+        fai.dt <- fread(opt$fai, select = 1:2, col.names = c("gene", "length"))
+        genome.size <- as.integer(fai.dt[gene == goi]$length)
+        hybrid.dt <- fread(opt$hybrids)
+        hybrid.dt <- hybrid.dt[type == "intragenic"][L_seqnames == goi]
 
-        mat <- get_contact_map(hybrid.dt = hybrid.dt, genome.size = genome.size)
-        saveRDS(mat, file = paste0(opt$output, ".", goi, ".mat.rds"))
+        if(!nrow(hybrid.dt) == 0) {
 
-        # Bin matrix and normalise
-        if(opt$bin_size == 1) {
-            binned.mat <- mat
+            mat <- get_contact_map(hybrid.dt = hybrid.dt, genome.size = genome.size)
+            saveRDS(mat, file = paste0(opt$output, ".", goi, ".mat.rds"))
+
+            # Bin matrix and normalise
+            if(opt$bin_size == 1) {
+                binned.mat <- mat
+            } else {
+                binned.mat <- bin_matrix(mat, bin.size = opt$bin_size)
+            }
+
+            # binned.dt <- data.table(reshape2::melt(binned.mat))
+            binned.dt <- melt(as.data.table(binned.mat)[, rn := 1:.N], id.vars = "rn")
+            binned.dt[, variable := as.integer(gsub("^V", "", as.character(variable)))]
+            binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
+            binned.dt <- binned.dt[value != 0]
+
+            fwrite(binned.dt, file = paste0(opt$output, ".", goi, ".", opt$bin_size, "_binned_map.tsv.gz"), sep = "\t")
+
         } else {
-            binned.mat <- bin_matrix(mat, bin.size = opt$bin_size)
+
+            message("No hybrids")
+
         }
 
-        # binned.dt <- data.table(reshape2::melt(binned.mat))
-        binned.dt <- melt(as.data.table(binned.mat)[, rn := 1:.N], id.vars = "rn")
-        binned.dt[, variable := as.integer(gsub("^V", "", as.character(variable)))]
-        binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
-        binned.dt <- binned.dt[value != 0]
+    }
 
-        fwrite(binned.dt, file = paste0(opt$output, ".", goi, ".", opt$bin_size, "_binned_map.tsv.gz"), sep = "\t")
+} else if(all(grepl(",", genes))) {
 
-    } else {
+    for(j in seq_along(genes)) {
+        
+        # Get two segments
+        goi <- genes[j]
+        goi <- sort(unlist(tstrsplit(goi, ","))) # ensures alphabetical so matches L & R for reorient_hybrids
+        gene_A <- goi[1]
+        gene_B <- goi[2]
+        
+        # Get lengths for each segment
+        fai.dt <- fread(opt$fai, select = 1:2, col.names = c("gene", "length"))
+        gene_A.size <- as.integer(fai.dt[gene == gene_A]$length)
+        gene_B.size <- as.integer(fai.dt[gene == gene_B]$length)
+        
+        hybrid.dt <- fread(opt$hybrids)
+        hybrid.dt <- reorient_hybrids(hybrid.dt)
+        hybrid.dt <- hybrid.dt[type == "intergenic"][L_seqnames == gene_A][R_seqnames == gene_B]
 
-        message("No hybrids")
+        if(!nrow(hybrid.dt) == 0) {
+
+            # Now create matrix and fill
+            mat <- matrix(data = 0, nrow = gene_A.size, ncol = gene_B.size)
+            
+            for (i in 1:nrow(hybrid.dt)) {
+            mat[
+                hybrid.dt[i]$L_start:hybrid.dt[i]$L_end,
+                hybrid.dt[i]$R_start:hybrid.dt[i]$R_end
+            ] <- mat[
+                hybrid.dt[i]$L_start:hybrid.dt[i]$L_end,
+                hybrid.dt[i]$R_start:hybrid.dt[i]$R_end
+            ] + 1
+            }
+            
+            saveRDS(mat, file = paste0(opt$output, ".", gene_A, "-", gene_B, ".mat.rds"))
+
+            # Don't bin inter as current binning code assumes a square matrix
+            binned.dt <- melt(as.data.table(mat)[, rn := 1:.N], id.vars = "rn")
+            binned.dt[, variable := as.integer(gsub("^V", "", as.character(variable)))]
+            binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
+            binned.dt <- binned.dt[value != 0]
+
+            fwrite(binned.dt, file = paste0(opt$output, ".", gene_A, "-", gene_B, ".", 1, "_binned_map.tsv.gz"), sep = "\t")
+        
+        } else {
+
+            message("No hybrids")
+
+        }
 
     }
+
+} else {
+
+    message("--genes cannot be a mix of intra-transcript and inter-transcript yet."
 
 }
