@@ -112,6 +112,13 @@ process CHUNK_HYBRIDS {
     if($sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt), $sample_size)]
     message("Number of hybrids to cluster: ", nrow(atlas.hybrids.dt))
 
+    # Inter-transcript only
+    inter_only = TRUE
+    if(inter_only) {
+        atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != R_seqnames]
+        print(unique(atlas.hybrids.dt[, .(L_seqnames, R_seqnames, total_count)]))
+    }
+
     # Keep ones not clustered to add back in later
     unclustered.hybrids.dt <- hybrids.dt[!name %in% atlas.hybrids.dt\$name]
     stopifnot(nrow(unclustered.hybrids.dt) + nrow(atlas.hybrids.dt) == nrow(hybrids.dt))
@@ -189,13 +196,13 @@ process IDENTIFY_CLUSTERS {
         if (file.size(ol) != 0) {
             bedpe.dt <- fread(ol, col.names = c(paste0(bedpe.colnames, ".x"), paste0(bedpe.colnames, ".y")))
             # Delete temporary files
-            invisible(file.remove(bedpe))
-            invisible(file.remove(ol))
+            # invisible(file.remove(bedpe))
+            # invisible(file.remove(ol))
         } else {
 
             # Delete temporary files
-            invisible(file.remove(bedpe))
-            invisible(file.remove(ol))
+            # invisible(file.remove(bedpe))
+            # invisible(file.remove(ol))
             return(data.table())
         }
 
