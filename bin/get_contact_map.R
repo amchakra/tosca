@@ -12,6 +12,41 @@ option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "ch
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
+# Reorienting function adjusted for segments
+reorient_hybrids_segments <- function(hybrids.dt) {
+
+  # First do starts
+  correct.dt <- hybrids.dt[L_start <= R_start]
+  incorrect.dt <- hybrids.dt[L_start > R_start]
+
+  renamed <- gsub("^L_", "X_", names(incorrect.dt))
+  renamed <- gsub("^R_", "L_", renamed)
+  renamed <- gsub("^X_", "R_", renamed)
+
+  setnames(incorrect.dt, renamed)
+  reoriented.dt <- rbindlist(list(correct.dt, incorrect.dt), use.names = TRUE)
+  stopifnot(all(reoriented.dt$L_start <= reoriented.dt$R_start))
+
+  # Then do segments (to make sure intergenics in same order)
+  reoriented.dt[, `:=` (L_segment = tstrsplit(L_seqnames, "_")[[2]],
+                        R_segment = tstrsplit(R_seqnames, "_")[[2]])]
+  correct.dt <- reoriented.dt[L_segment <= R_segment]
+  incorrect.dt <- reoriented.dt[L_segment > R_segment]
+
+  renamed <- gsub("^L_", "X_", names(incorrect.dt))
+  renamed <- gsub("^R_", "L_", renamed)
+  renamed <- gsub("^X_", "R_", renamed)
+
+  setnames(incorrect.dt, renamed)
+
+  reoriented.dt <- rbindlist(list(correct.dt, incorrect.dt), use.names = TRUE)
+  stopifnot(all(reoriented.dt$L_subject <= reoriented.dt$R_subject))
+  stopifnot(nrow(reoriented.dt) == nrow(hybrids.dt))
+
+  return(reoriented.dt)
+}
+
+
 genes <- readLines(opt$genes)
 
 # Intra-transcript maps
@@ -72,7 +107,7 @@ if(!any(grepl(",", genes))) {
         gene_B.size <- as.integer(fai.dt[gene == gene_B]$length)
         
         hybrid.dt <- fread(opt$hybrids)
-        hybrid.dt <- reorient_hybrids(hybrid.dt)
+        hybrid.dt <- reorient_hybrids_segments(hybrid.dt)
         hybrid.dt <- hybrid.dt[type == "intergenic"][L_seqnames == gene_A][R_seqnames == gene_B]
 
         if(!nrow(hybrid.dt) == 0) {
