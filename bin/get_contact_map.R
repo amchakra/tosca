@@ -97,7 +97,8 @@ if(!any(grepl(",", genes))) {
         
         # Get two segments
         goi <- genes[j]
-        goi <- sort(unlist(tstrsplit(goi, ","))) # ensures alphabetical so matches L & R for reorient_hybrids
+        # goi <- sort(unlist(tstrsplit(goi, ","))) # ensures alphabetical so matches L & R for reorient_hybrids
+        goi <- unlist(tstrsplit(goi, ",")) # ensures alphabetical so matches L & R for reorient_hybrids
         gene_A <- goi[1]
         gene_B <- goi[2]
         
