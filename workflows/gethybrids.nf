@@ -8,6 +8,8 @@ include { BLAT; FILTER_BLAT } from '../modules/maphybrids.nf'
 include { IDENTIFY_HYBRIDS; MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
 include { DEDUPLICATE } from '../modules/deduplicate.nf'
 
+include { BLAT_ALL_IN_ONE } from '../modules/maphybrids.nf'
+
 workflow GET_HYBRIDS {
 
     take:
@@ -23,17 +25,23 @@ workflow GET_HYBRIDS {
             .map { file -> tuple(file.simpleName, file) }
 
         // Convert to fasta
-        FASTQ_TO_FASTA(ch_split_fastq)
+        // FASTQ_TO_FASTA(ch_split_fastq)
 
         // Map hybrids
-        BLAT(FASTQ_TO_FASTA.out.fasta, fasta.collect())
-        FILTER_BLAT(BLAT.out.blast8)
+        // BLAT(FASTQ_TO_FASTA.out.fasta, fasta.collect())
+        // FILTER_BLAT(BLAT.out.blast8)
 
         // Identify hybrids
-        IDENTIFY_HYBRIDS(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
+        // IDENTIFY_HYBRIDS(FILTER_BLAT.out.blast8.join(FASTQ_TO_FASTA.out.fasta))
 
         // Merge hybrids
-        ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
+        // ch_merge_hybrids = IDENTIFY_HYBRIDS.out.hybrids
+        //     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+        //     .groupTuple(by: 0)
+
+        BLAT_ALL_IN_ONE(ch_split_fastq, fasta.collect())
+
+        ch_merge_hybrids = BLAT_ALL_IN_ONE.out.hybrids
             .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
             .groupTuple(by: 0)
 
