@@ -196,13 +196,13 @@ process IDENTIFY_CLUSTERS {
         if (file.size(ol) != 0) {
             bedpe.dt <- fread(ol, col.names = c(paste0(bedpe.colnames, ".x"), paste0(bedpe.colnames, ".y")))
             # Delete temporary files
-            # invisible(file.remove(bedpe))
-            # invisible(file.remove(ol))
+            invisible(file.remove(bedpe))
+            invisible(file.remove(ol))
         } else {
 
             # Delete temporary files
-            # invisible(file.remove(bedpe))
-            # invisible(file.remove(ol))
+            invisible(file.remove(bedpe))
+            invisible(file.remove(ol))
             return(data.table())
         }
 
