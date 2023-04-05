@@ -19,12 +19,13 @@ workflow GET_ATLAS {
         genome_fai      // channel: genome_fai
 
     main:
-        ch_all_hybrids = hybrids
-            .map { [ 'all', it[1] ] }
-            .groupTuple(by: 0)
-            // .view()
+        // ch_all_hybrids = hybrids
+        //     .map { [ 'all', it[1] ] }
+        //     .groupTuple(by: 0)
+        //     // .view()
 
-        MERGE_ATLAS_HYBRIDS("atlas", ch_all_hybrids)
+        // MERGE_ATLAS_HYBRIDS("atlas", ch_all_hybrids)
+        MERGE_ATLAS_HYBRIDS("atlas", hybrids)
         CLUSTER_ATLAS_HYBRIDS("atlas", MERGE_ATLAS_HYBRIDS.out.hybrids) // Get clusters
         EXPORT_ATLAS_BED("atlas",  CLUSTER_ATLAS_HYBRIDS.out.hybrids)
         EXPORT_ATLAS_BAM(EXPORT_ATLAS_BED.out.bed, genome_fai.collect())

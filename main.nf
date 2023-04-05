@@ -90,7 +90,7 @@ log.info "-\033[2m--------------------------------------------------------------
 def settings = [:]
 settings['Organism'] = params.org
 if(params.skip_qc) { settings['Skip QC'] = params.skip_qc } 
-if(params.skip_atlas) { settings['Skip atlas generation'] = params.skip_atlas }
+// if(params.skip_atlas) { settings['Skip atlas generation'] = params.skip_atlas }
 if(params.skip_premap) { settings['Skip premapping'] = params.skip_premap } 
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
@@ -114,52 +114,61 @@ if(params.goi) { settings['Breaks for arcs'] = params.breaks }
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-----------------------------------------------------------------"
 
-// Pipeline
-workflow {
+if(atlas) {
 
-    /* 
-    PREPARE INPUTS
-    */
-    METADATA(params.input) // Get fastq paths 
-    CUTADAPT(METADATA.out) // Trim adapters
+    ch_all_hybrids = Channel.fromPath(params.input)
+    GET_ATLAS(ch_all_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
 
-    /* 
-    IDENTIFY HYBRIDS
-    */
-    if(!params.skip_premap) {
-        PREMAP(CUTADAPT.out.fastq, ch_star_genome) // Filter spliced reads
-        GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa) // Identify hybrids
-    } else {
-        GET_HYBRIDS(CUTADAPT.out.fastq, ch_transcript_fa) // Identify hybrids
-    }
+} else {
 
-    /* 
-    IDENTIFY NON-HYBRIDS
-    */
-    GET_NON_HYBRIDS(GET_HYBRIDS.out.hybrids.join(METADATA.out))
+    // Pipeline
+    workflow {
 
-    /* 
-    PROCESS HYBRIDS
-    */
-    PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
+        /* 
+        PREPARE INPUTS
+        */
+        METADATA(params.input) // Get fastq paths 
+        CUTADAPT(METADATA.out) // Trim adapters
 
-    /* 
-    GET ATLAS
-    */
-    if(!params.skip_atlas) {
-        GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
-    }
+        /* 
+        IDENTIFY HYBRIDS
+        */
+        if(!params.skip_premap) {
+            PREMAP(CUTADAPT.out.fastq, ch_star_genome) // Filter spliced reads
+            GET_HYBRIDS(PREMAP.out.fastq, ch_transcript_fa) // Identify hybrids
+        } else {
+            GET_HYBRIDS(CUTADAPT.out.fastq, ch_transcript_fa) // Identify hybrids
+        }
 
-    /* 
-    GET VISUALISATIONS
-    */
-    GET_VISUALISATIONS(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai, ch_transcript_fai, ch_goi)
+        /* 
+        IDENTIFY NON-HYBRIDS
+        */
+        GET_NON_HYBRIDS(GET_HYBRIDS.out.hybrids.join(METADATA.out))
 
-    /* 
-    MAKE REPORT
-    */
-    if(!params.skip_qc) {
-        MAKE_REPORT(PREMAP.out.logs.collect(), GET_HYBRIDS.out.logs.collect(), GET_HYBRIDS.out.raw_hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.clusters.collect{it[1]}, ch_multiqc_config)
+        /* 
+        PROCESS HYBRIDS
+        */
+        PROCESS_HYBRIDS(GET_HYBRIDS.out.hybrids, ch_transcript_fa, ch_transcript_gtf, ch_regions_gtf)
+
+        // /* 
+        // GET ATLAS
+        // */
+        // if(!params.skip_atlas) {
+        //     GET_ATLAS(PROCESS_HYBRIDS.out.hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
+        // }
+
+        /* 
+        GET VISUALISATIONS
+        */
+        GET_VISUALISATIONS(PROCESS_HYBRIDS.out.hybrids, PROCESS_HYBRIDS.out.clusters, ch_genome_fai, ch_transcript_fai, ch_goi)
+
+        /* 
+        MAKE REPORT
+        */
+        if(!params.skip_qc) {
+            MAKE_REPORT(PREMAP.out.logs.collect(), GET_HYBRIDS.out.logs.collect(), GET_HYBRIDS.out.raw_hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.hybrids.collect{it[1]}, PROCESS_HYBRIDS.out.clusters.collect{it[1]}, ch_multiqc_config)
+        }
+
     }
 
 }
