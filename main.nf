@@ -120,8 +120,10 @@ workflow {
     if(params.atlas) {
 
         Channel.fromPath(params.input)
-               .map { path -> [ path.getSimpleName(), path ] }
+               .map { path -> [ 'atlas', path ] }
+               .groupTuple(by: 0)
                .set { ch_all_hybrids }
+            //    .view()
 
         GET_ATLAS(ch_all_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
 
