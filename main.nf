@@ -119,7 +119,10 @@ workflow {
 
     if(params.atlas) {
 
-        ch_all_hybrids = Channel.fromPath(params.input)
+        Channel.fromPath(params.input)
+               .map { path -> [ path.getSimpleName(), path ] }
+               .set { ch_all_hybrids }
+
         GET_ATLAS(ch_all_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
 
     } else {
