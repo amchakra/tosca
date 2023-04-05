@@ -114,19 +114,15 @@ if(params.goi) { settings['Breaks for arcs'] = params.breaks }
 log.info settings.collect { k,v -> "${k.padRight(25)}: $v" }.join("\n")
 log.info "-----------------------------------------------------------------"
 
-if(params.atlas) {
+// Pipeline
+workflow {
 
-    workflow {
+    if(params.atlas) {
 
         ch_all_hybrids = Channel.fromPath(params.input)
         GET_ATLAS(ch_all_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
 
-    }
-
-} else {
-
-    // Pipeline
-    workflow {
+    } else {
 
         /* 
         PREPARE INPUTS
