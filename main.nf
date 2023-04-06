@@ -120,7 +120,7 @@ workflow {
     if(params.atlas) {
 
         Channel.fromPath(params.input)
-               .map { path -> [ 'atlas', path ] }
+               .map { path -> [ params.atlas, path ] }
                .groupTuple(by: 0)
                .set { ch_all_hybrids }
             //    .view()
