@@ -6,11 +6,8 @@ nextflow.enable.dsl=2
 process GET_NON_HYBRIDS {
 
     tag "${sample_id}"
+    label 'process_low'
     publishDir "${params.outdir}/nonhybrids", mode: 'copy', overwrite: true
-
-    // cpus 4
-    // memory 16G
-    // time '1h'
 
     input:
         tuple val(sample_id), path(hybrids), path(reads)

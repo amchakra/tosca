@@ -8,6 +8,7 @@ ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists
 
 process TOSCA_QC {
     tag "${workflow.runName}"
+    label 'process_low'
 
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
 
@@ -30,6 +31,7 @@ process TOSCA_QC {
 
 process MULTIQC {
     tag "${workflow.runName}"
+    label 'process_low'
 
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
 

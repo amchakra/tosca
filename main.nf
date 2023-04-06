@@ -15,7 +15,7 @@ nextflow.enable.dsl=2
 
 // Processes
 include { hiclipheader } from './modules/utils.nf'
-include { METADATA } from './modules/metadata.nf'
+include { METADATA } from './workflows/metadata.nf'
 include { CUTADAPT } from './modules/cutadapt.nf'
 include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'

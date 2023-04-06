@@ -6,6 +6,8 @@ nextflow.enable.dsl=2
 process EXPORT_GENOMIC_BED {
 
     tag "${sample_id}"
+    label 'process_low'
+
     publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
     input:
@@ -34,8 +36,9 @@ process EXPORT_GENOMIC_BED {
 process EXPORT_GENOMIC_BAM {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
+    label 'process_low'
 
+    publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample_id), path(bed)
@@ -54,6 +57,8 @@ process EXPORT_GENOMIC_BAM {
 process GET_CONTACT_MAPS {
 
     tag "${sample_id}"
+    label 'process_medium'
+
     publishDir "${params.outdir}/maps", mode: 'copy', overwrite: true
 
     input:
@@ -78,6 +83,8 @@ process GET_CONTACT_MAPS {
 process GET_ARCS {
 
     tag "${sample_id}"
+    label 'process_low'
+    
     publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
 
     input:

@@ -6,6 +6,7 @@ nextflow.enable.dsl=2
 process STAR {
 
     tag "${sample_id}"
+    label 'process_high'
     if(params.keep_intermediates) publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
 
     input:
@@ -37,6 +38,7 @@ process STAR {
 process FILTER_SPLICED_READS {
 
     tag "${sample_id}"
+    label 'process_low'
     if(params.keep_intermediates) publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
 
     input:

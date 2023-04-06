@@ -4,7 +4,10 @@
 nextflow.enable.dsl=2
 
 process BLAT {
+
     tag "${sample_id}"
+    label 'process_medium'
+
     if(!params.keep_cache) cache false
 
     input:
@@ -33,6 +36,8 @@ process BLAT {
 process FILTER_BLAT {
 
     tag "${sample_id}"
+    label 'process_low'
+
     if(params.keep_intermediates) publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
 
     input:
@@ -55,11 +60,9 @@ process FILTER_BLAT {
 process BLAT_ALL_IN_ONE {
 
     tag "${sample_id}"
+    label 'process_high'
+    
     if(!params.keep_cache) cache false
-
-    cpus '8'
-    memory '32G'
-    time '8h'
 
     input:
         tuple val(sample_id), path(reads)

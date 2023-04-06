@@ -6,6 +6,7 @@ nextflow.enable.dsl=2
 process CUTADAPT {
 
     tag "${sample_id}"
+    label 'process_medium'
     // publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true
 
     input:

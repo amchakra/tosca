@@ -6,6 +6,8 @@ nextflow.enable.dsl=2
 process DEDUPLICATE {
 
     tag "${sample_id}"
+    label 'process_high'
+    
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: false
 
     input:

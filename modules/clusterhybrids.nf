@@ -6,6 +6,8 @@ nextflow.enable.dsl=2
 process CLUSTER_HYBRIDS_SLURM {
 
     tag "${sample_id}"
+    label 'process_medium'
+    
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     input:
@@ -38,6 +40,8 @@ process CLUSTER_HYBRIDS_SLURM {
 process COLLAPSE_CLUSTERS {
 
     tag "${sample_id}"
+    label 'process_low'
+
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     input:
@@ -68,6 +72,7 @@ process COLLAPSE_CLUSTERS {
 process CHUNK_HYBRIDS {
 
     tag "${sample_id}"
+    label 'process_medium'
 
     input:
         val(type)
@@ -146,6 +151,7 @@ process CHUNK_HYBRIDS {
 process IDENTIFY_CLUSTERS {
 
     tag "${sample_id}"
+    label 'process_high'
 
     input:
         val(type)
@@ -290,6 +296,8 @@ process IDENTIFY_CLUSTERS {
 process MERGE_CLUSTERS {
 
     tag "${sample_id}"
+    label 'process_medium'
+    
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     input:
