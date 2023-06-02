@@ -151,7 +151,7 @@ process CHUNK_HYBRIDS {
 process IDENTIFY_CLUSTERS {
 
     tag "${sample_id}"
-    label 'process_high'
+    label 'process_medium'
 
     input:
         val(type)

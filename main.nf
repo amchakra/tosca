@@ -25,21 +25,17 @@ include { GET_VISUALISATIONS } from './workflows/getvisualisations.nf'
 include { GET_ATLAS } from './workflows/getatlas.nf'
 include { MAKE_REPORT } from './workflows/makereport.nf'
 
+
 // Genome variables
 if(params.org && params.genomesdir) {
 
     params.genome_fai = params.genomes[ params.org ].genome_fai
-    params.transcript_fa = params.genomes[ params.org ].transcript_fa
-    params.transcript_fai = params.genomes[ params.org ].transcript_fai
     params.transcript_gtf = params.genomes[ params.org ].transcript_gtf
-    params.star_genome = params.genomes[ params.org ].star_genome
     params.regions_gtf = params.genomes[ params.org ].regions_gtf
 
 } else {
 
     if(!params.genome_fai) { exit 1, "--genome_fai is not specified." } 
-    if(!params.transcript_fa) { exit 1, "--transcript_fa is not specified." } 
-    if(!params.transcript_fai) { exit 1, "--transcript_fai is not specified." } 
     if(!params.transcript_gtf) { exit 1, "--transcript_gtf is not specified." } 
     if(!params.regions_gtf) { exit 1, "--regions_gtf is not specified." } 
 
@@ -47,23 +43,44 @@ if(params.org && params.genomesdir) {
 
 
 // Create channels for static files
-ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
-ch_transcript_fai = Channel.fromPath(params.transcript_fai, checkIfExists: true)
 ch_genome_fai = Channel.fromPath(params.genome_fai, checkIfExists: true)
 ch_transcript_gtf = Channel.fromPath(params.transcript_gtf, checkIfExists: true)
 ch_regions_gtf = Channel.fromPath(params.regions_gtf, checkIfExists: true)
 
-// Channels for optional inputs
-if(!params.skip_premap) {
-    ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
-} else {
-    ch_star_genome = Channel.empty()
-}
+// If not making atlas
+if(!params.atlas) {
 
-if(params.goi) {
-    ch_goi = Channel.fromPath(params.goi, checkIfExists: true) 
-} else {
-    ch_goi = Channel.empty()
+    if(params.org && params.genomesdir) {
+
+        params.transcript_fa = params.genomes[ params.org ].transcript_fa
+        params.transcript_fai = params.genomes[ params.org ].transcript_fai
+        params.star_genome = params.genomes[ params.org ].star_genome
+
+    } else {
+
+        if(!params.transcript_fa) { exit 1, "--transcript_fa is not specified." } 
+        if(!params.transcript_fai) { exit 1, "--transcript_fai is not specified." } 
+
+    }
+
+
+    // Create channels for static files
+    ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
+    ch_transcript_fai = Channel.fromPath(params.transcript_fai, checkIfExists: true)
+
+    // Channels for optional inputs
+    if(!params.skip_premap) {
+        ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
+    } else {
+        ch_star_genome = Channel.empty()
+    }
+
+    if(params.goi) {
+        ch_goi = Channel.fromPath(params.goi, checkIfExists: true) 
+    } else {
+        ch_goi = Channel.empty()
+    }
+
 }
 
 // Channel for MultiQC config
@@ -124,6 +141,7 @@ workflow {
                .groupTuple(by: 0)
                .set { ch_all_hybrids }
             //    .view()
+            // [atlas, [hybrids_1.tsv.gz, hybrids_2.tsv.gz, hybrids_3.tsv.gz, ...]
 
         GET_ATLAS(ch_all_hybrids, ch_transcript_gtf, ch_regions_gtf, ch_genome_fai)
 
