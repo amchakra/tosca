@@ -87,6 +87,8 @@ process CHUNK_HYBRIDS {
     sample_size = params.sample_size
     chunk_number = params.chunk_number
     inter_only = params.intertranscript_only
+    omit_highincidence = params.omit_highincidence
+    omit_transcripts = params.omit_transcripts
 
     """
     #!/usr/bin/env Rscript
@@ -110,9 +112,27 @@ process CHUNK_HYBRIDS {
     atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
     atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
 
-    message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
-    # atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
-    atlas.hybrids.dt <- atlas.hybrids.dt[total_count > 1]
+    if("$omit_transcripts" != "") {
+
+        tx_to_omit <- unlist(tstrsplit("$omit_transcripts", ","))
+        for(tx in tx_to_omit) {
+
+            atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == tx & R_seqnames == tx)]
+
+        }
+
+    }
+
+    if($omit_highincidence != 0) {
+
+        message(nrow(atlas.hybrids.dt[total_count > $omit_highincidence]), " high incidence gene pairs not clustered")
+        atlas.hybrids.dt <- atlas.hybrids.dt[total_count < $omit_highincidence & total_count > 1]
+
+    } else {
+        
+        atlas.hybrids.dt <- atlas.hybrids.dt[total_count > 1]
+
+    }
 
     # Subsample as indicated
     if($sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt), $sample_size)]
