@@ -86,6 +86,7 @@ process CHUNK_HYBRIDS {
 
     sample_size = params.sample_size
     chunk_number = params.chunk_number
+    inter_only = params.intertranscript_only
 
     """
     #!/usr/bin/env Rscript
@@ -118,7 +119,7 @@ process CHUNK_HYBRIDS {
     message("Number of hybrids to cluster: ", nrow(atlas.hybrids.dt))
 
     # Inter-transcript only
-    inter_only = TRUE
+    inter_only = as.logical("$inter_only")
     if(inter_only) {
         atlas.hybrids.dt <- atlas.hybrids.dt[L_seqnames != R_seqnames]
         print(unique(atlas.hybrids.dt[, .(L_seqnames, R_seqnames, total_count)]))
