@@ -83,7 +83,7 @@ missing.dt <- data.table(sample = unique(regions.dt$sample),
 regions.dt <- rbindlist(list(regions.dt, missing.dt))
 }
 
-regions.dt <- dcast.data.table(regions.dt[N == ], sample ~ L_region, value.var = "N", fun.aggregate = sum) # need fun.aggregate otherwise reverts to length for regions that are all 0 for some reason
+regions.dt <- dcast.data.table(regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum) # need fun.aggregate otherwise reverts to length for regions that are all 0 for some reason
 regions.dt <- regions.dt[, .(sample, rRNA, tRNA, ncRNA, UTR5, CDS, intron, UTR3, intergenic)]
 
 fwrite(regions.dt, "regions.tsv", sep = "\t")
