@@ -126,7 +126,7 @@ intragenic_regions.dt <- intragenic_regions.dt[, .N, by = .(sample, L_region)]
 
 if(!all(regions %in% intragenic_regions.dt$L_region)) {
   missing.dt <- data.table(sample = unique(intragenic_regions.dt$sample),
-                           L_region = rep(intragenic_regions.dt[!regions %in% intragenic_regions.dt$L_region],
+                           L_region = rep(regions[!regions %in% intragenic_regions.dt$L_region],
                                           length(unique(intragenic_regions.dt$sample))),
                            N = rep(0,
                                    length(unique(intragenic_regions.dt$sample))))
