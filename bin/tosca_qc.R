@@ -34,6 +34,7 @@ hybrid_identification.dt <- lapply(seq_along(hybrids.files), function(i) {
 hybrid_identification.dt <- Reduce(function(x, y) merge(x, y, by = "hybrid_selection", all = TRUE), hybrid_identification.dt)
 hybrid_identification.dt <- transpose(hybrid_identification.dt, keep.names = "sample", make.names = "hybrid_selection")
 hybrid_identification.dt <- merge(hybrid_identification.dt, premap.dt, by = "sample")
+hybrid_identification.dt[is.na(hybrid_identification.dt)] <- 0 # Replace any NAs e.g. no multioverlap
 hybrid_identification.dt[, nonhybrid := unspliced - ambiguous - multi_overlap - single]
 hybrid_identification.dt <- hybrid_identification.dt[, .(sample, spliced, nonhybrid, ambiguous, multi_overlap, single)]
 
