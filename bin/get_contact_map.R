@@ -149,7 +149,8 @@ if(!any(grepl(",", genes))) {
         hybrid.dt <- fread(opt$hybrids)
         # hybrid.dt <- reorient_hybrids_segments(hybrid.dt)
         hybrid.dt <- reorient_hybrids(hybrid.dt)
-        hybrid.dt <- hybrid.dt[type == "intergenic"][L_seqnames == gene_A][R_seqnames == gene_B]
+        # hybrid.dt <- hybrid.dt[type == "intergenic"][L_seqnames == gene_A][R_seqnames == gene_B]
+        hybrid.dt <- hybrid.dt[L_seqnames == gene_A][R_seqnames == gene_B]
 
         if(!nrow(hybrid.dt) == 0) {
 
