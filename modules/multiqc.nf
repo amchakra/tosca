@@ -13,7 +13,7 @@ process TOSCA_QC {
     publishDir "${params.outdir}/multiqc", mode: 'copy', overwrite: true
 
     input:
-    path(filter_spliced_reads_logs)
+    path(input_reads_logs)
     path(dedup_logs)
     path(raw_hybrids)
     path(hybrids)
