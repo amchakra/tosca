@@ -64,7 +64,7 @@ custom_data:
         plot_type: 'bargraph'
         pconfig:
             id: 'duplexes'
-        
+
 custom_plot_config:
     intrainter:
         intergenic:

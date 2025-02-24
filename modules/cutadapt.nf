@@ -7,7 +7,7 @@ process CUTADAPT {
 
     tag "${sample_id}"
     label 'process_medium'
-    // publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true, pattern: '*.log'
 
     input:
         tuple val(sample_id), path(reads)
@@ -18,7 +18,7 @@ process CUTADAPT {
 
     script:
     args = " -j ${task.cpus}"
-    args += " -a " + params.adapter 
+    args += " -a " + params.adapter
     args += " -q " + params.min_quality
     args += " --minimum-length " + params.min_readlength
     args += " -o ${sample_id}.trimmed.fastq.gz"
@@ -26,5 +26,5 @@ process CUTADAPT {
     """
     cutadapt $args $reads > ${sample_id}.cutadapt.log
     """
-    
+
 }
