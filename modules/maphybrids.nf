@@ -61,7 +61,7 @@ process BLAT_ALL_IN_ONE {
 
     tag "${sample_id}"
     label 'process_high'
-    publishDir "${params.outdir}/blat", mode: 'copy', overwrite: true, pattern: '*.filter_blat.log'
+    publishDir "${params.outdir}/logs", mode: 'copy', overwrite: true, pattern: '*.log'
 
     if(!params.keep_cache) cache false
 
@@ -72,7 +72,7 @@ process BLAT_ALL_IN_ONE {
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
         tuple val(sample_id), path("${sample_id}.filter_blat.log"), emit: blat_log
-        // tuple val(sample_id), path("${sample_id}.identify_hybrids.log"), emit: hybrids_log
+        tuple val(sample_id), path("${sample_id}.identify_hybrids.log"), emit: hybrids_log
 
     script:
 
@@ -95,7 +95,7 @@ process BLAT_ALL_IN_ONE {
     filter_blat.py ${sample_id}.blast8.gz ${sample_id}.filtered.blast8.gz $evalue $maxhits ${sample_id}.filter_blat.log
     rm ${sample_id}.blast8.gz
 
-    identify_hybrids.R -t ${task.cpus} -b ${sample_id}.filtered.blast8.gz -f ${sample_id}.fasta -o ${sample_id}.hybrids.tsv.gz
+    identify_hybrids.R -t ${task.cpus} -b ${sample_id}.filtered.blast8.gz -f ${sample_id}.fasta -o ${sample_id}.hybrids.tsv.gz -l ${sample_id}.identify_hybrids.log
     rm ${sample_id}.fasta
     """
 
