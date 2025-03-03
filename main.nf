@@ -188,8 +188,7 @@ workflow {
         MAKE REPORT
         */
         if(!params.skip_qc) {
-            // ch_premap_logs = params.skip_premap ? Channel.empty() : PREMAP.out.logs.collect()
-            // ch_premap_logs = params.skip_premap ? Channel.of([]) : PREMAP.out.logs.collect()
+            // ch_input_logs = params.skip_premap ? Channel.of([]) : PREMAP.out.logs.collect()
             ch_input_logs = params.skip_premap ? CUTADAPT.out.log.collect() : PREMAP.out.logs.collect()
 
             MAKE_REPORT(ch_input_logs,

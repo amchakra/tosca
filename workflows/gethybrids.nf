@@ -4,11 +4,10 @@
 nextflow.enable.dsl=2
 
 include { SPLIT_FASTQ; FASTQ_TO_FASTA } from '../modules/splitfastq.nf'
-include { BLAT; FILTER_BLAT } from '../modules/maphybrids.nf'
+// include { BLAT; FILTER_BLAT } from '../modules/maphybrids.nf'
+include { BLAT_ALL_IN_ONE } from '../modules/maphybrids.nf'
 include { IDENTIFY_HYBRIDS; MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
 include { DEDUPLICATE } from '../modules/deduplicate.nf'
-
-include { BLAT_ALL_IN_ONE } from '../modules/maphybrids.nf'
 
 workflow GET_HYBRIDS {
 
