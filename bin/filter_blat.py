@@ -65,41 +65,40 @@ def CountReads(blast_in, e_value, max_hits, log_file):
     # Log after e-value and orientation filtering
     post_filter_unique_reads = len(reads)
     post_filter_mappings = sum(reads.values())
-    LogStep("After e-value and orientation filtering", post_filter_unique_reads, post_filter_mappings, start_time, log_file)
-
+    # LogStep("After e-value and orientation filtering", post_filter_unique_reads, post_filter_mappings, start_time, log_file)
+    # Log after e-value and orientation filtering with threshold info
+    LogStep(f"After e-value (≤ {e_value}) and orientation filtering", post_filter_unique_reads, post_filter_mappings, start_time, log_file)
     # Step 3: Apply max_hits filtering
     filtered_reads = {k: v for k, v in reads.items() if v > 1 and v <= max_hits}
 
     # Log after max hits filtering
     post_max_hits_unique_reads = len(filtered_reads)
     post_max_hits_mappings = sum(filtered_reads.values())
-    LogStep("After max hits filtering", post_max_hits_unique_reads, post_max_hits_mappings, start_time, log_file)
-
+    # LogStep("After max hits filtering", post_max_hits_unique_reads, post_max_hits_mappings, start_time, log_file)
+    # Log after max hits filtering with threshold info
+    LogStep(f"After max hits (≤ {max_hits}) filtering", post_max_hits_unique_reads, post_max_hits_mappings, start_time, log_file)
     return filtered_reads
 
 
 # Function to filter BLAT
-def FilterBlast(blast_in, blast_out, filtered_reads, log_file):
-    total_counter = 0        # To count all lines processed
-    retained_mappings = 0    # To count only retained mappings
+def FilterBlast(blast_in, blast_out, e_value, filtered_reads):
+    counter = 0 # To count all lines processed
     start_time = time.time()
-    retained_reads = set()
 
     with gzip.open(blast_in, mode='rt') as blast:
         with gzip.open(blast_out, mode='wt') as blast_out:
             for line in blast:
-                total_counter += 1  # Count all lines processed
-                if total_counter % 1000000 == 0:
-                    print(total_counter)
+                counter += 1
+                if counter % 1000000 == 0:
+                    print(counter)
 
                 mapping = line.rstrip('\n').rsplit('\t')
                 read = mapping[0]
-
-                # Check if the read is in filtered_reads
-                if read in filtered_reads:
+                evalue = float(mapping[10])
+                s_start = int(mapping[8])
+                s_end = int(mapping[9])
+                if evalue <= e_value and s_start < s_end and read in filtered_reads:
                     blast_out.write(line)
-                    retained_reads.add(read)
-                    retained_mappings += 1  # Count only retained mappings
 
 # ==========
 # Run
@@ -118,7 +117,7 @@ if len(sys.argv) == 6:
     start = time.time()
 
     filtered_reads = CountReads(blast_in, e_value, max_hits, log_file)
-    FilterBlast(blast_in, blast_out, filtered_reads, log_file)
+    FilterBlast(blast_in, blast_out, e_value, filtered_reads)
 
     end = time.time()
     print(f"Total time: {(end - start) / 60} minutes")
