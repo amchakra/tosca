@@ -15,13 +15,14 @@ import time
 # Function to initialize log file
 def CreateLogFile(log_file):
     with open(log_file, 'w') as log:
-        log.write("Step\tReads\tBLAT mappings\tElapsed time (s)\n")
+        log.write("Step\tReads remaining\tReads discarded\tBLAT mappings remaining\tElapsed time (s)\n")
 
-# Function to log information to the log file
-def LogStep(step, reads, blat_mappings, start_time, log_file):
+
+def LogStep(step, reads_remaining, reads_removed, blat_mappings, start_time, log_file):
     elapsed_time = round(time.time() - start_time, 2)
     with open(log_file, 'a') as log:
-        log.write(f"{step}\t{reads}\t{blat_mappings}\t{elapsed_time}\n")
+        log.write(f"{step}\t{reads_remaining}\t{reads_removed}\t{blat_mappings}\t{elapsed_time}\n")
+
 
 # Function to count number of valid reads with granular logging
 def CountReads(blast_in, e_value, max_hits, log_file):
@@ -40,7 +41,7 @@ def CountReads(blast_in, e_value, max_hits, log_file):
             initial_reads.add(read)
 
     # Log initial counts before any filtering
-    LogStep("Initial", len(initial_reads), initial_mappings, start_time, log_file)
+    LogStep("initial", len(initial_reads), 0, initial_mappings, start_time, log_file)
 
     # Step 2: Apply e-value and orientation filters
     with gzip.open(blast_in, mode='rt') as blast:
@@ -63,20 +64,21 @@ def CountReads(blast_in, e_value, max_hits, log_file):
                     reads[read] = 1
 
     # Log after e-value and orientation filtering
-    post_filter_unique_reads = len(reads)
+    post_filter_reads = len(reads)
     post_filter_mappings = sum(reads.values())
-    # LogStep("After e-value and orientation filtering", post_filter_unique_reads, post_filter_mappings, start_time, log_file)
-    # Log after e-value and orientation filtering with threshold info
-    LogStep(f"After e-value (≤ {e_value}) and orientation filtering", post_filter_unique_reads, post_filter_mappings, start_time, log_file)
+    post_filter_reads_removed = len(initial_reads) - post_filter_reads
+    LogStep(f"e-value (≤ {e_value}) and orientation filtering", post_filter_reads, post_filter_reads_removed, post_filter_mappings, start_time, log_file)
+
     # Step 3: Apply max_hits filtering
     filtered_reads = {k: v for k, v in reads.items() if v > 1 and v <= max_hits}
 
     # Log after max hits filtering
-    post_max_hits_unique_reads = len(filtered_reads)
+    post_max_hits_reads = len(filtered_reads)
     post_max_hits_mappings = sum(filtered_reads.values())
-    # LogStep("After max hits filtering", post_max_hits_unique_reads, post_max_hits_mappings, start_time, log_file)
-    # Log after max hits filtering with threshold info
-    LogStep(f"After max hits (≤ {max_hits}) filtering", post_max_hits_unique_reads, post_max_hits_mappings, start_time, log_file)
+    post_max_hits_reads_removed = post_filter_reads - post_max_hits_reads
+
+    # Log after max hits filtering
+    LogStep(f"max hits (≤ {max_hits}) filtering", post_max_hits_reads, post_max_hits_reads_removed, post_max_hits_mappings, start_time, log_file)
     return filtered_reads
 
 

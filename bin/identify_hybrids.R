@@ -18,6 +18,11 @@ get_valid_hybrids <- function(
     s_minoverlap = 0,
     xlink_distance = 1000000) {
 
+  # Stop if the query is not unique
+  if (length(unique(blast.query.dt$query)) != 1) {
+    stop("Error: get_valid_hybrids must be applied per unique query. Found multiple or no queries.")
+    }
+
   # Keep best match for a given query region
   hybrids.dt <- blast.query.dt[evalue == min_evalue]
 
