@@ -71,8 +71,7 @@ process BLAT_ALL_IN_ONE {
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
-        tuple val(sample_id), path("${sample_id}.filter_blat.log"), emit: blat_log
-        tuple val(sample_id), path("${sample_id}.identify_hybrids.log"), emit: hybrids_log
+        tuple val(sample_id), path("${sample_id}.filter_blat.log"), path("${sample_id}.identify_hybrids.log"), emit: logs
 
     script:
 

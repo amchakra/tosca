@@ -5,9 +5,9 @@ suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(toscatools))
 suppressPackageStartupMessages(library(parallel))
 
-####################
-### MONKEY PATCH ###
-####################
+# ============
+# MONKEY PATCH
+# ============
 
 # This function is designed to be applied per query, returning either a data.table of valid hybrids or a character string with a discard reason.
 get_valid_hybrids <- function(
@@ -78,9 +78,9 @@ get_valid_hybrids <- function(
   }
 }
 
-########################
-### MONKEY PATCH END ###
-########################
+# ============
+# MONKEY PATCH END
+# ============
 
 option_list <- list(make_option(c("-b", "--blast8"), action = "store", type = "character", help = "Blat blast8"),
             make_option(c("-f", "--fasta"), action = "store", type = "character", help = "Reads fasta"),

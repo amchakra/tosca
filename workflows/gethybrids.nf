@@ -7,6 +7,7 @@ include { SPLIT_FASTQ; FASTQ_TO_FASTA } from '../modules/splitfastq.nf'
 // include { BLAT; FILTER_BLAT } from '../modules/maphybrids.nf'
 include { BLAT_ALL_IN_ONE } from '../modules/maphybrids.nf'
 include { IDENTIFY_HYBRIDS; MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
+include { AGGREGATE_LOGS } from '../modules/logging.nf'
 include { DEDUPLICATE } from '../modules/deduplicate.nf'
 
 workflow GET_HYBRIDS {
@@ -43,14 +44,22 @@ workflow GET_HYBRIDS {
         ch_merge_hybrids = BLAT_ALL_IN_ONE.out.hybrids
             .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
             .groupTuple(by: 0)
-
         MERGE_HYBRIDS("hybrids", ch_merge_hybrids)
+
+        ch_aggregate_logs = BLAT_ALL_IN_ONE.out.logs
+            .map { sample_id, filter_blat_log, identify_hybrids_log ->
+                def new_id = sample_id.split('_')[0..-2].join('_')
+                tuple(new_id, filter_blat_log, identify_hybrids_log)
+            }
+            .groupTuple(by: 0)
+
+        AGGREGATE_LOGS(ch_aggregate_logs)
         DEDUPLICATE(MERGE_HYBRIDS.out.hybrids) // Remove PCR duplicates
 
     emit:
         hybrids = DEDUPLICATE.out.hybrids
         raw_hybrids = MERGE_HYBRIDS.out.hybrids
-        logs = DEDUPLICATE.out.log
+        logs = AGGREGATE_LOGS.out.logs.join(DEDUPLICATE.out.log, by: 0)
 
 }
 

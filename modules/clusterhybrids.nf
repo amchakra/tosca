@@ -7,7 +7,7 @@ process CLUSTER_HYBRIDS_SLURM {
 
     tag "${sample_id}"
     label 'process_medium'
-    
+
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     input:

@@ -191,12 +191,14 @@ workflow {
             // ch_input_logs = params.skip_premap ? Channel.of([]) : PREMAP.out.logs.collect()
             ch_input_logs = params.skip_premap ? CUTADAPT.out.log.collect() : PREMAP.out.logs.collect()
 
-            MAKE_REPORT(ch_input_logs,
-                        GET_HYBRIDS.out.logs.collect(),
-                        GET_HYBRIDS.out.raw_hybrids.collect{it[1]},
-                        PROCESS_HYBRIDS.out.hybrids.collect{it[1]},
-                        PROCESS_HYBRIDS.out.clusters.collect{it[1]},
-                        ch_multiqc_config)
+            MAKE_REPORT(
+                ch_input_logs,
+                GET_HYBRIDS.out.logs.collect { it[1..-1].flatten() },
+                GET_HYBRIDS.out.raw_hybrids.collect { it[1] },
+                PROCESS_HYBRIDS.out.hybrids.collect { it[1] },
+                PROCESS_HYBRIDS.out.clusters.collect { it[1] },
+                ch_multiqc_config
+            )
         }
 
     }

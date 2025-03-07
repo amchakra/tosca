@@ -2,7 +2,7 @@
 
 # Script to filter blat blast8 output
 # A. M. Chakrabarti
-# 27th March 2019 (Modified by I.A. Iosub: 3rd of March 2025)
+# 27th March 2019 (Modified by I.A. Iosub: 7th March 2025)
 
 import sys
 import gzip

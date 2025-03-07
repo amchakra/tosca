@@ -7,7 +7,7 @@ process DEDUPLICATE {
 
     tag "${sample_id}"
     label 'process_high'
-    
+
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: false
 
     input:
@@ -15,7 +15,7 @@ process DEDUPLICATE {
 
     output:
         tuple val(sample_id), path("${sample_id}.hybrids.dedup.tsv.gz"), emit: hybrids
-        path("*.dedup.log"), emit: log
+        tuple val(sample_id), path("*.dedup.log"), emit: log
 
     script:
 
