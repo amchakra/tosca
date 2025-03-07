@@ -64,9 +64,9 @@ opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
 filter_blat_logs.list <- list.files(opt$logs, pattern = ".filter_blat.log", full.names = TRUE)
-print(filter_blat_logs.list)
+
 identify_hybrids_logs.list <- list.files(opt$logs, pattern = ".identify_hybrids.log", full.names = TRUE)
-print(identify_hybrids_logs.list)
+
 # Ensure only logs for the specified sample are used
 filter_blat_logs.list <- filter_blat_logs.list[str_detect(filter_blat_logs.list, opt$output)]
 identify_hybrids_logs.list <- identify_hybrids_logs.list[str_detect(identify_hybrids_logs.list, opt$output)]
