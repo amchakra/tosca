@@ -44,6 +44,7 @@ workflow GET_HYBRIDS {
         ch_merge_hybrids = BLAT_ALL_IN_ONE.out.hybrids
             .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
             .groupTuple(by: 0)
+
         MERGE_HYBRIDS("hybrids", ch_merge_hybrids)
 
         ch_aggregate_logs = BLAT_ALL_IN_ONE.out.logs

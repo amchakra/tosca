@@ -46,7 +46,7 @@ process FILTER_SPLICED_READS {
 
     output:
         tuple val(sample_id), path("${sample_id}.unspliced.fastq.gz"), emit: fastq
-        path("*.filter_spliced_reads.log"), emit: log
+        tuple val(sample_id), path("*.filter_spliced_reads.log"), emit: log
 
     script:
 

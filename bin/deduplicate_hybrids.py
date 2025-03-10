@@ -45,7 +45,11 @@ if len(sys.argv) == 5:
 
     # Read in hybrids
     hybrids = pd.read_csv(f_in, sep='\t')
+    all_hybrids_count = len(hybrids['name'].unique())
+
+    # Filter out ambiguous
     hybrids = hybrids[hybrids['hybrid_selection'].isin(['single', 'multi_overlap'])]
+    ambiguous_hybrids_count = all_hybrids_count - len(hybrids['name'].unique())
 
     if dedup_method != 'none':
 
@@ -70,6 +74,7 @@ if len(sys.argv) == 5:
     # Write out
     unique_hybrids.to_csv(f_out, sep = '\t', index = False)
 
+    print(f"Removed {ambiguous_hybrids_count} ambiguous hybrids")
     print(f"Deduplicated in {toc - tic:0.2f} seconds")
     print(f"Hybrids in: {hybrids.shape[0]}")
     print(f"Hybrids out: {unique_hybrids.shape[0]}")

@@ -11,7 +11,7 @@ process AGGREGATE_LOGS {
     publishDir "${params.outdir}/logs", mode: 'copy', overwrite: true, pattern: "${sample_id}.*.log"
 
     input:
-        tuple val(sample_id), path(filter_blat_logs), path(identify_hybrids_logs)
+        tuple val(sample_id), path(filter_blat_logs), path(identify_hybrids)
 
     output:
         tuple val(sample_id), path("${sample_id}.filter_blat.log"), path("${sample_id}.identify_hybrids.log"), emit: logs
@@ -20,6 +20,29 @@ process AGGREGATE_LOGS {
 
     """
     aggregate_logs.R -l . -t ${task.cpus} -o ${sample_id}
+    """
+
+}
+
+process TRACK_READ_FATE {
+
+    tag "${sample_id}"
+    label 'process_low'
+
+    container 'iraiosub/nf-riboseq-qc:latest'
+
+    publishDir "${params.outdir}/logs", mode: 'copy', overwrite: true
+
+    input:
+        tuple val(sample_id), path(logs)
+
+    output:
+        tuple val(sample_id), path("${sample_id}_sankey.html"), path("*_sankey_files"), emit: sankey
+
+    script:
+
+    """
+    plot_sankey.R -l . -o ${sample_id}_sankey.html
     """
 
 }
