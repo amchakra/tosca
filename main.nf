@@ -160,7 +160,7 @@ workflow {
         if (!params.skip_premap) {
             PREMAP(CUTADAPT.out.fastq, ch_star_genome)
             ch_for_hybrids = PREMAP.out.fastq
-            ch_premap_log = PREMAP.out.log
+            ch_premap_log = PREMAP.out.logs
         } else {
             ch_for_hybrids = CUTADAPT.out.fastq
             ch_premap_log = Channel.empty()
