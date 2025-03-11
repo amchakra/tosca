@@ -211,7 +211,7 @@ colnames(links) <- c('source', 'target', 'value')
 links$link_source <- nodes$name[links$source + 1]
 
 # Define color scheme
-my_color <- 'd3.scaleOrdinal().domain(["a", "b", "c", "d", "e", "f", "g", "h"]).range(["#F3ECD9", "#F0F1E3", "#D7E0D8", "#C6D5D0", "#889C9B", "#7D7A70", "#5C625C"])'
+my_color <- 'd3.scaleOrdinal().domain(["a", "b", "c", "d", "e", "f", "g", "h"]).range(["#F3ECD9", "#F0F1E3", "#D7E0D8", "#C6D5D0", "#889C9B", "#7D7A70", "#5C625C", "#3E443F"])'
 
 # Plotting Sankey diagram
 p <- sankeyNetwork(

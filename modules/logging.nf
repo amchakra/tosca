@@ -31,7 +31,7 @@ process TRACK_READ_FATE {
 
     container 'iraiosub/nf-riboseq-qc:latest'
 
-    publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/read_fate", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample_id), path(logs)
