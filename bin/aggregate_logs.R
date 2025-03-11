@@ -25,28 +25,24 @@ aggregate_filter_blat_logs <- function(log_files, num_cores) {
     return(log.dt)
   }, mc.cores = num_cores)
 
+  # Check if the list is empty
+  if (length(log_list) == 0) {
+    stop("The list of logs is empty.")
+  }
+
   # If only one log file, return it directly
   if (length(log_list) == 1) {
     aggregated.dt <- log_list[[1]]
   } else {
-
-    # Check if the list is empty
-    if (length(log_list) == 0) {
-      stop("The list of data.tables is empty.")
-    }
     # Ensure all data.tables have the same structure
     col_names <- names(log_list[[1]])
-
     # Bind all tables together while keeping column names consistent
     merged.dt <- rbindlist(log_list, use.names = TRUE, fill = TRUE)
-
     # Sum across all numerical columns grouped by "Step"
     cols_to_sum <- setdiff(col_names, "Step")
     aggregated.dt <- merged.dt[, lapply(.SD, sum), .SDcols = cols_to_sum, by = Step]
-
     # Ensure column order remains the same as the input
     setcolorder(aggregated.dt, col_names)
-
   }
 
   return(aggregated.dt)
@@ -60,28 +56,25 @@ aggregate_identify_hybrids_logs <- function(log_files, num_cores) {
     return(log.dt)
   }, mc.cores = num_cores)
 
-  # If only one log file, return it directly without merging
-  if (length(log_list) == 1) {
-    aggregated.dt <- log_list[[1]]
+  # Check if the list is empty
+  if (length(log_list) == 0) {
+    stop("The list of logs is empty.")
   }
 
-  # Merge logs while summing "count" values
-  aggregated.dt <- Reduce(function(x, y) {
-    merge(x, y, by = "type", all = TRUE, suffixes = c(".x", ".y"))
-  }, log_list)
-
-  # Replace NA values with 0 before summing
-  aggregated.dt[is.na(aggregated.dt)] <- 0
-
-  # Sum only the "count" column from all logs
-  count_cols <- setdiff(names(aggregated.dt), "type")  # All numerical columns except "type"
-  aggregated.dt[, count := rowSums(.SD, na.rm = TRUE), .SDcols = count_cols]
-
-  # Keep only "type" and summed "count" column
-  aggregated.dt <- aggregated.dt[, .(type, count)]
-
-  # Ensure order of rows matches the first log file
-  aggregated.dt <- aggregated.dt[match(log_list[[1]]$type, aggregated.dt$type), ]
+  # If only one log file, return it directly
+  if (length(log_list) == 1) {
+    aggregated.dt <- log_list[[1]]
+  } else {
+    # Ensure all data.tables have the same structure
+    col_names <- names(log_list[[1]])
+    # Bind all tables together while keeping column names consistent
+    merged.dt <- rbindlist(log_list, use.names = TRUE, fill = TRUE)
+    # Sum across all numerical columns grouped by "type"
+    cols_to_sum <- setdiff(col_names, "type")
+    aggregated.dt <- merged.dt[, lapply(.SD, sum), .SDcols = cols_to_sum, by = type]
+    # Ensure column order remains the same as the input
+    setcolorder(aggregated.dt, col_names)
+  }
 
   return(aggregated.dt)
 }
