@@ -8,7 +8,7 @@ process AGGREGATE_LOGS {
     tag "${sample_id}"
     label 'process_medium'
 
-    publishDir "${params.outdir}/logs", mode: 'copy', overwrite: true, pattern: "${sample_id}.*.log"
+    publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: true, pattern: "${sample_id}.*.log"
 
     input:
         tuple val(sample_id), path(filter_blat_logs), path(identify_hybrids)
@@ -31,7 +31,7 @@ process TRACK_READ_FATE {
 
     container 'iraiosub/nf-riboseq-qc:latest'
 
-    publishDir "${params.outdir}/logs", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample_id), path(logs)
