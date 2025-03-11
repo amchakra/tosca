@@ -44,8 +44,8 @@ cutadapt.log <- readLines(cutadapt.log)
 total.reads <- cutadapt.log[grep("^Total reads processed:", cutadapt.log)]
 cutadapt_remaining.reads <- cutadapt.log[grep("^Reads written \\(passing filters\\):", cutadapt.log)]
 
-# min.length <- cutadapt.log[grep("^Command line parameters:", cutadapt.log)]
-# min.length <- parse_number(str_split(min.length, "--minimum-length ")[[1]][2])
+min.length <- cutadapt.log[grep("^Command line parameters:", cutadapt.log)]
+min.length <- parse_number(str_split(min.length, "--minimum-length ")[[1]][2])
 total.reads <- parse_number(total.reads)
 cutadapt_remaining.reads <- parse_number(cutadapt_remaining.reads)
 
@@ -60,6 +60,7 @@ if (length(cutadapt.log) != 0 & length(filter_spliced_reads.log) == 0) {
 } else if (length(cutadapt.log) != 0 & length(filter_spliced_reads.log) == 1) {
 
   message("premap log is not empty")
+  filter_spliced_reads.log <- readLines(filter_spliced_reads.log)
   trimmed.reads <- parse_number(filter_spliced_reads.log[grep("^Total reads:", filter_spliced_reads.log)])
 
   # Check that input reads for premapping is the same as the output reads from cutadapt
@@ -81,6 +82,13 @@ blat_unmapped.reads <- cutadapt_remaining.reads - spliced.reads - blat_mapped.re
 too_high_evalue_antisense.reads <- blat_filter.log[str_detect(blat_filter.log$Step, "e-value|orientation")]$`Reads discarded`
 too_many_blat_hits.reads <- blat_filter.log[str_detect(blat_filter.log$Step, "max hits")]$`Reads discarded`
 blat_filter_remaining.reads <- blat_filter.log[str_detect(blat_filter.log$Step, "max hits")]$`Reads remaining`
+
+# Extract `e-value` (using regex to match the number after ≤)
+evalue_row <- blat_filter.log[str_detect(Step, "e-value|orientation")]
+evalue <- str_extract(evalue_row$Step, "≤\\s*[0-9.]+") %>% str_remove("≤\\s*")
+# Extract `max hits` (from e.g. "max hits (≤ 100)")
+max_hits_row <- blat_filter.log[str_detect(Step, "max hits")]
+max_hits <- str_extract(max_hits_row$Step, "≤\\s*[0-9]+") %>% str_remove("≤\\s*")
 
 # Hybrid identification
 identify_hybrids.log <- fread(identify_hybrids.log)
@@ -150,13 +158,13 @@ nodes <- data.frame(
   name = c(
     'Total',
     'Cutadapt Discarded',
-    'Cutadapt Remaining',
+    paste0('Trimmed ≥ ', min.length) ,
     'Spliced',
     'Unspliced',
     'BLAT Unmapped',
     'BLAT Mapped',
-    'Too High E-value or Antisense',
-    'Too Many BLAT Hits',
+    paste0('Too High (> ', evalue, ') E-value or Antisense'),
+    paste0('Too Many (> ', max_hits, ') BLAT Hits'),
     'BLAT Remaining',
     'Strong Match to Single Gene',
     'Excessive Overlap in Query',

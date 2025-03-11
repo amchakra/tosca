@@ -7,6 +7,7 @@ process CUTADAPT {
 
     tag "${sample_id}"
     label 'process_medium'
+
     publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true, pattern: '*.log'
 
     input:

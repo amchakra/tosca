@@ -62,8 +62,6 @@ process BLAT_ALL_IN_ONE {
     tag "${sample_id}"
     label 'process_high'
 
-    publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: true, pattern: '*.log'
-
     if(!params.keep_cache) cache false
 
     input:
