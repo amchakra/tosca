@@ -166,10 +166,18 @@ workflow {
         /*
         TRACK READ FATE
         */
+        ch_cutadapt_log = CUTADAPT.out.log
+        ch_premap_log = params.skip_premap ? Channel.empty() : PREMAP.out.log
+        ch_hybrids_log = GET_HYBRIDS.out.logs
 
-        ch_for_read_fate = CUTADAPT.out.log
-            .join(params.skip_premap ? Channel.empty() : PREMAP.out.log, by: 0, remainder: true)
-            .join(GET_HYBRIDS.out.logs, by: 0)
+        ch_cutadapt_log.view { "CUTADAPT log: $it" }
+        ch_premap_log.view { "PREMAP log: $it" }
+        ch_hybrids_log.view { "GET_HYBRIDS log: $it" }
+
+        // Join channels
+        ch_for_read_fate = ch_cutadapt_log
+            .join(ch_premap_log, by: 0, remainder: true)
+            .join(ch_hybrids_log, by: 0)
             .map { tuple ->
                 def sample_id = tuple[0]
                 def logs = tuple[1..-1].findAll { it != null }
