@@ -173,12 +173,14 @@ nodes <- data.frame(
     'Valid Hybrids',
     'Ambiguous',
     'Duplicated',
+    'Single or Multi-overlap',
     'Final'
   ),
   group = c(
     'a', 'b', 'b', 'c', 'c', 'd', 'd',
     'e', 'e', 'e', 'f', 'f', 'f', 'f', 'f',
-    'g', 'g', 'g'
+    'g', 'g', 'g',
+    'h'
   )
 )
 
@@ -200,7 +202,8 @@ links <- as.data.frame(rbind(
   c(9, 14, read_list[['identify_hybrids_remaining']]),
   c(14, 15, read_list[['ambiguous']]),
   c(14, 16, read_list[['duplicated']]),
-  c(14, 17, read_list[['final']])
+  c(14, 17, read_list[['final']]),
+  c(17, 18, read_list[['final']])
 ))
 
 # Set column names for links
@@ -208,7 +211,7 @@ colnames(links) <- c('source', 'target', 'value')
 links$link_source <- nodes$name[links$source + 1]
 
 # Define color scheme
-my_color <- 'd3.scaleOrdinal().domain(["a", "b", "c", "d", "e", "f", "g"]).range(["#F3ECD9", "#F0F1E3", "#D7E0D8", "#C6D5D0", "#889C9B", "#7D7A70", "#5C625C"])'
+my_color <- 'd3.scaleOrdinal().domain(["a", "b", "c", "d", "e", "f", "g", "h"]).range(["#F3ECD9", "#F0F1E3", "#D7E0D8", "#C6D5D0", "#889C9B", "#7D7A70", "#5C625C"])'
 
 # Plotting Sankey diagram
 p <- sankeyNetwork(
