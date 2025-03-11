@@ -227,7 +227,7 @@ p <- sankeyNetwork(
   fontSize = 16,
   nodeWidth = 50,
   fontFamily = "sans-serif",
-  width = 1800,
+  width = 2000,
   height = 1000,
   margin = c(top = 5, right = 1, bottom = 5, left = 1),
   nodePadding = 20,
