@@ -30,7 +30,7 @@ message("Analysing ", sample_id)
 
 filter_blat.log <- all.logs[str_detect(all.logs, ".filter_blat.log")] # filter blat
 identify_hybrids.log <- all.logs[str_detect(all.logs, "identify_hybrids.log")] # hybrid identification
-dedup.log <- all.logs[str_detect(all.logs, ".dedup.log")] # dedup if umi dedup enabled
+dedup.log <- all.logs[str_detect(all.logs, ".dedup.log")] # dedup if umi dedup enabled; otherwise just logs for ambiguous removal
 
 # Load optional logs
 

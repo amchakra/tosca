@@ -2,9 +2,9 @@
 
 _Tosca_ is presented and described further in our preprint:
 
-**[A computationally-enhanced hiCLIP atlas reveals Staufen1 RNA binding features and links 3’ UTR structure to RNA metabolism](https://doi.org/10.1101/2022.06.13.495933)**.
+**[A computationally-enhanced hiCLIP atlas reveals Staufen1-RNA binding features and links 3′ UTR structure to RNA metabolism](https://doi.org/10.1093/nar/gkad221)**.
 
-Anob M. Chakrabarti, Ira A. Iosub, Flora C. Y. Lee, Jernej Ule, Nicholas M. Luscombe. _bioRxiv_ (2022).
+Anob M. Chakrabarti, Ira A. Iosub, Flora C. Y. Lee, Jernej Ule, Nicholas M. Luscombe. _Nucleic Acids Research_ (2023).
 
 ## Table of contents
 
