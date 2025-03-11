@@ -7,6 +7,7 @@ process GET_NON_HYBRIDS {
 
     tag "${sample_id}"
     label 'process_low'
+
     publishDir "${params.outdir}/nonhybrids", mode: 'copy', overwrite: true
 
     input:
@@ -16,7 +17,7 @@ process GET_NON_HYBRIDS {
         tuple val(sample_id), path("${sample_id}.nonhybrid.fastq.gz"), emit: nonhybrids
 
     script:
-    
+
     """
     gunzip -c $hybrids | \
     awk -v col=name 'NR==1{for(i=1;i<=NF;i++){if(\$i==col){colnum=i;break}}} {print \$colnum}'  \

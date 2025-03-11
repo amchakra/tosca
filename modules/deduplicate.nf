@@ -8,8 +8,8 @@ process DEDUPLICATE {
     tag "${sample_id}"
     label 'process_high'
 
-    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: false, pattern: '*.hybrids.dedup.tsv.gz'
-    publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: false, pattern: '*.dedup.log'
+    publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true, pattern: '*.hybrids.dedup.tsv.gz'
+    publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: true, pattern: '*.dedup.log'
 
 
     input:

@@ -14,40 +14,74 @@ suppressPackageStartupMessages(library(parallel))
 # ==========
 
 # Function to read and aggregate filter_blat logs
-aggregate_filter_blat_logs <- function(log_files, cores) {
+aggregate_filter_blat_logs <- function(log_files, num_cores) {
   # Read all logs into a list of data.tables in parallel and remove "Elapsed time (s)" column
   log_list <- mclapply(log_files, function(log_file) {
     log.dt <- fread(log_file, sep = "\t", header = TRUE)
-    log.dt[, `Elapsed time (s)` := NULL]  # Remove time column
+    elapsed_time_col <- "Elapsed time (s)"
+    if (elapsed_time_col %in% colnames(log.dt)) {
+      log.dt[, (elapsed_time_col) := NULL]  # Remove time column
+    }
     return(log.dt)
-  }, mc.cores = cores)
+  }, mc.cores = num_cores)
 
-  # Aggregate all logs by summing counts for each step
-  aggregated.dt <- Reduce(function(x, y) {
-    x[, .(`Reads remaining` = `Reads remaining` + y$`Reads remaining`,
-        `Reads discarded` = `Reads discarded` + y$`Reads discarded`,
-        `BLAT mappings remaining` = `BLAT mappings remaining` + y$`BLAT mappings remaining`),
-        by = Step]
-  }, log_list)
+  # If only one log file, return it directly
+  if (length(log_list) == 1) {
+    aggregated.dt <- log_list[[1]]
+  } else {
+
+    # Check if the list is empty
+    if (length(log_list) == 0) {
+      stop("The list of data.tables is empty.")
+    }
+    # Ensure all data.tables have the same structure
+    col_names <- names(log_list[[1]])
+
+    # Bind all tables together while keeping column names consistent
+    merged.dt <- rbindlist(log_list, use.names = TRUE, fill = TRUE)
+
+    # Sum across all numerical columns grouped by "Step"
+    cols_to_sum <- setdiff(col_names, "Step")
+    aggregated.dt <- merged.dt[, lapply(.SD, sum), .SDcols = cols_to_sum, by = Step]
+
+    # Ensure column order remains the same as the input
+    setcolorder(aggregated.dt, col_names)
+
+  }
 
   return(aggregated.dt)
 }
 
 # Function to read and aggregate identify_hybrids logs
-aggregate_identify_hybrids_logs <- function(log_files, cores) {
+aggregate_identify_hybrids_logs <- function(log_files, num_cores) {
   # Read all logs into a list of data.tables in parallel
   log_list <- mclapply(log_files, function(log_file) {
-    library(data.table)  # Needed inside parLapply
     log.dt <- fread(log_file, sep = "\t", header = TRUE)
     return(log.dt)
-  }, mc.cores = cores)
+  }, mc.cores = num_cores)
 
-  # Aggregate all logs by summing counts for each type
+  # If only one log file, return it directly without merging
+  if (length(log_list) == 1) {
+    aggregated.dt <- log_list[[1]]
+  }
+
+  # Merge logs while summing "count" values
   aggregated.dt <- Reduce(function(x, y) {
-    merge(x, y, by = "type", all = TRUE, suffixes = c(".x", ".y"))[
-      , .(type, count = rowSums(.SD, na.rm = TRUE)), .SDcols = patterns("count")
-    ]
+    merge(x, y, by = "type", all = TRUE, suffixes = c(".x", ".y"))
   }, log_list)
+
+  # Replace NA values with 0 before summing
+  aggregated.dt[is.na(aggregated.dt)] <- 0
+
+  # Sum only the "count" column from all logs
+  count_cols <- setdiff(names(aggregated.dt), "type")  # All numerical columns except "type"
+  aggregated.dt[, count := rowSums(.SD, na.rm = TRUE), .SDcols = count_cols]
+
+  # Keep only "type" and summed "count" column
+  aggregated.dt <- aggregated.dt[, .(type, count)]
+
+  # Ensure order of rows matches the first log file
+  aggregated.dt <- aggregated.dt[match(log_list[[1]]$type, aggregated.dt$type), ]
 
   return(aggregated.dt)
 }
