@@ -1,6 +1,6 @@
 # _Tosca_ - proximity ligation data analysis
 
-_Tosca_ is presented and described further in our preprint:
+_Tosca_ is presented and described further in our paper:
 
 **[A computationally-enhanced hiCLIP atlas reveals Staufen1-RNA binding features and links 3′ UTR structure to RNA metabolism](https://doi.org/10.1093/nar/gkad221)**.
 
@@ -199,7 +199,8 @@ Tosca outputs results in a number of subfolders:
     - `*.hybrids.dedup.tsv.gz` contains the deduplicated hybrids
     - `*.hybrids.clustered.tsv.gz` contains the deduplicated hybrids with clusters calculated that identify the unique duplexes/RNA structure they represent
     - `*.hybrids.gc.tsv.gz` contains the deduplicated hybrids with genomic coordinates calculated
-    - `*.hybrids.gc.annotated.tsv.gz` contains the deduplicated hybrids with genomic coordinates, gene, region and biotypes calculated.
+    - `*.hybrids.gc.annotated.tsv.gz` contains the deduplicated hybrids with genomic coordinates, gene, region and biotypes calculated
+    - `logs` contains logs produced during hybrid read mapping and identification logs, along with Sankey visualisations of read fate at each pipeline step for each sample
 - `clusters` contains files that have the identified clusters as TSV files:
     - `*.clusters.tsv.gz` contains all the collapsed clusters
     - `*.clusters.gc.tsv.gz` contains the collapsed clusters with genomic coordinates calculated
