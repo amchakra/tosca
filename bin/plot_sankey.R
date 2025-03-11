@@ -137,9 +137,10 @@ read_list['blat_remaining'] <- blat_filter_remaining.reads
 read_list['strong_contiguous_match_to_a_single_gene'] <- strong_contiguous_match_to_a_single_gene.reads
 read_list['excessive_overlap_in_query_mappings'] <- excessive_overlap_in_query_mappings.reads
 read_list['excessive_gap_between_query_mappings'] <- excessive_gap_between_query_mappings.reads
+read_list['excessive_overlap_in_subject_mappings']<- excessive_overlap_in_subject_mappings.reads
 read_list['identify_hybrids_remaining'] <- identify_hybrids_remaining.reads
 
-# Dedup &/or ambiguous
+# Dedup and/or ambiguous
 read_list['ambiguous'] <- ambiguous.reads
 read_list['duplicated'] <- duplicated.reads
 read_list['final'] <- dedup_remaining.reads
@@ -160,6 +161,7 @@ nodes <- data.frame(
     'Strong Match to Single Gene',
     'Excessive Overlap in Query',
     'Excessive Gap in Query',
+    'Excessive Overlap in Subject',
     'Valid Hybrids',
     'Ambiguous',
     'Duplicated',
@@ -167,7 +169,7 @@ nodes <- data.frame(
   ),
   group = c(
     'a', 'b', 'b', 'c', 'c', 'd', 'd',
-    'e', 'e', 'e', 'f', 'f', 'f', 'f',
+    'e', 'e', 'e', 'f', 'f', 'f', 'f', 'f',
     'g', 'g', 'g'
   )
 )
@@ -186,10 +188,11 @@ links <- as.data.frame(rbind(
   c(9, 10, read_list[['strong_contiguous_match_to_a_single_gene']]),
   c(9, 11, read_list[['excessive_overlap_in_query_mappings']]),
   c(9, 12, read_list[['excessive_gap_between_query_mappings']]),
-  c(9, 13, read_list[['identify_hybrids_remaining']]),
-  c(13, 14, read_list[['ambiguous']]),
-  c(13, 15, read_list[['duplicated']]),
-  c(13, 16, read_list[['final']])
+  c(9, 13, read_list[['excessive_overlap_in_subject_mappings']]),
+  c(9, 14, read_list[['identify_hybrids_remaining']]),
+  c(14, 15, read_list[['ambiguous']]),
+  c(14, 16, read_list[['duplicated']]),
+  c(14, 17, read_list[['final']])
 ))
 
 # Set column names for links
@@ -211,7 +214,7 @@ p <- sankeyNetwork(
   NodeGroup = 'group',
   units = 'reads',
   fontSize = 16,
-  nodeWidth = 45,
+  nodeWidth = 50,
   fontFamily = "sans-serif",
   width = 1800,
   height = 1000,
