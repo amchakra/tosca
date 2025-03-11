@@ -160,8 +160,10 @@ workflow {
         if (!params.skip_premap) {
             PREMAP(CUTADAPT.out.fastq, ch_star_genome)
             ch_for_hybrids = PREMAP.out.fastq
+            ch_premap_log = PREMAP.out.log
         } else {
             ch_for_hybrids = CUTADAPT.out.fastq
+            ch_premap_log = Channel.empty()
         }
 
         GET_HYBRIDS(ch_for_hybrids, ch_transcript_fa) // Identify hybrids
@@ -170,13 +172,13 @@ workflow {
         TRACK READ FATE
         */
         ch_for_read_fate = CUTADAPT.out.log
-            .join(params.skip_premap ? Channel.empty() : PREMAP.out.log, by: 0, remainder: true)
-            .join(GET_HYBRIDS.out.logs, by: 0)
-            .map { tuple ->
-                def sample_id = tuple[0]
-                def logs = tuple[1..-1].findAll { it != null }
-                [sample_id, logs]
-            }
+        .join(ch_premap_log, by: 0, remainder: true)
+        .join(GET_HYBRIDS.out.logs, by: 0)
+        .map { tuple ->
+            def sample_id = tuple[0]
+            def logs = tuple[1..-1].findAll { it != null }
+            [sample_id, logs]
+        }
             // .view { "Channel for TRACK_READ_FATE: $it" }
 
         TRACK_READ_FATE(ch_for_read_fate)
