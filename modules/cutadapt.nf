@@ -7,6 +7,7 @@ process CUTADAPT {
 
     tag "${sample_id}"
     label 'process_medium'
+
     publishDir "${params.outdir}/trimmed", mode: 'copy', overwrite: true, pattern: '*.log'
 
     input:
@@ -14,7 +15,7 @@ process CUTADAPT {
 
     output:
         tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: fastq
-        path("*.cutadapt.log"), emit: log
+        tuple val(sample_id), path("*.cutadapt.log"), emit: log
 
     script:
     args = " -j ${task.cpus}"

@@ -19,6 +19,7 @@ include { METADATA } from './workflows/metadata.nf'
 include { CUTADAPT } from './modules/cutadapt.nf'
 include { PREMAP } from './workflows/premap.nf'
 include { GET_HYBRIDS } from './workflows/gethybrids.nf'
+include { TRACK_READ_FATE } from './modules/logging.nf'
 include { GET_NON_HYBRIDS } from './modules/getnonhybrids.nf'
 include { PROCESS_HYBRIDS } from './workflows/processhybrids.nf'
 include { GET_VISUALISATIONS } from './workflows/getvisualisations.nf'
@@ -156,11 +157,31 @@ workflow {
         /*
         IDENTIFY HYBRIDS
         */
-        ch_for_hybrids = params.skip_premap
-            ? CUTADAPT.out.fastq
-            : PREMAP(CUTADAPT.out.fastq, ch_star_genome).fastq
+        if (!params.skip_premap) {
+            PREMAP(CUTADAPT.out.fastq, ch_star_genome)
+            ch_for_hybrids = PREMAP.out.fastq
+            ch_premap_log = PREMAP.out.logs
+        } else {
+            ch_for_hybrids = CUTADAPT.out.fastq
+            ch_premap_log = Channel.empty()
+        }
 
         GET_HYBRIDS(ch_for_hybrids, ch_transcript_fa) // Identify hybrids
+
+        /*
+        TRACK READ FATE
+        */
+        ch_for_read_fate = CUTADAPT.out.log
+        .join(ch_premap_log, by: 0, remainder: true)
+        .join(GET_HYBRIDS.out.logs, by: 0)
+        .map { tuple ->
+            def sample_id = tuple[0]
+            def logs = tuple[1..-1].findAll { it != null }
+            [sample_id, logs]
+        }
+            // .view { "Channel for TRACK_READ_FATE: $it" }
+
+        TRACK_READ_FATE(ch_for_read_fate)
 
         /*
         IDENTIFY NON-HYBRIDS
@@ -188,16 +209,17 @@ workflow {
         MAKE REPORT
         */
         if(!params.skip_qc) {
-            // ch_premap_logs = params.skip_premap ? Channel.empty() : PREMAP.out.logs.collect()
-            // ch_premap_logs = params.skip_premap ? Channel.of([]) : PREMAP.out.logs.collect()
-            ch_input_logs = params.skip_premap ? CUTADAPT.out.log.collect() : PREMAP.out.logs.collect()
+            // ch_input_logs = params.skip_premap ? Channel.of([]) : PREMAP.out.logs.collect()
+            ch_input_logs = params.skip_premap ? CUTADAPT.out.log.collect { it[1] } : PREMAP.out.logs.collect { it[1] }
 
-            MAKE_REPORT(ch_input_logs,
-                        GET_HYBRIDS.out.logs.collect(),
-                        GET_HYBRIDS.out.raw_hybrids.collect{it[1]},
-                        PROCESS_HYBRIDS.out.hybrids.collect{it[1]},
-                        PROCESS_HYBRIDS.out.clusters.collect{it[1]},
-                        ch_multiqc_config)
+            MAKE_REPORT(
+                ch_input_logs,
+                GET_HYBRIDS.out.logs.collect { it[1..-1].flatten() },
+                GET_HYBRIDS.out.raw_hybrids.collect { it[1] },
+                PROCESS_HYBRIDS.out.hybrids.collect { it[1] },
+                PROCESS_HYBRIDS.out.clusters.collect { it[1] },
+                ch_multiqc_config
+            )
         }
 
     }

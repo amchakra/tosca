@@ -9,8 +9,10 @@ message("Getting hybrid identification metrics...")
 
 # Get input and spliced or trimmed reads
 premap.logs <- list.files(".", pattern = "filter_spliced_reads.log$", full.names = TRUE)
+
 if (length(premap.logs) == 0) {
   message("No premap log files found (pre-mapping was skipped). Using cutadapt logs to get read counts.")
+
   # Extract sample names and trimmed read counts from cutadapt logs if available
   cutadapt.logs <- list.files(".", pattern = ".cutadapt.log$", full.names = TRUE)
   if (length(cutadapt.logs) > 0) {
@@ -28,12 +30,7 @@ if (length(premap.logs) == 0) {
                             spliced = 0L)
 
   } else {
-    sample_names <- character()
-
-    premap.dt <- data.table(sample = sample_names,
-                            total = 0L,
-                            unspliced = 0L,
-                            spliced = 0L)
+    stop("No premap or cutadapt log files found. Exiting.")
   }
 
 } else {
