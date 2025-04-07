@@ -32,8 +32,9 @@ atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == 
 atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
 atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
 
-message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
-atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
+# message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
+# atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]
+atlas.hybrids.dt <- atlas.hybrids.dt[total_count > 1]
 
 # Subsample as indicated
 if(opt$sample_size != -1) atlas.hybrids.dt <- atlas.hybrids.dt[sample(1:nrow(atlas.hybrids.dt, opt$sample_size))]

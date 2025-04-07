@@ -6,11 +6,9 @@ nextflow.enable.dsl=2
 process GET_NON_HYBRIDS {
 
     tag "${sample_id}"
-    publishDir "${params.outdir}/nonhybrids", mode: 'copy', overwrite: true
+    label 'process_low'
 
-    // cpus 4
-    // memory 16G
-    // time '1h'
+    publishDir "${params.outdir}/nonhybrids", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample_id), path(hybrids), path(reads)
@@ -19,7 +17,7 @@ process GET_NON_HYBRIDS {
         tuple val(sample_id), path("${sample_id}.nonhybrid.fastq.gz"), emit: nonhybrids
 
     script:
-    
+
     """
     gunzip -c $hybrids | \
     awk -v col=name 'NR==1{for(i=1;i<=NF;i++){if(\$i==col){colnum=i;break}}} {print \$colnum}'  \

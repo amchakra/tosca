@@ -6,8 +6,9 @@ nextflow.enable.dsl=2
 process SPLIT_FASTQ {
 
     tag "${sample_id}"
-    if(!params.keep_cache) cache false
+    label 'process_low'
 
+    if(!params.keep_cache) cache false
 
     input:
         tuple val(sample_id), path(reads)
@@ -28,10 +29,9 @@ process SPLIT_FASTQ {
 process FASTQ_TO_FASTA {
 
     tag "${sample_id}"
-    if(!params.keep_cache) cache false
+    label 'process_low'
 
-    cpus 8
-    time '1h'
+    if(!params.keep_cache) cache false
 
     input:
         tuple val(sample_id), path(reads)

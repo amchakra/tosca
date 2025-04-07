@@ -6,6 +6,7 @@ nextflow.enable.dsl=2
 process IDENTIFY_HYBRIDS {
 
     tag "${sample_id}"
+    label 'process_high'
 
     input:
         tuple val(sample_id), path(blast8), path(reads)
@@ -24,6 +25,8 @@ process IDENTIFY_HYBRIDS {
 process MERGE_HYBRIDS {
 
     tag "${sample_id}"
+    label 'process_medium'
+
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
     input:
@@ -34,9 +37,9 @@ process MERGE_HYBRIDS {
         tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
 
     script:
-    
+
     // zcat $hybrids | pigz > ${sample_id}.hybrids.tsv.gz
-    // This doesn't account for empty table files 
+    // This doesn't account for empty table files
 
     """
     #!/usr/bin/env Rscript

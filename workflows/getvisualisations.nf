@@ -27,7 +27,10 @@ workflow GET_VISUALISATIONS {
         if(params.goi) {
 
             GET_CONTACT_MAPS(hybrids, transcript_fai.collect(), goi.collect())
-            GET_ARCS(clusters, goi.collect())
+
+            if(!params.skip_arcs) {
+                GET_ARCS(clusters, goi.collect())
+            }
 
         }
 

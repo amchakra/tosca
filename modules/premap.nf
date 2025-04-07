@@ -6,12 +6,13 @@ nextflow.enable.dsl=2
 process STAR {
 
     tag "${sample_id}"
+    label 'process_high'
     if(params.keep_intermediates) publishDir "${params.outdir}/premap", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample_id), path(reads)
         file(star_genome_index)
-    
+
     output:
         tuple val(sample_id), path("${sample_id}.Aligned.sortedByCoord.out.bam"), path("${sample_id}.Aligned.sortedByCoord.out.bam.bai"), emit: bam
         path("*.Log.final.out"), emit: log
@@ -19,7 +20,7 @@ process STAR {
     script:
 
     args = " --runThreadN ${task.cpus} "
-    args += " --genomeDir $star_genome_index --genomeLoad NoSharedMemory " 
+    args += " --genomeDir $star_genome_index --genomeLoad NoSharedMemory "
     args += " --readFilesIn $reads --readFilesCommand gunzip -c "
     args += " --outFileNamePrefix ${sample_id}. "
     args += " --outSAMattributes All --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within " // need to keep unmapped for later filtering
@@ -28,7 +29,7 @@ process STAR {
     args += " --alignIntronMin 20 --alignIntronMax 100000 "
     args += " --limitBAMsortRAM 60000000000"
     args += " " + params.star_args
-   
+
     """
     STAR $args && samtools index -@ ${task.cpus} ${sample_id}.Aligned.sortedByCoord.out.bam
     """
@@ -37,6 +38,7 @@ process STAR {
 process FILTER_SPLICED_READS {
 
     tag "${sample_id}"
+    label 'process_low'
     if(params.keep_intermediates) publishDir "${params.outdir}/filtered", mode: 'copy', overwrite: true
 
     input:
@@ -44,12 +46,12 @@ process FILTER_SPLICED_READS {
 
     output:
         tuple val(sample_id), path("${sample_id}.unspliced.fastq.gz"), emit: fastq
-        path("*.filter_spliced_reads.log"), emit: log
+        tuple val(sample_id), path("*.filter_spliced_reads.log"), emit: log
 
     script:
 
     """
     filter_spliced_reads.py $bam ${sample_id} > ${sample_id}.filter_spliced_reads.log
     """
-    
+
 }

@@ -4,7 +4,10 @@
 nextflow.enable.dsl=2
 
 process BLAT {
+
     tag "${sample_id}"
+    label 'process_medium'
+
     if(!params.keep_cache) cache false
 
     input:
@@ -17,9 +20,9 @@ process BLAT {
     script:
 
     args = " -threads=${task.cpus} "
-    args += " -stepSize=" + params.step_size 
+    args += " -stepSize=" + params.step_size
     args += " -tileSize=" + params.tile_size
-    args += " -minScore=" + params.min_score 
+    args += " -minScore=" + params.min_score
     args += " -out=blast8 "
     args += " -dots=1000000 "
 
@@ -33,6 +36,8 @@ process BLAT {
 process FILTER_BLAT {
 
     tag "${sample_id}"
+    label 'process_low'
+
     if(params.keep_intermediates) publishDir "${params.outdir}/mapped", mode: 'copy', overwrite: true
 
     input:
@@ -48,6 +53,48 @@ process FILTER_BLAT {
 
     """
     filter_blat.py $blast8 ${sample_id}.filtered.blast8.gz $evalue $maxhits
+    """
+
+}
+
+process BLAT_ALL_IN_ONE {
+
+    tag "${sample_id}"
+    label 'process_high'
+
+    if(!params.keep_cache) cache false
+
+    input:
+        tuple val(sample_id), path(reads)
+        path(transcript_fa)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.hybrids.tsv.gz"), emit: hybrids
+        tuple val(sample_id), path("${sample_id}.filter_blat.log"), path("${sample_id}.identify_hybrids.log"), emit: logs
+
+    script:
+
+    args = " -threads=${task.cpus} "
+    args += " -stepSize=" + params.step_size
+    args += " -tileSize=" + params.tile_size
+    args += " -minScore=" + params.min_score
+    args += " -out=blast8 "
+    args += " -dots=1000000 "
+
+    evalue = params.evalue
+    maxhits = params.maxhits
+
+    """
+    reformat.sh in1=$reads out1=${sample_id}.fasta
+
+    pblat $args $transcript_fa ${sample_id}.fasta ${sample_id}.blast8
+    pigz ${sample_id}.blast8
+
+    filter_blat.py ${sample_id}.blast8.gz ${sample_id}.filtered.blast8.gz $evalue $maxhits ${sample_id}.filter_blat.log
+    rm ${sample_id}.blast8.gz
+
+    identify_hybrids.R -t ${task.cpus} -b ${sample_id}.filtered.blast8.gz -f ${sample_id}.fasta -o ${sample_id}.hybrids.tsv.gz -l ${sample_id}.identify_hybrids.log
+    rm ${sample_id}.fasta
     """
 
 }
