@@ -90,10 +90,24 @@ option_list <- list(make_option(c("-b", "--blast8"), action = "store", type = "c
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
+# Prepare data for logging
+discarded_reasons <- c(
+    "strong_contiguous_match_to_a_single_gene",
+    "excessive_overlap_in_query_mappings",
+    "excessive_gap_between_query_mappings",
+    "excessive_overlap_in_subject_mappings"
+)
+
 if(is.na(readLines(opt$blast8)[1])) {
 
+    message("Empty blast8 input — writing empty output and default log.")
     fwrite(data.table(), file = opt$output, sep = "\t", col.names = TRUE) # Accounts for empty filtered blast file
-    fwrite(data.table(), file = opt$log, sep = "\t", col.names = FALSE)
+
+    log.dt <- data.table(
+      type = c("initial_read_count", discarded_reasons, "remaining_read_count"),
+      count = c(0L, rep(0L, length(discarded_reasons)), 0L)
+    )
+    fwrite(log.dt, file = opt$log, sep = "\t")
 
 } else {
 
@@ -108,7 +122,7 @@ if(is.na(readLines(opt$blast8)[1])) {
     hybrids.list <- parLapply(cl = cl, blast.list, function(x) get_valid_hybrids(blast.query.dt = x))
     stopCluster(cl)
 
-    # get_valid_hybrids returns a data.table if valid, or a character string with a discard reason if not.
+    # get_valid_hybrids returns a data.table if valid, or a character string with a discard reason if not
     discarded_bools <- sapply(hybrids.list, is.character)
 
     # message(sum(S4Vectors::elementNROWS(hybrids.list) == 0), " out of ", length(hybrids.list), " reads did not have hybrids")
@@ -126,30 +140,23 @@ if(is.na(readLines(opt$blast8)[1])) {
     fwrite(valid.hybrids.dt, file = opt$output, sep = "\t", col.names = TRUE)
 
     # Prepare data for logging
-    discarded_reasons <- c(
-        "strong_contiguous_match_to_a_single_gene",
-        "excessive_overlap_in_query_mappings",
-        "excessive_gap_between_query_mappings",
-        "excessive_overlap_in_subject_mappings"
-    )
     discarded_reads.list <- hybrids.list[discarded_bools]
 
     if (length(unlist(discarded_reads.list)) > 0) {
-        discarded_reads_log.dt <- as.data.table(table(unlist(discarded_reads.list)))
+        message("Logging discard reasons...")
+        discarded_vector <- factor(unlist(discarded_reads.list), levels = discarded_reasons) # force factor with full levels
+        discarded_reads_log.dt <- as.data.table(table(discarded_vector)) # table() will include the unused levels with count = 0
         setnames(discarded_reads_log.dt, c("type", "count"))
     } else {
+        message("No reads were discarded.")
         discarded_reads_log.dt <- data.table(type = discarded_reasons, count = rep(0L, length(discarded_reasons)))
     }
-
-    print(head(discarded_reads_log.dt))
 
     log.dt <- rbind(
         data.table(type = "initial_read_count", count = length(blast.list)),
         discarded_reads_log.dt,
         data.table(type = "remaining_read_count", count = length(hybrids.list[!discarded_bools]))
     )
-
-    print(head(log.dt))
 
     fwrite(log.dt, file = opt$log, sep = "\t")
 
