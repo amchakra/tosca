@@ -15,9 +15,19 @@ suppressPackageStartupMessages(library(parallel))
 
 # Function to read and aggregate filter_blat logs
 aggregate_filter_blat_logs <- function(log_files, num_cores) {
+
+  expected_steps_keywords <- c("initial", "e-value", "max hits")
+
   # Read all logs into a list of data.tables in parallel and remove "Elapsed time (s)" column
   log_list <- mclapply(log_files, function(log_file) {
     log.dt <- fread(log_file, sep = "\t", header = TRUE)
+
+    missing_steps <- expected_steps_keywords[!sapply(expected_steps_keywords, function(p) any(str_detect(log.dt$Step, fixed(p))))]
+
+    if (length(missing_steps) > 0) {
+      stop(paste("Log file", log_file, "is missing required Step(s): ", paste(missing_steps, collapse = ", ")))
+    }
+
     elapsed_time_col <- "Elapsed time (s)"
     if (elapsed_time_col %in% colnames(log.dt)) {
       log.dt[, (elapsed_time_col) := NULL]  # Remove time column
@@ -50,9 +60,26 @@ aggregate_filter_blat_logs <- function(log_files, num_cores) {
 
 # Function to read and aggregate identify_hybrids logs
 aggregate_identify_hybrids_logs <- function(log_files, num_cores) {
+
+  expected_types <- c(
+    "initial_read_count",
+    "strong_contiguous_match_to_a_single_gene",
+    "excessive_overlap_in_query_mappings",
+    "excessive_gap_between_query_mappings",
+    "excessive_overlap_in_subject_mappings",
+    "remaining_read_count"
+  )
+
   # Read all logs into a list of data.tables in parallel
   log_list <- mclapply(log_files, function(log_file) {
     log.dt <- fread(log_file, sep = "\t", header = TRUE)
+
+    # Check all expected types are present
+    missing_types <- setdiff(expected_types, log.dt$type)
+    if (length(missing_types) > 0) {
+      stop(paste("Log file", log_file, "is missing expected types: ", paste(missing_types, collapse = ", ")))
+    }
+
     return(log.dt)
   }, mc.cores = num_cores)
 
@@ -60,6 +87,7 @@ aggregate_identify_hybrids_logs <- function(log_files, num_cores) {
   if (length(log_list) == 0) {
     stop("The list of logs is empty.")
   }
+
 
   # If only one log file, return it directly
   if (length(log_list) == 1) {
