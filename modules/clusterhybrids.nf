@@ -221,7 +221,10 @@ process IDENTIFY_CLUSTERS {
 
         # Check if there are no overlaps
         if (file.size(ol) != 0) {
-            bedpe.dt <- fread(ol, col.names = c(paste0(bedpe.colnames, ".x"), paste0(bedpe.colnames, ".y")))
+            bedpe.dt <- fread(ol, sep = "\t", col.names = c(paste0(bedpe.colnames, ".x"), paste0(bedpe.colnames, ".y"))) 
+            # need to specify sep for cases where the sequence is:
+            # "tRNA-iMet-CAT-1-8;tRNA-iMet-CAT-1-7;tRNA-iMet-CAT-1-6;tRNA-iMet-CAT-1-5;tRNA-iMet-CAT-1-4;tRNA-iMet-CAT-1-3;tRNA-iMet-CAT-1-2;tRNA-iMet-CAT-1-1" as autodetected as ; separated
+            
             # Delete temporary files
             invisible(file.remove(bedpe))
             invisible(file.remove(ol))
