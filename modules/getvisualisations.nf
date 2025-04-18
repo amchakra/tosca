@@ -132,7 +132,7 @@ process EXPORT_BEDPE {
         bedpe.colnames <- c("L_seqnames", "L_start", "L_end", "R_seqnames", "R_start", "R_end", "name", "total_count", "L_strand", "R_strand")
         bedpe.dt <- hybrids.dt[, ..bedpe.colnames]
     } else if("$type" == "clusters") {
-        bedpe.colnames <- c("L_seqnames", "L_start", "L_end", "R_seqnames", "R_start", "R_end", "name", "cluster_count", "L_strand", "R_strand")
+        bedpe.colnames <- c("L_seqnames", "L_start", "L_end", "R_seqnames", "R_start", "R_end", "name", "count", "L_strand", "R_strand")
         bedpe.dt <- hybrids.dt[, ..bedpe.colnames]
     }
 
