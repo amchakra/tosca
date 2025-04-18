@@ -23,7 +23,7 @@ workflow GET_VISUALISATIONS {
 
     main:
         EXPORT_HYBRIDS_GENOMIC_BED("hybrids", hybrids)
-        EXPORT_GENOMIC_BAM(EXPORT_HYBRID_GENOMIC_BED.out.bed, genome_fai.collect())
+        EXPORT_GENOMIC_BAM(EXPORT_HYBRIDS_GENOMIC_BED.out.bed, genome_fai.collect())
         EXPORT_CLUSTERS_GENOMIC_BED("clusters", clusters)
 
         EXPORT_HYBRIDS_BEDPE("hybrids", hybrids)
