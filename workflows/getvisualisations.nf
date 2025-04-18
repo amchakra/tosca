@@ -3,9 +3,11 @@
 // Specify DSL2
 nextflow.enable.dsl=2
 
-include { EXPORT_GENOMIC_BED as EXPORT_HYBRID_GENOMIC_BED; 
+include { EXPORT_GENOMIC_BED as EXPORT_HYBRIDS_GENOMIC_BED; 
           EXPORT_GENOMIC_BED as EXPORT_CLUSTERS_GENOMIC_BED;
           EXPORT_GENOMIC_BAM;
+          EXPORT_BEDPE as EXPORT_HYBRIDS_BEDPE;
+          EXPORT_BEDPE as EXPORT_CLUSTERS_BEDPE;
           GET_CONTACT_MAPS;
           GET_ARCS } from '../modules/getvisualisations.nf'
 
@@ -20,9 +22,12 @@ workflow GET_VISUALISATIONS {
         goi
 
     main:
-        EXPORT_HYBRID_GENOMIC_BED("hybrids", hybrids)
-        EXPORT_GENOMIC_BAM(EXPORT_HYBRID_GENOMIC_BED.out.bed, genome_fai.collect())
+        EXPORT_HYBRIDS_GENOMIC_BED("hybrids", hybrids)
+        EXPORT_GENOMIC_BAM(EXPORT_HYBRIDS_GENOMIC_BED.out.bed, genome_fai.collect())
         EXPORT_CLUSTERS_GENOMIC_BED("clusters", clusters)
+
+        EXPORT_HYBRIDS_BEDPE("hybrids", hybrids)
+        EXPORT_CLUSTERS_BEDPE("clusters", clusters)
 
         if(params.goi) {
 
