@@ -103,3 +103,43 @@ process GET_ARCS {
     """
 
 }
+
+process EXPORT_BEDPE {
+
+    tag "${sample_id}"
+    label 'process_low'
+
+    publishDir "${params.outdir}/igv", mode: 'copy', overwrite: true
+
+    input:
+        val(type)
+        tuple val(sample_id), path(hybrids)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.${type}.bedpe.gz"), emit: bedpe
+
+    script:
+    """
+    #!/usr/bin/env Rscript
+
+    suppressPackageStartupMessages(library(data.table))
+    suppressPackageStartupMessages(library(toscatools))
+
+    hybrids.dt <- fread("$hybrids")
+    hybrids.dt <- toscatools::reorient_hybrids(hybrids.dt)
+
+    if($type == "hybrids") {
+        bedpe.colnames <- c("L_seqnames", "L_start", "L_end", "R_seqnames", "R_start", "R_end", "name", "total_count", "L_strand", "R_strand")
+        bedpe.dt <- hybrids.dt[, ..bedpe.colnames]
+    } else if($type == "clusters") {
+        bedpe.colnames <- c("L_seqnames", "L_start", "L_end", "R_seqnames", "R_start", "R_end", "name", "cluster_hybrid_count", "L_strand", "R_strand")
+        bedpe.dt <- hybrids.dt[, ..bedpe.colnames]
+    }
+
+    bedpe.dt[, `:=` (L_start = L_start - 1, 
+                     R_start = R_start - 1)]
+
+    fwrite(bedpe.dt, "${sample_id}.${type}.bedpe.gz", sep = "\t", col.names = FALSE, quote = FALSE)
+    """
+
+}
