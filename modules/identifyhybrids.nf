@@ -25,7 +25,7 @@ process IDENTIFY_HYBRIDS {
 process MERGE_HYBRIDS {
 
     tag "${sample_id}"
-    label 'process_medium'
+    label 'process_high'
 
     publishDir "${params.outdir}/${type}", mode: 'copy', overwrite: true
 
