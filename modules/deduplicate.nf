@@ -6,7 +6,11 @@ nextflow.enable.dsl=2
 process DEDUPLICATE {
 
     tag "${sample_id}"
-    label 'process_high'
+    // label 'process_high'
+    memory '192 GB'
+    time '12h'
+    cpus 4
+
 
     publishDir "${params.outdir}/hybrids", mode: 'copy', overwrite: true, pattern: '*.hybrids.dedup.tsv.gz'
     publishDir "${params.outdir}/hybrids/logs", mode: 'copy', overwrite: true, pattern: '*.dedup.log'
