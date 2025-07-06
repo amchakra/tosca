@@ -122,6 +122,7 @@ if(params.slurm) settings['Use SLURM'] = params.slurm
 settings['Clustering chunk number'] = params.chunk_number
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
+settings['Clustering method'] = params.cluster_method
 settings['Analyse structures'] = params.analyse_structures
 if(params.analyse_structures) settings['Analyse clusters only'] = params.clusters_only
 if(params.analyse_structures) settings['Analyse shuffled energies'] = params.shuffled_energies

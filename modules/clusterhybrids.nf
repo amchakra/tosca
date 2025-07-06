@@ -184,6 +184,7 @@ process IDENTIFY_CLUSTERS {
     script:
 
     percent_overlap = params.percent_overlap
+    cluster_method = params.cluster_method
 
     """
     #!/usr/bin/env Rscript
@@ -262,7 +263,7 @@ process IDENTIFY_CLUSTERS {
         return(bedpe.dt)
     }
 
-    cluster_hybrids_fraction <- function(hybrids.dt, percent_overlap = 0.75, verbose = FALSE) {
+    cluster_hybrids_fraction <- function(hybrids.dt, percent_overlap = $percent_overlap, cluster_method = "$cluster_method", verbose = FALSE) {
 
         hybrids.bedpe.dt <- find_hybrid_overlaps_fraction(hybrids.dt, fraction_overlap = percent_overlap)
 
@@ -276,12 +277,19 @@ process IDENTIFY_CLUSTERS {
         g <- igraph::graph_from_edgelist(el = as.matrix(sel.bedpe.dt[, .(name.x, name.y)]), directed = FALSE)
         igraph::E(g)\$weight <- sel.bedpe.dt\$mean_p # weight by percent overlap
 
-        c <- igraph::components(g)
-        if (verbose) message(c\$no, " clusters")
+        if (cluster_method == "leiden") {
+            c <- igraph::cluster_leiden(g, objective_function = "modularity", weights = igraph::E(g)\$weight)
+            cluster_membership <- igraph::membership(c)
+            if (verbose) message(length(unique(cluster_membership)), " Leiden clusters")
+        } else if (cluster_method == "components") {
+            c <- igraph::components(g)
+            cluster_membership <- c\$membership
+            if (verbose) message(c\$no, " clusters")
+        }
 
         clusters.dt <- data.table(
-            name = names(c\$membership),
-            cluster = c\$membership
+            name = names(cluster_membership),
+            cluster = cluster_membership
         )
         setorder(clusters.dt, cluster)
 
