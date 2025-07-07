@@ -263,7 +263,7 @@ process IDENTIFY_CLUSTERS {
         return(bedpe.dt)
     }
 
-    cluster_hybrids_fraction <- function(hybrids.dt, percent_overlap = $percent_overlap, cluster_method = "$cluster_method", verbose = FALSE) {
+    cluster_hybrids_fraction <- function(hybrids.dt, percent_overlap = $percent_overlap, cluster_method = "components", verbose = FALSE) {
 
         hybrids.bedpe.dt <- find_hybrid_overlaps_fraction(hybrids.dt, fraction_overlap = percent_overlap)
 
@@ -281,6 +281,10 @@ process IDENTIFY_CLUSTERS {
             c <- igraph::cluster_leiden(g, objective_function = "modularity", weights = igraph::E(g)\$weight)
             cluster_membership <- igraph::membership(c)
             if (verbose) message(length(unique(cluster_membership)), " Leiden clusters")
+        } else if (cluster_method == "louvain") {
+            c <- igraph::cluster_louvain(g, objective_function = "modularity", weights = igraph::E(g)\$weight)
+            cluster_membership <- igraph::membership(c)
+            if (verbose) message(length(unique(cluster_membership)), " Louvain clusters")
         } else if (cluster_method == "components") {
             c <- igraph::components(g)
             cluster_membership <- c\$membership
@@ -317,7 +321,7 @@ process IDENTIFY_CLUSTERS {
 
     atlas.hybrids.list <- readRDS("$rds")
     # atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = $percent_overlap, mc.cores = ${task.cpus})
-    atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids_fraction, percent_overlap = ${percent_overlap}, mc.cores = ${task.cpus})
+    atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids_fraction, percent_overlap = ${percent_overlap}, cluster_method = "$cluster_method", mc.cores = ${task.cpus})
     atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
 
     fwrite(atlas.clusters.dt, paste0("${sample_id}", ".clustered.tsv.gz"), sep = "\t")
