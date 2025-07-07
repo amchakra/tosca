@@ -282,7 +282,7 @@ process IDENTIFY_CLUSTERS {
             cluster_membership <- igraph::membership(c)
             if (verbose) message(length(unique(cluster_membership)), " Leiden clusters")
         } else if (cluster_method == "louvain") {
-            c <- igraph::cluster_louvain(g, objective_function = "modularity", weights = igraph::E(g)\$weight)
+            c <- igraph::cluster_louvain(g, weights = igraph::E(g)\$weight)
             cluster_membership <- igraph::membership(c)
             if (verbose) message(length(unique(cluster_membership)), " Louvain clusters")
         } else if (cluster_method == "components") {
