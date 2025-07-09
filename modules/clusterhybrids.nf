@@ -278,11 +278,13 @@ process IDENTIFY_CLUSTERS {
         igraph::E(g)\$weight <- sel.bedpe.dt\$mean_p # weight by percent overlap
 
         if (cluster_method == "leiden") {
-            c <- igraph::cluster_leiden(g, objective_function = "modularity", weights = igraph::E(g)\$weight)
+            // c <- igraph::cluster_leiden(g, objective_function = "modularity", weights = igraph::E(g)\$weight)
+            c <- igraph::cluster_leiden(g, objective_function = "modularity", weights = NA)
             cluster_membership <- igraph::membership(c)
             if (verbose) message(length(unique(cluster_membership)), " Leiden clusters")
         } else if (cluster_method == "louvain") {
-            c <- igraph::cluster_louvain(g, weights = igraph::E(g)\$weight)
+            // c <- igraph::cluster_louvain(g, weights = igraph::E(g)\$weight)
+            c <- igraph::cluster_louvain(g, weights = NA)
             cluster_membership <- igraph::membership(c)
             if (verbose) message(length(unique(cluster_membership)), " Louvain clusters")
         } else if (cluster_method == "components") {
