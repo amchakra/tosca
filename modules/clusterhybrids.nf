@@ -198,11 +198,12 @@ process IDENTIFY_CLUSTERS {
     set.seed(42)
 
     atlas.hybrids.list <- readRDS("$rds")
-    atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = ${percent_overlap}, cluster_method = "$cluster_method", weight = $weight_cluster, mc.cores = ${task.cpus})
+    # atlas.clusters.list <- parallel::mclapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = ${percent_overlap}, cluster_method = "$cluster_method", weight = $weight_cluster, mc.cores = ${task.cpus})
+    atlas.clusters.list <- lapply(atlas.hybrids.list, cluster_hybrids, percent_overlap = ${percent_overlap}, cluster_method = "$cluster_method", weight = $weight_cluster)
     atlas.clusters.dt <- rbindlist(atlas.clusters.list, use.names = TRUE, fill = TRUE)
 
     atlas.hybrids.dt <- rbindlist(atlas.hybrids.list)
-    stopifnot(all(atlas.hybrids.dt$name %in% atlas.clusters.dt$name))
+    stopifnot(all(atlas.hybrids.dt\$name %in% atlas.clusters.dt\$name))
 
     fwrite(atlas.clusters.dt, paste0("${sample_id}", ".clustered.tsv.gz"), sep = "\t")
 
