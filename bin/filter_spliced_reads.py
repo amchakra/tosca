@@ -51,9 +51,14 @@ if len(sys.argv) == 3:
     bam_out = pysam.AlignmentFile(f_out, 'wb', template = bam_in)
     FilterBam(bam_in, bam_out)
 
-    # System call to bedtools to convert to fastq
+    # # System call to bedtools to convert to fastq
+    # fastq_out = sys.argv[2] + '.unspliced.fastq.gz'
+    # run(f'bedtools bamtofastq -i {f_out} -fq /dev/stdout | pigz > {fastq_out}', shell = True)
+    # BEDTools 2.31.1 and 2.31.0 have a bug where bamtofastq output duplicate reads, so switched to SAMtools
+
+    # System call to samtools to convert to fastq
     fastq_out = sys.argv[2] + '.unspliced.fastq.gz'
-    run(f'bedtools bamtofastq -i {f_out} -fq /dev/stdout | pigz > {fastq_out}', shell = True)
+    run(f'samtools fastq -0 {fastq_out} {f_out}', shell = True)
 
 else:
     print("filter_spliced_reads.py <input_bam> <output_stem>")
