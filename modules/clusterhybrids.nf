@@ -115,11 +115,12 @@ process CHUNK_HYBRIDS {
     if("$omit_transcripts" != "") {
 
         tx_to_omit <- unlist(tstrsplit("$omit_transcripts", ","))
-        for(tx in tx_to_omit) {
+        // for(tx in tx_to_omit) {
 
-            atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == tx & R_seqnames == tx)]
+        //     atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == tx | R_seqnames == tx)]
 
-        }
+        // }
+        atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames %in% tx_to_omit | R_seqnames %in% tx_to_omit)]
 
     }
 
@@ -172,7 +173,7 @@ process CHUNK_HYBRIDS {
 process IDENTIFY_CLUSTERS {
 
     tag "${sample_id}"
-    label 'process_medium'
+    label 'process_high'
 
     input:
         val(type)
