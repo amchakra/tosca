@@ -9,16 +9,22 @@ option_list <- list(make_option(c("-b", "--blast8"), action = "store", type = "c
             make_option(c("-f", "--fasta"), action = "store", type = "character", help = "Reads fasta"),
             make_option(c("-o", "--output"), action = "store", type = "character", help = "Output file"),
             make_option(c("-l", "--log"), action = "store", type = "character", help = "Output file for logs"),
-            make_option(c("-t", "--threads"), action = "store", type = "integer", default = 8, help = "Number of threads [default: %default]"))
+            make_option(c("-t", "--threads"), action = "store", type = "integer", default = 8, help = "Number of threads [default: %default]"),
+            make_option(c("-x", "--xlink_distance"), action = "store", type = "double", default = NA,
+                        help = "Keep a hybrid only if one arm starts before this read position (e.g. 5 for hiCLIP, whose read 5' end is the crosslink); NA = off [default: %default]"))
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
+
+# NULL switches the crosslink-distance filter off in toscatools::get_valid_hybrids()
+xlink_distance <- if (is.na(opt$xlink_distance)) NULL else opt$xlink_distance
 
 # Prepare data for logging
 discarded_reasons <- c(
     "strong_contiguous_match_to_a_single_gene",
     "excessive_overlap_in_query_mappings",
     "excessive_gap_between_query_mappings",
-    "excessive_overlap_in_subject_mappings"
+    "excessive_overlap_in_subject_mappings",
+    "hybrids_too_far_from_xlink_site" # always logged; 0 when the crosslink-distance filter is off
 )
 
 if(is.na(readLines(opt$blast8)[1])) {
@@ -42,7 +48,7 @@ if(is.na(readLines(opt$blast8)[1])) {
     blast.list <- split(blast.dt, blast.dt$query)
 
     cl <- makeForkCluster(opt$threads) # otherwise really slow...
-    hybrids.list <- parLapply(cl = cl, blast.list, function(x) get_valid_hybrids(blast.query.dt = x))
+    hybrids.list <- parLapply(cl = cl, blast.list, function(x) get_valid_hybrids(blast.query.dt = x, xlink_distance = xlink_distance))
     stopCluster(cl)
 
     # get_valid_hybrids returns a data.table if valid, or a character string with a discard reason if not
