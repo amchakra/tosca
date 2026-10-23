@@ -34,7 +34,8 @@ dedup.log <- all.logs[str_detect(all.logs, ".dedup.log")] # dedup if umi dedup e
 
 # Load optional logs
 
-filter_spliced_reads.log <- all.logs[str_detect(all.logs, ".filter_spliced_reads.log")] # only if premapping enabled
+# Premap/linear-filter log: filter_premap_reads.log (current) or filter_spliced_reads.log (older runs)
+filter_spliced_reads.log <- all.logs[str_detect(all.logs, "\\.filter_(premap|spliced)_reads\\.log$")] # only if premapping and/or the linear filter ran
 
 # =========
 # 1. Extract information from cutadapt and premapping logs
@@ -55,6 +56,7 @@ if (length(cutadapt.log) != 0 & length(filter_spliced_reads.log) == 0) {
 
   message("premap log is empty")
   spliced.reads <- 0
+  linear.reads <- 0
   unspliced.reads <- cutadapt_remaining.reads
 
 } else if (length(cutadapt.log) != 0 & length(filter_spliced_reads.log) == 1) {
@@ -67,6 +69,10 @@ if (length(cutadapt.log) != 0 & length(filter_spliced_reads.log) == 0) {
   stopifnot(trimmed.reads == cutadapt_remaining.reads)
   spliced.reads <- parse_number(filter_spliced_reads.log[grep("^Reads discarded:", filter_spliced_reads.log)])
   unspliced.reads <- parse_number(filter_spliced_reads.log[grep("^Reads kept:", filter_spliced_reads.log)])
+  # Linear reads (STAR linear-read filter); absent from older logs
+  linear.line <- filter_spliced_reads.log[grep("^Reads linear:", filter_spliced_reads.log)]
+  linear.reads <- if (length(linear.line) == 1) parse_number(linear.line) else 0
+  stopifnot(spliced.reads + linear.reads + unspliced.reads == trimmed.reads)
 
 }
 
@@ -77,7 +83,7 @@ if (length(cutadapt.log) != 0 & length(filter_spliced_reads.log) == 0) {
 # pBLAT
 blat_filter.log <- fread(filter_blat.log)
 blat_mapped.reads <- blat_filter.log[blat_filter.log$Step == "initial"]$`Reads remaining`
-blat_unmapped.reads <- cutadapt_remaining.reads - spliced.reads - blat_mapped.reads
+blat_unmapped.reads <- cutadapt_remaining.reads - spliced.reads - linear.reads - blat_mapped.reads
 
 too_high_evalue_antisense.reads <- blat_filter.log[str_detect(blat_filter.log$Step, "e-value|orientation")]$`Reads discarded`
 too_many_blat_hits.reads <- blat_filter.log[str_detect(blat_filter.log$Step, "max hits")]$`Reads discarded`
@@ -100,7 +106,15 @@ strong_contiguous_match_to_a_single_gene.reads <- identify_hybrids.log[identify_
 excessive_overlap_in_query_mappings.reads <- identify_hybrids.log[identify_hybrids.log$type =="excessive_overlap_in_query_mappings"]$count
 excessive_gap_between_query_mappings.reads <- identify_hybrids.log[identify_hybrids.log$type =="excessive_gap_between_query_mappings"]$count
 excessive_overlap_in_subject_mappings.reads <- identify_hybrids.log[identify_hybrids.log$type =="excessive_overlap_in_subject_mappings"]$count
+# Absent from logs written before the crosslink-distance filter existed
+too_far_from_xlink.reads <- identify_hybrids.log[identify_hybrids.log$type =="hybrids_too_far_from_xlink_site"]$count
+if (length(too_far_from_xlink.reads) == 0) too_far_from_xlink.reads <- 0L
 identify_hybrids_remaining.reads <- identify_hybrids.log[identify_hybrids.log$type =="remaining_read_count"]$count
+
+# Every read entering hybrid identification is either discarded for one reason or kept
+stopifnot(identify_hybrids_input.reads == strong_contiguous_match_to_a_single_gene.reads + excessive_overlap_in_query_mappings.reads +
+            excessive_gap_between_query_mappings.reads + excessive_overlap_in_subject_mappings.reads +
+            too_far_from_xlink.reads + identify_hybrids_remaining.reads)
 
 # =========
 # 3. Extract information from dedup logs
@@ -130,6 +144,7 @@ read_list['cutadapt_remaining'] <- cutadapt_remaining.reads
 
 # Remove spliced reads
 read_list['spliced'] <- spliced.reads
+read_list['linear'] <- linear.reads
 read_list['unspliced'] <- unspliced.reads
 
 # Map
@@ -146,6 +161,7 @@ read_list['strong_contiguous_match_to_a_single_gene'] <- strong_contiguous_match
 read_list['excessive_overlap_in_query_mappings'] <- excessive_overlap_in_query_mappings.reads
 read_list['excessive_gap_between_query_mappings'] <- excessive_gap_between_query_mappings.reads
 read_list['excessive_overlap_in_subject_mappings']<- excessive_overlap_in_subject_mappings.reads
+read_list['hybrids_too_far_from_xlink_site'] <- too_far_from_xlink.reads
 read_list['identify_hybrids_remaining'] <- identify_hybrids_remaining.reads
 
 # Dedup and/or ambiguous
@@ -153,57 +169,56 @@ read_list['ambiguous'] <- ambiguous.reads
 read_list['duplicated'] <- duplicated.reads
 read_list['final'] <- dedup_remaining.reads
 
-# Define nodes based on the new structure of read_list
+# Nodes, with their colour group. Links below refer to nodes by name, so adding a node does not
+# shift any hard-coded indices.
+trimmed.node <- paste0('Trimmed ≥ ', min.length)
+evalue.node <- paste0('Too High (> ', evalue, ') E-value or Antisense')
+maxhits.node <- paste0('Too Many (> ', max_hits, ') BLAT Hits')
 nodes <- data.frame(
   name = c(
-    'Total',
-    'Cutadapt Discarded',
-    paste0('Trimmed ≥ ', min.length) ,
-    'Spliced',
-    'Unspliced',
-    'BLAT Unmapped',
-    'BLAT Mapped',
-    paste0('Too High (> ', evalue, ') E-value or Antisense'),
-    paste0('Too Many (> ', max_hits, ') BLAT Hits'),
-    'BLAT Remaining',
-    'Strong Match to Single Gene',
-    'Excessive Overlap in Query',
-    'Excessive Gap in Query',
-    'Excessive Overlap in Subject',
-    'Valid Hybrids',
-    'Ambiguous',
-    'Duplicated',
-    'Single or Multi-overlap',
+    'Total', 'Cutadapt Discarded', trimmed.node,
+    'Spliced', 'Linear (STAR)', 'To BLAT',
+    'BLAT Unmapped', 'BLAT Mapped',
+    evalue.node, maxhits.node, 'BLAT Remaining',
+    'Strong Match to Single Gene', 'Excessive Overlap in Query', 'Excessive Gap in Query',
+    'Excessive Overlap in Subject', 'Too Far From Crosslink', 'Valid Hybrids',
+    'Ambiguous', 'Duplicated', 'Single or Multi-overlap',
     'Final'
   ),
   group = c(
-    'a', 'b', 'b', 'c', 'c', 'd', 'd',
-    'e', 'e', 'e', 'f', 'f', 'f', 'f', 'f',
+    'a', 'b', 'b',
+    'c', 'c', 'c',
+    'd', 'd',
+    'e', 'e', 'e',
+    'f', 'f', 'f', 'f', 'f', 'f',
     'g', 'g', 'g',
     'h'
   )
 )
+node <- function(name) { i <- match(name, nodes$name); stopifnot(!is.na(i)); i - 1 } # 0-based for networkD3
 
-# Define links based on the updated read_list keys
+link <- function(from, to, key) c(node(from), node(to), read_list[[key]])
 links <- as.data.frame(rbind(
-  c(0, 1, read_list[['cutadapt_discarded']]),
-  c(0, 2, read_list[['cutadapt_remaining']]),
-  c(2, 3, read_list[['spliced']]),
-  c(2, 4, read_list[['unspliced']]),
-  c(4, 5, read_list[['blat_unmapped']]),
-  c(4, 6, read_list[['blat_mapped']]),
-  c(6, 7, read_list[['too_high_evalue_antisense']]),
-  c(6, 8, read_list[['too_many_blat_hits']]),
-  c(6, 9, read_list[['blat_remaining']]),
-  c(9, 10, read_list[['strong_contiguous_match_to_a_single_gene']]),
-  c(9, 11, read_list[['excessive_overlap_in_query_mappings']]),
-  c(9, 12, read_list[['excessive_gap_between_query_mappings']]),
-  c(9, 13, read_list[['excessive_overlap_in_subject_mappings']]),
-  c(9, 14, read_list[['identify_hybrids_remaining']]),
-  c(14, 15, read_list[['ambiguous']]),
-  c(14, 16, read_list[['duplicated']]),
-  c(14, 17, read_list[['final']]),
-  c(17, 18, read_list[['final']])
+  link('Total', 'Cutadapt Discarded', 'cutadapt_discarded'),
+  link('Total', trimmed.node, 'cutadapt_remaining'),
+  link(trimmed.node, 'Spliced', 'spliced'),
+  link(trimmed.node, 'Linear (STAR)', 'linear'),
+  link(trimmed.node, 'To BLAT', 'unspliced'),
+  link('To BLAT', 'BLAT Unmapped', 'blat_unmapped'),
+  link('To BLAT', 'BLAT Mapped', 'blat_mapped'),
+  link('BLAT Mapped', evalue.node, 'too_high_evalue_antisense'),
+  link('BLAT Mapped', maxhits.node, 'too_many_blat_hits'),
+  link('BLAT Mapped', 'BLAT Remaining', 'blat_remaining'),
+  link('BLAT Remaining', 'Strong Match to Single Gene', 'strong_contiguous_match_to_a_single_gene'),
+  link('BLAT Remaining', 'Excessive Overlap in Query', 'excessive_overlap_in_query_mappings'),
+  link('BLAT Remaining', 'Excessive Gap in Query', 'excessive_gap_between_query_mappings'),
+  link('BLAT Remaining', 'Excessive Overlap in Subject', 'excessive_overlap_in_subject_mappings'),
+  link('BLAT Remaining', 'Too Far From Crosslink', 'hybrids_too_far_from_xlink_site'),
+  link('BLAT Remaining', 'Valid Hybrids', 'identify_hybrids_remaining'),
+  link('Valid Hybrids', 'Ambiguous', 'ambiguous'),
+  link('Valid Hybrids', 'Duplicated', 'duplicated'),
+  link('Valid Hybrids', 'Single or Multi-overlap', 'final'),
+  link('Single or Multi-overlap', 'Final', 'final')
 ))
 
 # Set column names for links

@@ -8,7 +8,8 @@ suppressPackageStartupMessages(library(data.table))
 message("Getting hybrid identification metrics...")
 
 # Get input and spliced or trimmed reads
-premap.logs <- list.files(".", pattern = "filter_spliced_reads.log$", full.names = TRUE)
+# filter_premap_reads.log (current) or filter_spliced_reads.log (older runs, no linear filter)
+premap.logs <- list.files(".", pattern = "filter_(premap|spliced)_reads.log$", full.names = TRUE)
 
 if (length(premap.logs) == 0) {
   message("No premap log files found (pre-mapping was skipped). Using cutadapt logs to get read counts.")
@@ -27,20 +28,28 @@ if (length(premap.logs) == 0) {
     premap.dt <- data.table(sample = sample_names,
                             total = read_counts,
                             unspliced = read_counts,
-                            spliced = 0L)
+                            spliced = 0L,
+                            linear = 0L)
 
   } else {
     stop("No premap or cutadapt log files found. Exiting.")
   }
 
 } else {
+  # Read counts by label, so the 4-line log (with Reads linear) and older 3-line logs both parse
+  log_count <- function(lines, label) {
+    hit <- grep(paste0("^", label, ":"), lines, value = TRUE)
+    if (length(hit) == 0) return(0)
+    as.numeric(sub(".*:\\s*", "", hit[1]))
+  }
   premap.dt <- lapply(seq_along(premap.logs), function(i) {
-    dt <- fread(premap.logs[i], select = 3)
+    lines <- readLines(premap.logs[i])
     data.table(
       sample = tstrsplit(basename(premap.logs[i]), "\\.")[[1]],
-      total = dt[1]$V3,
-      unspliced = dt[2]$V3,
-      spliced = dt[3]$V3
+      total = log_count(lines, "Total reads"),
+      unspliced = log_count(lines, "Reads kept"),       # reads passed on to BLAT
+      spliced = log_count(lines, "Reads discarded"),
+      linear = log_count(lines, "Reads linear")
     )
   })
   premap.dt <- rbindlist(premap.dt)
@@ -72,11 +81,11 @@ for (col in hybrid_selection.cols) {
   }
 }
 
-# Calculate nonhybrid as unspliced minus the sum of hybrid categories
+# Calculate nonhybrid as the reads passed to BLAT minus the sum of hybrid categories
 hybrid_identification.dt[, nonhybrid := unspliced - ambiguous - multi_overlap - single]
 
 # Select final columns
-hybrid_identification.dt <- hybrid_identification.dt[, .(sample, spliced, nonhybrid, ambiguous, multi_overlap, single)]
+hybrid_identification.dt <- hybrid_identification.dt[, .(sample, spliced, linear, nonhybrid, ambiguous, multi_overlap, single)]
 
 stopifnot(all(rowSums(hybrid_identification.dt[, -1]) %in% premap.dt$total)) # order might be different
 

@@ -22,9 +22,9 @@ Tosca is a Nextflow pipeline for the analysis of [hiCLIP](https://www.nature.com
 ## Pipeline summary
 
 1. Adapter and quality trimming ([`Cutadapt`](https://cutadapt.readthedocs.io))
-2. Premapping to remove spliced reads ([`STAR`]())
+2. Premapping ([`STAR`]()) to remove reads on annotated splice junctions and linear reads (reads STAR aligns over (nearly) their whole length, which BLAT can otherwise split into false short-loop hybrids)
 3. Hybrid identification ([`pblat`](https://icebert.github.io/pblat/) and [`toscatools`]())
-4. UMI-based deduplication ([`toscatools`]() and modified [`UMI-tools`](https://umi-tools.readthedocs.io/en/latest/))
+4. UMI-based deduplication ([`toscatools`]() and modified [`UMI-tools`](https://umi-tools.readthedocs.io/en/latest/)), then flagging of repeat-shift hybrids
 5. Hybrid clustering ([`toscatools`]())
 6. Annotation ([`toscatools`]())
 7. Duplex and structure analysis and binding energy characterisation ([`toscatools`]()) 
@@ -129,6 +129,16 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
 - `--split_size` specifies number of reads per FASTQ file when splitting for parallelised alignment
     - default: `100000`
 - `--star_args` specifies optional additional STAR aligmnent parameters
+- `--linear_reference` specifies the alignment used by the linear-read filter: `auto` (the genome premap if it runs, otherwise an unspliced STAR alignment to `--transcript_fa`), `genome` or `transcript`
+    - default: `auto`
+- `--linear_min_frac` specifies the minimum fraction of the read STAR must align (M/I/=/X) for it to count as linear
+    - default: `0.9`
+- `--linear_max_del` specifies the longest single deletion a linear read may contain; longer gaps are left for BLAT, so genomic-order loops of 9 nt and over are not removed
+    - default: `8`
+- `--linear_star_index` specifies a prebuilt STAR index of `--transcript_fa` for the transcriptome linear filter (built if not given)
+- `--linear_star_args` specifies optional additional STAR parameters for the transcriptome alignment
+- `--drop_repeat_shifts` removes, rather than only flags (`repeat_shift` column), genomic-order hybrids whose transcript gap (1-20 nt) is an exact copy of its flank, i.e. a linear read with fewer tandem-repeat copies than the reference. The read-fate plot shows counts before this drop
+    - default: `false`
 - `--step_size` specifies pblat step size
     - default: `5`
 - `--tile_size` specifies pblat tile size
@@ -139,6 +149,8 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
     - default: `0.001`
 - `--maxhits` specfies maximum number of pblat alignments per read
     - default: `100`
+- `--xlink_distance` switches on the crosslink-distance filter: a hybrid is kept only if one of its arms starts before this read position. Use it for protocols whose read 5' end marks the crosslink site, such as hiCLIP and other iCLIP-style libraries (read starts at crosslink + 1); `5` keeps hybrids with an arm starting at read positions 1-4. Leave it off for SPLASH, PARIS or COMRADES, where the read start carries no crosslink information. Hybrids it removes are counted as `hybrids_too_far_from_xlink_site` in `*.identify_hybrids.log` and as "Too Far From Crosslink" in the read-fate plot. Needs toscatools >= 1.0.0.9002 in the container
+    - default: `false` (off)
 
 ### Hybrid identification and characterisation
 
@@ -171,7 +183,15 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
 
 ### Optional pipeline modules
 
-- `--skip_premap` skips premapping to the genome and filtering of spliced reads
+- `--skip_premap` skips premapping to the genome and filtering of spliced reads. The linear-read filter still runs, against `--transcript_fa`, unless `--skip_linear_filter` is also given
+- `--skip_linear_filter` skips the linear-read filter
+
+| `--skip_premap` | `--skip_linear_filter` | Alignment for the linear filter | Removed before BLAT |
+|---|---|---|---|
+| no | no | genome premap (no extra alignment) | annotated-spliced and linear reads |
+| yes | no | unspliced STAR alignment to `--transcript_fa` | linear reads |
+| no | yes | genome premap | annotated-spliced reads |
+| yes | yes | none | nothing |
 - `--skip_atlas` skips generation of an atlas by combining all the samples
 - `--skip_qc` skips generation of QC plots and MultiQC report
 
