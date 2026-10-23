@@ -16,7 +16,7 @@ jobs:
 
       - name: Run script tests in the pipeline container
         run: |
-          docker run --rm -v ${GITHUB_WORKSPACE}:/tosca -w /tosca amclab/tosca:2.0.0dev \
+          docker run --rm -v ${GITHUB_WORKSPACE}:/tosca -w /tosca amclab/tosca:2.0.1dev \
             bash -c "python tests/test_filter_premap_reads.py && python tests/test_flag_repeat_shifts.py"
 
   test-tosca-pipeline:
