@@ -3,7 +3,7 @@
 | Image | Built from | Contents |
 |---|---|---|
 | `amclab/tosca:2.0.0dev` | `Dockerfile.base` + `environment.yml` (2025) | conda environment `tosca-2.0.0dev`; toscatools from the `dev` branch at build time |
-| `amclab/tosca:2.0.1dev` | `Dockerfile` | 2.0.0dev (pinned by digest) + toscatools `v1.0.0.9002` |
+| `amclab/tosca:2.0.1dev` | `Dockerfile` | 2.0.0dev (pinned by digest) + toscatools `v1.1.0.9001` |
 
 ## Known issue: the conda environment does not rebuild reproducibly
 
