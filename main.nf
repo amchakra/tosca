@@ -74,6 +74,9 @@ if(!params.atlas) {
     if(params.linear_reference == 'genome' && params.skip_premap && !params.skip_linear_filter) { exit 1, "--linear_reference genome needs the genome premap (do not use --skip_premap)." }
     if(params.linear_min_frac <= 0 || params.linear_min_frac > 1) { exit 1, "--linear_min_frac must be in (0, 1]." }
 
+    // Crosslink-distance filter
+    if(params.xlink_distance && !(params.xlink_distance.toString().isInteger() && params.xlink_distance.toString().toInteger() > 1)) { exit 1, "--xlink_distance must be an integer > 1 (e.g. 5 for hiCLIP), or false to switch the filter off." }
+
     // Channels for optional inputs
     if(!params.skip_premap) {
         ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
@@ -126,6 +129,7 @@ settings['Minimum read length'] = params.min_readlength
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
+settings['Crosslink distance'] = params.xlink_distance ? "one arm starts before read position ${params.xlink_distance}" : 'off'
 settings['Deduplication method'] = params.dedup_method
 if(params.dedup_method != 'none') settings['UMI separator'] = params.umi_separator
 if(params.slurm) settings['Use SLURM'] = params.slurm

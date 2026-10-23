@@ -106,7 +106,15 @@ strong_contiguous_match_to_a_single_gene.reads <- identify_hybrids.log[identify_
 excessive_overlap_in_query_mappings.reads <- identify_hybrids.log[identify_hybrids.log$type =="excessive_overlap_in_query_mappings"]$count
 excessive_gap_between_query_mappings.reads <- identify_hybrids.log[identify_hybrids.log$type =="excessive_gap_between_query_mappings"]$count
 excessive_overlap_in_subject_mappings.reads <- identify_hybrids.log[identify_hybrids.log$type =="excessive_overlap_in_subject_mappings"]$count
+# Absent from logs written before the crosslink-distance filter existed
+too_far_from_xlink.reads <- identify_hybrids.log[identify_hybrids.log$type =="hybrids_too_far_from_xlink_site"]$count
+if (length(too_far_from_xlink.reads) == 0) too_far_from_xlink.reads <- 0L
 identify_hybrids_remaining.reads <- identify_hybrids.log[identify_hybrids.log$type =="remaining_read_count"]$count
+
+# Every read entering hybrid identification is either discarded for one reason or kept
+stopifnot(identify_hybrids_input.reads == strong_contiguous_match_to_a_single_gene.reads + excessive_overlap_in_query_mappings.reads +
+            excessive_gap_between_query_mappings.reads + excessive_overlap_in_subject_mappings.reads +
+            too_far_from_xlink.reads + identify_hybrids_remaining.reads)
 
 # =========
 # 3. Extract information from dedup logs
@@ -153,6 +161,7 @@ read_list['strong_contiguous_match_to_a_single_gene'] <- strong_contiguous_match
 read_list['excessive_overlap_in_query_mappings'] <- excessive_overlap_in_query_mappings.reads
 read_list['excessive_gap_between_query_mappings'] <- excessive_gap_between_query_mappings.reads
 read_list['excessive_overlap_in_subject_mappings']<- excessive_overlap_in_subject_mappings.reads
+read_list['hybrids_too_far_from_xlink_site'] <- too_far_from_xlink.reads
 read_list['identify_hybrids_remaining'] <- identify_hybrids_remaining.reads
 
 # Dedup and/or ambiguous
@@ -172,7 +181,7 @@ nodes <- data.frame(
     'BLAT Unmapped', 'BLAT Mapped',
     evalue.node, maxhits.node, 'BLAT Remaining',
     'Strong Match to Single Gene', 'Excessive Overlap in Query', 'Excessive Gap in Query',
-    'Excessive Overlap in Subject', 'Valid Hybrids',
+    'Excessive Overlap in Subject', 'Too Far From Crosslink', 'Valid Hybrids',
     'Ambiguous', 'Duplicated', 'Single or Multi-overlap',
     'Final'
   ),
@@ -181,7 +190,7 @@ nodes <- data.frame(
     'c', 'c', 'c',
     'd', 'd',
     'e', 'e', 'e',
-    'f', 'f', 'f', 'f', 'f',
+    'f', 'f', 'f', 'f', 'f', 'f',
     'g', 'g', 'g',
     'h'
   )
@@ -204,6 +213,7 @@ links <- as.data.frame(rbind(
   link('BLAT Remaining', 'Excessive Overlap in Query', 'excessive_overlap_in_query_mappings'),
   link('BLAT Remaining', 'Excessive Gap in Query', 'excessive_gap_between_query_mappings'),
   link('BLAT Remaining', 'Excessive Overlap in Subject', 'excessive_overlap_in_subject_mappings'),
+  link('BLAT Remaining', 'Too Far From Crosslink', 'hybrids_too_far_from_xlink_site'),
   link('BLAT Remaining', 'Valid Hybrids', 'identify_hybrids_remaining'),
   link('Valid Hybrids', 'Ambiguous', 'ambiguous'),
   link('Valid Hybrids', 'Duplicated', 'duplicated'),
