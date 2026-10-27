@@ -18,6 +18,9 @@ process EXPORT_GENOMIC_BED {
         tuple val(sample_id), path("${sample_id}.${type}.intragenic.bed.gz"), emit: bed
 
     script:
+
+    nongenomic_entries = params.nongenomic_entries
+
     """
     #!/usr/bin/env Rscript
 
@@ -26,7 +29,9 @@ process EXPORT_GENOMIC_BED {
 
     hybrids.dt <- fread("$hybrids")
     intragenic.dt <- hybrids.dt[L_seqnames == R_seqnames]
-    intragenic.dt <- intragenic.dt[grep("^rRNA|^rDNA", L_seqnames, invert = TRUE)] # Remove rRNA
+    # Remove non-genomic reference entries (rRNA, tRNA, snRNA, ...): they have no genome coordinates
+    nongenomic <- "${nongenomic_entries}"
+    intragenic.dt <- intragenic.dt[!grepl(nongenomic, L_seqnames) & !grepl(nongenomic, R_seqnames)]
 
     export_genomic_bed(hybrids.dt = intragenic.dt, sam_tag = TRUE, filename = "${sample_id}.${type}.intragenic.bed.gz")
     """
@@ -97,9 +102,10 @@ process GET_ARCS {
     script:
 
     breaks = params.breaks
+    nongenomic_entries = params.nongenomic_entries
 
     """
-    get_arcs.R --clusters $clusters --genes $genes --breaks $breaks --output ${sample_id}
+    get_arcs.R --clusters $clusters --genes $genes --breaks $breaks --nongenomic_entries '${nongenomic_entries}' --output ${sample_id}
     """
 
 }

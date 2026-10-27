@@ -69,6 +69,14 @@ if(!params.atlas) {
     ch_transcript_fa = Channel.fromPath(params.transcript_fa, checkIfExists: true)
     ch_transcript_fai = Channel.fromPath(params.transcript_fai, checkIfExists: true)
 
+    // Linear-read filter settings
+    if(!(params.linear_reference in ['auto', 'genome', 'transcript'])) { exit 1, "--linear_reference must be one of auto, genome, transcript." }
+    if(params.linear_reference == 'genome' && params.skip_premap && !params.skip_linear_filter) { exit 1, "--linear_reference genome needs the genome premap (do not use --skip_premap)." }
+    if(params.linear_min_frac <= 0 || params.linear_min_frac > 1) { exit 1, "--linear_min_frac must be in (0, 1]." }
+
+    // Crosslink-distance filter
+    if(params.xlink_distance && !(params.xlink_distance.toString().isInteger() && params.xlink_distance.toString().toInteger() > 1)) { exit 1, "--xlink_distance must be an integer > 1 (e.g. 5 for hiCLIP), or false to switch the filter off." }
+
     // Channels for optional inputs
     if(!params.skip_premap) {
         ch_star_genome = Channel.fromPath(params.star_genome, checkIfExists: true)
@@ -110,18 +118,26 @@ settings['Organism'] = params.org
 if(params.skip_qc) { settings['Skip QC'] = params.skip_qc }
 // if(params.skip_atlas) { settings['Skip atlas generation'] = params.skip_atlas }
 if(params.skip_premap) { settings['Skip premapping'] = params.skip_premap }
+if(params.skip_linear_filter) { settings['Skip linear-read filter'] = params.skip_linear_filter }
+if(!params.skip_linear_filter) settings['Linear-read reference'] = params.linear_reference
+if(!params.skip_linear_filter) settings['Linear min aligned frac'] = params.linear_min_frac
+if(!params.skip_linear_filter) settings['Linear max deletion'] = params.linear_max_del
+if(params.drop_repeat_shifts) settings['Drop repeat shifts'] = params.drop_repeat_shifts
 settings['Adapter sequence'] = params.adapter
 settings['Minimum read quality'] = params.min_quality
 settings['Minimum read length'] = params.min_readlength
 settings['FASTQ split size'] = params.split_size
 settings['Minimum e-value'] = params.evalue
 settings['Maximum hits/read'] = params.maxhits
+settings['Crosslink distance'] = params.xlink_distance ? "one arm starts before read position ${params.xlink_distance}" : 'off'
 settings['Deduplication method'] = params.dedup_method
 if(params.dedup_method != 'none') settings['UMI separator'] = params.umi_separator
 if(params.slurm) settings['Use SLURM'] = params.slurm
+settings['Non-genomic entries'] = params.nongenomic_entries
 settings['Clustering chunk number'] = params.chunk_number
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap
+settings['Clustering method'] = params.cluster_method
 settings['Analyse structures'] = params.analyse_structures
 if(params.analyse_structures) settings['Analyse clusters only'] = params.clusters_only
 if(params.analyse_structures) settings['Analyse shuffled energies'] = params.shuffled_energies
@@ -157,8 +173,10 @@ workflow {
         /*
         IDENTIFY HYBRIDS
         */
-        if (!params.skip_premap) {
-            PREMAP(CUTADAPT.out.fastq, ch_star_genome)
+        // Premapping: genome STAR to remove annotated-spliced reads, and/or the linear-read filter
+        run_premap = !params.skip_premap || !params.skip_linear_filter
+        if (run_premap) {
+            PREMAP(CUTADAPT.out.fastq, ch_star_genome, ch_transcript_fa)
             ch_for_hybrids = PREMAP.out.fastq
             ch_premap_log = PREMAP.out.logs
         } else {
@@ -166,7 +184,7 @@ workflow {
             ch_premap_log = Channel.empty()
         }
 
-        GET_HYBRIDS(ch_for_hybrids, ch_transcript_fa) // Identify hybrids
+        GET_HYBRIDS(ch_for_hybrids, ch_transcript_fa, ch_transcript_fai) // Identify hybrids
 
         /*
         TRACK READ FATE
@@ -210,7 +228,7 @@ workflow {
         */
         if(!params.skip_qc) {
             // ch_input_logs = params.skip_premap ? Channel.of([]) : PREMAP.out.logs.collect()
-            ch_input_logs = params.skip_premap ? CUTADAPT.out.log.collect { it[1] } : PREMAP.out.logs.collect { it[1] }
+            ch_input_logs = run_premap ? PREMAP.out.logs.collect { it[1] } : CUTADAPT.out.log.collect { it[1] }
 
             MAKE_REPORT(
                 ch_input_logs,

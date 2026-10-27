@@ -6,6 +6,7 @@ suppressPackageStartupMessages(library(optparse))
 option_list <- list(make_option(c("", "--clusters"), action = "store", type = "character", help = "Clusters file"),
             make_option(c("", "--genes"), action = "store", type = "character", help = "List of genes"),
             make_option(c("", "--breaks"), action = "store", type = "character", default = "0,0.3,0.8,1", help = "Comma separated string of breaks for colours [default: %default]"),
+            make_option(c("", "--nongenomic_entries"), action = "store", type = "character", default = "^(rRNA|rDNA|tRNA|snRNA_|7SK$|7SL$|YRNA_|chrM$)", help = "Regex for non-genomic reference entries (no genome coordinates); no arcs are made for them [default: %default]"),
             make_option(c("", "--output"), action = "store", type = "character", help = "Output stem"))
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
@@ -17,6 +18,11 @@ for(i in seq_along(genes)) {
 
     goi <- genes[i]
     message(goi)
+
+    if(grepl(opt$nongenomic_entries, goi)) {
+        message("Skipping ", goi, ": non-genomic reference entry, no genome coordinates for arcs")
+        next
+    }
 
     cluster.dt <- clusters.dt[L_seqnames == R_seqnames][L_seqnames == goi]
 

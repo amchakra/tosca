@@ -5,19 +5,45 @@ on:
     branches:
       - main
       - dev
+      - feat-clustering
 
 jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run script tests in the pipeline container
+        run: |
+          docker run --rm -v ${GITHUB_WORKSPACE}:/tosca -w /tosca amclab/tosca:2.0.2dev \
+            bash -c "python tests/test_filter_premap_reads.py && python tests/test_flag_repeat_shifts.py"
+
   test-tosca-pipeline:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
-          mv nextflow /usr/local/bin/  
+          mv nextflow /usr/local/bin/
 
+      # The github profile skips the genome premap, so this exercises the transcriptome linear-read
+      # filter end to end (STAR_TX_INDEX -> STAR_TX -> FILTER_PREMAP_READS) on the ARF1 test data.
+      # Current Nextflow releases default to the strict config parser, which rejects the shebang in
+      # nextflow.config; use the legacy parser until the configs are updated.
       - name: Run test pipeline
+        env:
+          NXF_SYNTAX_PARSER: v1
         run: |
           nextflow run ${GITHUB_WORKSPACE}/main.nf -profile github
+
+      - name: Check the linear-filter log
+        run: |
+          for f in results/filtered/*.filter_premap_reads.log; do
+            cat "$f"
+            awk -F': ' '/^Total reads/ {t=$2} /^Reads kept/ {k=$2} /^Reads discarded/ {s=$2} /^Reads linear/ {l=$2}
+                        END {if (t != k + s + l) {print "log does not add up"; exit 1}}' "$f"
+          done

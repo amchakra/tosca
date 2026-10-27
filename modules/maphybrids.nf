@@ -83,6 +83,7 @@ process BLAT_ALL_IN_ONE {
 
     evalue = params.evalue
     maxhits = params.maxhits
+    xlink_args = params.xlink_distance ? "-x ${params.xlink_distance}" : ""
 
     """
     reformat.sh in1=$reads out1=${sample_id}.fasta
@@ -93,7 +94,7 @@ process BLAT_ALL_IN_ONE {
     filter_blat.py ${sample_id}.blast8.gz ${sample_id}.filtered.blast8.gz $evalue $maxhits ${sample_id}.filter_blat.log
     rm ${sample_id}.blast8.gz
 
-    identify_hybrids.R -t ${task.cpus} -b ${sample_id}.filtered.blast8.gz -f ${sample_id}.fasta -o ${sample_id}.hybrids.tsv.gz -l ${sample_id}.identify_hybrids.log
+    identify_hybrids.R -t ${task.cpus} -b ${sample_id}.filtered.blast8.gz -f ${sample_id}.fasta -o ${sample_id}.hybrids.tsv.gz -l ${sample_id}.identify_hybrids.log $xlink_args
     rm ${sample_id}.fasta
     """
 

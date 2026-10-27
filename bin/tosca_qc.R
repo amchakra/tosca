@@ -8,7 +8,8 @@ suppressPackageStartupMessages(library(data.table))
 message("Getting hybrid identification metrics...")
 
 # Get input and spliced or trimmed reads
-premap.logs <- list.files(".", pattern = "filter_spliced_reads.log$", full.names = TRUE)
+# filter_premap_reads.log (current) or filter_spliced_reads.log (older runs, no linear filter)
+premap.logs <- list.files(".", pattern = "filter_(premap|spliced)_reads.log$", full.names = TRUE)
 
 if (length(premap.logs) == 0) {
   message("No premap log files found (pre-mapping was skipped). Using cutadapt logs to get read counts.")
@@ -27,20 +28,28 @@ if (length(premap.logs) == 0) {
     premap.dt <- data.table(sample = sample_names,
                             total = read_counts,
                             unspliced = read_counts,
-                            spliced = 0L)
+                            spliced = 0L,
+                            linear = 0L)
 
   } else {
     stop("No premap or cutadapt log files found. Exiting.")
   }
 
 } else {
+  # Read counts by label, so the 4-line log (with Reads linear) and older 3-line logs both parse
+  log_count <- function(lines, label) {
+    hit <- grep(paste0("^", label, ":"), lines, value = TRUE)
+    if (length(hit) == 0) return(0)
+    as.numeric(sub(".*:\\s*", "", hit[1]))
+  }
   premap.dt <- lapply(seq_along(premap.logs), function(i) {
-    dt <- fread(premap.logs[i], select = 3)
+    lines <- readLines(premap.logs[i])
     data.table(
       sample = tstrsplit(basename(premap.logs[i]), "\\.")[[1]],
-      total = dt[1]$V3,
-      unspliced = dt[2]$V3,
-      spliced = dt[3]$V3
+      total = log_count(lines, "Total reads"),
+      unspliced = log_count(lines, "Reads kept"),       # reads passed on to BLAT
+      spliced = log_count(lines, "Reads discarded"),
+      linear = log_count(lines, "Reads linear")
     )
   })
   premap.dt <- rbindlist(premap.dt)
@@ -72,11 +81,11 @@ for (col in hybrid_selection.cols) {
   }
 }
 
-# Calculate nonhybrid as unspliced minus the sum of hybrid categories
+# Calculate nonhybrid as the reads passed to BLAT minus the sum of hybrid categories
 hybrid_identification.dt[, nonhybrid := unspliced - ambiguous - multi_overlap - single]
 
 # Select final columns
-hybrid_identification.dt <- hybrid_identification.dt[, .(sample, spliced, nonhybrid, ambiguous, multi_overlap, single)]
+hybrid_identification.dt <- hybrid_identification.dt[, .(sample, spliced, linear, nonhybrid, ambiguous, multi_overlap, single)]
 
 stopifnot(all(rowSums(hybrid_identification.dt[, -1]) %in% premap.dt$total)) # order might be different
 
@@ -108,24 +117,20 @@ fwrite(intrainter.dt, "intrainter.tsv", sep = "\t")
 
 message("Getting arm region metrics...")
 
-regions <- c("rRNA", "tRNA", "ncRNA", "UTR5", "CDS", "intron", "UTR3", "intergenic")
+# Non-genomic reference entries (rRNA, tRNA, snRNA, 7SK, 7SL, Y RNA, whole mitochondrial genome) are labelled
+# by class by toscatools::annotate_hybrids(); gene arms carry their regions.gtf region
+nongenomic_regions <- c("rRNA", "tRNA", "snRNA", "7SK", "7SL", "Y_RNA", "Mt")
+regions <- c(nongenomic_regions, "ncRNA", "UTR5", "CDS", "intron", "UTR3", "intergenic")
 
 regions.dt <- rbindlist(list(hybrids.dt[, .(sample, L_region)],
                              hybrids.dt[, .(sample, R_region)]),
                         use.names = FALSE)
 regions.dt <- regions.dt[, .N, by = .(sample, L_region)]
 
-if(!all(regions %in% regions.dt$L_region)) {
-missing.dt <- data.table(sample = unique(regions.dt$sample),
-                         L_region = rep(regions[!regions %in% regions.dt$L_region],
-                                        length(unique(regions.dt$sample))),
-                         N = rep(0,
-                                 length(unique(regions.dt$sample))))
-regions.dt <- rbindlist(list(regions.dt, missing.dt))
-}
-
-regions.dt <- dcast.data.table(regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum) # need fun.aggregate otherwise reverts to length for regions that are all 0 for some reason
-regions.dt <- regions.dt[, .(sample, rRNA, tRNA, ncRNA, UTR5, CDS, intron, UTR3, intergenic)]
+regions.dt <- dcast.data.table(regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum, fill = 0L) # need fun.aggregate otherwise reverts to length for regions that are all 0 for some reason
+missing.cols <- setdiff(regions, names(regions.dt))
+for(col in missing.cols) regions.dt[, (col) := 0L] # 0 counts for regions absent from every sample (e.g. older references)
+regions.dt <- regions.dt[, c("sample", regions), with = FALSE]
 
 fwrite(regions.dt, "regions.tsv", sep = "\t")
 
@@ -164,7 +169,7 @@ message("Getting intragenic mRNA region metrics...")
 
 regions <- c("ncRNA", "UTR5", "CDS", "intron", "UTR3")
 
-intragenic_regions.dt <- hybrids.dt[type == "intragenic"][!L_region %in% c("rRNA", "tRNA", "intergenic")]
+intragenic_regions.dt <- hybrids.dt[type == "intragenic"][!L_region %in% c(nongenomic_regions, "intergenic")]
 
 intragenic_regions.dt <- rbindlist(list(intragenic_regions.dt[, .(sample, L_region)],
                                         intragenic_regions.dt[, .(sample, R_region)]),
@@ -173,18 +178,10 @@ intragenic_regions.dt <- intragenic_regions.dt[, .N, by = .(sample, L_region)]
 
 message(nrow(intragenic_regions.dt))
 
-
-if(!all(regions %in% intragenic_regions.dt$L_region)) {
-  missing.dt <- data.table(sample = unique(intragenic_regions.dt$sample),
-                           L_region = rep(regions[!regions %in% intragenic_regions.dt$L_region],
-                                          length(unique(intragenic_regions.dt$sample))),
-                           N = rep(0,
-                                   length(unique(intragenic_regions.dt$sample))))
-  intragenic_regions.dt <- rbindlist(list(intragenic_regions.dt, missing.dt))
-}
-
-intragenic_regions.dt <-  dcast.data.table(intragenic_regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum)
-intragenic_regions.dt <- intragenic_regions.dt[, .(sample, ncRNA, UTR5, CDS, intron, UTR3)]
+intragenic_regions.dt <-  dcast.data.table(intragenic_regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum, fill = 0L)
+missing.cols <- setdiff(regions, names(intragenic_regions.dt))
+for(col in missing.cols) intragenic_regions.dt[, (col) := 0L] # 0 counts for regions absent from every sample
+intragenic_regions.dt <- intragenic_regions.dt[, c("sample", regions), with = FALSE]
 
 fwrite(intragenic_regions.dt, "intragenic_regions.tsv", sep = "\t")
 
