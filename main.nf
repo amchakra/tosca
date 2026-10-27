@@ -133,6 +133,7 @@ settings['Crosslink distance'] = params.xlink_distance ? "one arm starts before 
 settings['Deduplication method'] = params.dedup_method
 if(params.dedup_method != 'none') settings['UMI separator'] = params.umi_separator
 if(params.slurm) settings['Use SLURM'] = params.slurm
+settings['Non-genomic entries'] = params.nongenomic_entries
 settings['Clustering chunk number'] = params.chunk_number
 settings['Clustering sample size'] = params.sample_size
 settings['Clustering overlap'] = params.percent_overlap

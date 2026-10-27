@@ -3,7 +3,8 @@
 | Image | Built from | Contents |
 |---|---|---|
 | `amclab/tosca:2.0.0dev` | `Dockerfile.base` + `environment.yml` (2025) | conda environment `tosca-2.0.0dev`; toscatools from the `dev` branch at build time |
-| `amclab/tosca:2.0.1dev` | `Dockerfile` | 2.0.0dev (pinned by digest) + toscatools `v1.1.0.9001` |
+| `amclab/tosca:2.0.1dev` | `Dockerfile` with `TOSCATOOLS_VERSION=1.1.0.9001` | 2.0.0dev (pinned by digest) + toscatools `v1.1.0.9001` |
+| `amclab/tosca:2.0.2dev` | `Dockerfile` | 2.0.0dev (pinned by digest) + toscatools `v1.1.0.9002` |
 
 ## Known issue: the conda environment does not rebuild reproducibly
 
@@ -13,7 +14,7 @@
 - **Versions are pinned, builds are not.** `star=2.7.11b` accepts any build of 2.7.11b; a rebuild picked `h5ca1c30_8` instead of `_6`. Under x86 emulation, all of `_8`'s SIMD variants crashed with "Illegal instruction".
 - **Only the top level is pinned.** The file pins about 30 top-level packages, while the environment has about 375. The rest are solved fresh, e.g. htslib went from 1.22 to 1.24, and around 40 other packages changed.
 
-**For now:** 2.0.1dev is layered on the published 2.0.0dev image instead of being rebuilt.
+**For now:** 2.0.1dev and 2.0.2dev are layered on the published 2.0.0dev image instead of being rebuilt.
 
 **To do at the next pipeline/container update:** make the environment reproducible.
 - **Lock file:** commit one, from `conda list --explicit --md5` or `conda-lock`, exported from a known-good image, and build the environment from it.
