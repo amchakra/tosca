@@ -117,7 +117,7 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
 - `--transcript_fa` specifies the pseudo-transcriptome FASTA
 - `--transcript_fai` specifies the pseudo-transcriptome FASTA index
 - `--transcript_gtf` specifies the pseudo-transcriptome annotation GTF
-- `--nongenomic_entries` is a regular expression matching non-genomic pseudo-transcriptome entries, i.e. reference entries with no genome coordinates: rRNA/rDNA, tRNA, snRNA, 7SK, 7SL, Y RNA and the whole mitochondrial genome as one entry. These entries have no genome coordinates, so hybrids on them are left out of the genome BED/BAM and no arcs are made for them, and self-hybrids on them (both arms on the same entry) are not clustered or structure-analysed. Their arms are labelled by class (`rRNA`, `tRNA`, `snRNA`, `7SK`, `7SL`, `Y_RNA`, `Mt`) by toscatools `annotate_hybrids()` (toscatools >= 1.1.0.9002 for the classes other than rRNA and tRNA)
+- `--nongenomic_entries` is a regular expression matching non-genomic pseudo-transcriptome entries, i.e. reference entries with no genome coordinates: rRNA/rDNA, tRNA, snRNA, 7SK, 7SL, Y RNA and the whole mitochondrial genome as one entry. These entries have no genome coordinates, so hybrids on them are left out of the genome BED/BAM and no arcs are made for them, and self-hybrids on them (both arms on the same entry) are not clustered or structure-analysed. Their arms are labelled by class (`rRNA`, `tRNA`, `snRNA`, `7SK`, `7SL`, `Y_RNA`, `Mt`) by toscatools `annotate_hybrids()` (toscatools >= 1.1.0.9002, i.e. `amclab/tosca:2.0.2dev`, for the classes other than rRNA and tRNA)
     - default: `^(rRNA|rDNA|tRNA|snRNA_|7SK$|7SL$|YRNA_|chrM$)`
 
 ### Read trimming and alignment parameters
@@ -151,7 +151,7 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
     - default: `0.001`
 - `--maxhits` specfies maximum number of pblat alignments per read
     - default: `100`
-- `--xlink_distance` switches on the crosslink-distance filter: a hybrid is kept only if one of its arms starts before this read position. Use it for protocols whose read 5' end marks the crosslink site, such as hiCLIP and other iCLIP-style libraries (read starts at crosslink + 1); `5` keeps hybrids with an arm starting at read positions 1-4. Leave it off for SPLASH, PARIS or COMRADES, where the read start carries no crosslink information. Hybrids it removes are counted as `hybrids_too_far_from_xlink_site` in `*.identify_hybrids.log` and as "Too Far From Crosslink" in the read-fate plot. Needs toscatools >= 1.1.0.9001 in the container (`amclab/tosca:2.0.1dev`)
+- `--xlink_distance` switches on the crosslink-distance filter: a hybrid is kept only if one of its arms starts before this read position. Use it for protocols whose read 5' end marks the crosslink site, such as hiCLIP and other iCLIP-style libraries (read starts at crosslink + 1); `5` keeps hybrids with an arm starting at read positions 1-4. Leave it off for SPLASH, PARIS or COMRADES, where the read start carries no crosslink information. Hybrids it removes are counted as `hybrids_too_far_from_xlink_site` in `*.identify_hybrids.log` and as "Too Far From Crosslink" in the read-fate plot. Needs toscatools >= 1.1.0.9001 in the container (`amclab/tosca:2.0.1dev` or later)
     - default: `false` (off)
 
 ### Hybrid identification and characterisation
