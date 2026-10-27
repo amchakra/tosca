@@ -13,6 +13,44 @@ option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "ch
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
+# ==========
+# Inline Rcpp contact-map kernel for inter-transcript (rectangular) maps.
+# Kept here on purpose: toscatools no longer ships rcpp_get_contact_map().
+# ==========
+
+src <-
+  '
+  IntegerMatrix rcpp_get_contact_map(DataFrame hybrids, int gene_A_size, int gene_B_size) {
+
+    IntegerVector L_start_v = hybrids["L_start"];
+    IntegerVector L_end_v = hybrids["L_end"];
+    IntegerVector R_start_v = hybrids["R_start"];
+    IntegerVector R_end_v = hybrids["R_end"];
+
+    IntegerMatrix contact_map(gene_A_size, gene_B_size);
+
+    int n_hybrids = hybrids.nrows();
+    for (int i = 0; i < n_hybrids; i++) {
+
+      int L_start = L_start_v[i] - 1;
+      int L_end = L_end_v[i] - 1;
+      int R_start = R_start_v[i] - 1;
+      int R_end = R_end_v[i] - 1;
+
+      for (int x = L_start; x <= L_end; x++) {
+        for (int y = R_start; y <= R_end; y++) {
+          contact_map(x, y) ++;
+        }
+      }
+
+    }
+
+    return(contact_map);
+
+  }
+  '
+cppFunction(src)
+
 genes <- readLines(opt$genes)
 
 # ==========
@@ -94,10 +132,10 @@ if(!any(grepl(",", genes))) {
             if(opt$bin_size == 1) {
                 binned.mat <- mat
             } else {
-                binned.mat <- bin_matrix_rect(mat, bin.size = opt$bin_size)
+                binned.mat <- bin_matrix_rect(mat, bin_size = opt$bin_size)
             }
 
-            binned.dt <- melt(as.data.table(mat)[, rn := 1:.N], id.vars = "rn")
+            binned.dt <- melt(as.data.table(binned.mat)[, rn := 1:.N], id.vars = "rn")
             binned.dt[, variable := as.integer(gsub("^V", "", as.character(variable)))]
             binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
             binned.dt <- binned.dt[value != 0]
