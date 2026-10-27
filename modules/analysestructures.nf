@@ -44,6 +44,7 @@ process CHUNK_SEQUENCES {
 
     clusters_only = params.clusters_only
     chunk_number = params.chunk_number
+    nongenomic_entries = params.nongenomic_entries
 
     """
     #!/usr/bin/env Rscript
@@ -69,10 +70,9 @@ process CHUNK_SEQUENCES {
     hybrids.dt <- get_sequence(hybrids.dt = hybrids.dt, genome.dt = genome.dt)
     stopifnot(!any(is.na(c(hybrids.dt\$L_sequence, hybrids.dt\$R_sequence))))
 
-    # Remove rRNA
-    sel.hybrids.dt <- hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45S")]
-    sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
-    sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
+    # Remove self-hybrids on non-genomic entries (rRNA, tRNA, snRNA, ...)
+    nongenomic <- "${nongenomic_entries}"
+    sel.hybrids.dt <- hybrids.dt[!(L_seqnames == R_seqnames & grepl(nongenomic, L_seqnames))]
 
     # if($clusters_only == "true") sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][cluster != "."] # Some are "" if unclustered as too many
     if("$clusters_only" == "true") sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][grep("^C", cluster)]

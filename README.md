@@ -117,6 +117,8 @@ Either `--genomesdir` and `--org` or all of the other reference files need to be
 - `--transcript_fa` specifies the pseudo-transcriptome FASTA
 - `--transcript_fai` specifies the pseudo-transcriptome FASTA index
 - `--transcript_gtf` specifies the pseudo-transcriptome annotation GTF
+- `--nongenomic_entries` is a regular expression matching non-genomic pseudo-transcriptome entries, i.e. reference entries with no genome coordinates: rRNA/rDNA, tRNA, snRNA, 7SK, 7SL, Y RNA and the whole mitochondrial genome as one entry. These entries have no genome coordinates, so hybrids on them are left out of the genome BED/BAM and no arcs are made for them, and self-hybrids on them (both arms on the same entry) are not clustered or structure-analysed. Their arms are labelled by class (`rRNA`, `tRNA`, `snRNA`, `7SK`, `7SL`, `Y_RNA`, `Mt`) by toscatools `annotate_hybrids()` (toscatools >= 1.1.0.9002 for the classes other than rRNA and tRNA)
+    - default: `^(rRNA|rDNA|tRNA|snRNA_|7SK$|7SL$|YRNA_|chrM$)`
 
 ### Read trimming and alignment parameters
 

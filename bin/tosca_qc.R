@@ -117,24 +117,20 @@ fwrite(intrainter.dt, "intrainter.tsv", sep = "\t")
 
 message("Getting arm region metrics...")
 
-regions <- c("rRNA", "tRNA", "ncRNA", "UTR5", "CDS", "intron", "UTR3", "intergenic")
+# Non-genomic reference entries (rRNA, tRNA, snRNA, 7SK, 7SL, Y RNA, whole mitochondrial genome) are labelled
+# by class by toscatools::annotate_hybrids(); gene arms carry their regions.gtf region
+nongenomic_regions <- c("rRNA", "tRNA", "snRNA", "7SK", "7SL", "Y_RNA", "Mt")
+regions <- c(nongenomic_regions, "ncRNA", "UTR5", "CDS", "intron", "UTR3", "intergenic")
 
 regions.dt <- rbindlist(list(hybrids.dt[, .(sample, L_region)],
                              hybrids.dt[, .(sample, R_region)]),
                         use.names = FALSE)
 regions.dt <- regions.dt[, .N, by = .(sample, L_region)]
 
-if(!all(regions %in% regions.dt$L_region)) {
-missing.dt <- data.table(sample = unique(regions.dt$sample),
-                         L_region = rep(regions[!regions %in% regions.dt$L_region],
-                                        length(unique(regions.dt$sample))),
-                         N = rep(0,
-                                 length(unique(regions.dt$sample))))
-regions.dt <- rbindlist(list(regions.dt, missing.dt))
-}
-
-regions.dt <- dcast.data.table(regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum) # need fun.aggregate otherwise reverts to length for regions that are all 0 for some reason
-regions.dt <- regions.dt[, .(sample, rRNA, tRNA, ncRNA, UTR5, CDS, intron, UTR3, intergenic)]
+regions.dt <- dcast.data.table(regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum, fill = 0L) # need fun.aggregate otherwise reverts to length for regions that are all 0 for some reason
+missing.cols <- setdiff(regions, names(regions.dt))
+for(col in missing.cols) regions.dt[, (col) := 0L] # 0 counts for regions absent from every sample (e.g. older references)
+regions.dt <- regions.dt[, c("sample", regions), with = FALSE]
 
 fwrite(regions.dt, "regions.tsv", sep = "\t")
 
@@ -173,7 +169,7 @@ message("Getting intragenic mRNA region metrics...")
 
 regions <- c("ncRNA", "UTR5", "CDS", "intron", "UTR3")
 
-intragenic_regions.dt <- hybrids.dt[type == "intragenic"][!L_region %in% c("rRNA", "tRNA", "intergenic")]
+intragenic_regions.dt <- hybrids.dt[type == "intragenic"][!L_region %in% c(nongenomic_regions, "intergenic")]
 
 intragenic_regions.dt <- rbindlist(list(intragenic_regions.dt[, .(sample, L_region)],
                                         intragenic_regions.dt[, .(sample, R_region)]),
@@ -182,18 +178,10 @@ intragenic_regions.dt <- intragenic_regions.dt[, .N, by = .(sample, L_region)]
 
 message(nrow(intragenic_regions.dt))
 
-
-if(!all(regions %in% intragenic_regions.dt$L_region)) {
-  missing.dt <- data.table(sample = unique(intragenic_regions.dt$sample),
-                           L_region = rep(regions[!regions %in% intragenic_regions.dt$L_region],
-                                          length(unique(intragenic_regions.dt$sample))),
-                           N = rep(0,
-                                   length(unique(intragenic_regions.dt$sample))))
-  intragenic_regions.dt <- rbindlist(list(intragenic_regions.dt, missing.dt))
-}
-
-intragenic_regions.dt <-  dcast.data.table(intragenic_regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum)
-intragenic_regions.dt <- intragenic_regions.dt[, .(sample, ncRNA, UTR5, CDS, intron, UTR3)]
+intragenic_regions.dt <-  dcast.data.table(intragenic_regions.dt, sample ~ L_region, value.var = "N", fun.aggregate = sum, fill = 0L)
+missing.cols <- setdiff(regions, names(intragenic_regions.dt))
+for(col in missing.cols) intragenic_regions.dt[, (col) := 0L] # 0 counts for regions absent from every sample
+intragenic_regions.dt <- intragenic_regions.dt[, c("sample", regions), with = FALSE]
 
 fwrite(intragenic_regions.dt, "intragenic_regions.tsv", sep = "\t")
 

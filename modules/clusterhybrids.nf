@@ -21,6 +21,7 @@ process CLUSTER_HYBRIDS_SLURM {
 
     percent_overlap = params.percent_overlap
     sample_size = params.sample_size
+    nongenomic_entries = params.nongenomic_entries
 
     args = ""
     if(params.slurm) { args += " --slurm" }
@@ -32,6 +33,7 @@ process CLUSTER_HYBRIDS_SLURM {
         --type ${type} \
         --percent_overlap ${percent_overlap} \
         --sample_size ${sample_size} \
+        --nongenomic_entries '${nongenomic_entries}' \
         ${args}
     """
 
@@ -89,6 +91,7 @@ process CHUNK_HYBRIDS {
     inter_only = params.intertranscript_only
     omit_highincidence = params.omit_highincidence
     omit_transcripts = params.omit_transcripts
+    nongenomic_entries = params.nongenomic_entries
 
     """
     #!/usr/bin/env Rscript
@@ -106,11 +109,10 @@ process CHUNK_HYBRIDS {
 
     # Filter hybrids
     message("Number of hybrids: ", nrow(hybrids.dt))
-    message("Removing rRNA-rRNA")
+    message("Removing self-hybrids on non-genomic entries (rRNA, tRNA, snRNA, ...)")
+    nongenomic <- "${nongenomic_entries}"
     atlas.hybrids.dt <- hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)]
-    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45S")]
-    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
-    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
+    atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == R_seqnames & grepl(nongenomic, L_seqnames))]
 
     if("$omit_transcripts" != "") {
 
