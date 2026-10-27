@@ -132,10 +132,10 @@ if(!any(grepl(",", genes))) {
             if(opt$bin_size == 1) {
                 binned.mat <- mat
             } else {
-                binned.mat <- bin_matrix_rect(mat, bin.size = opt$bin_size)
+                binned.mat <- bin_matrix_rect(mat, bin_size = opt$bin_size)
             }
 
-            binned.dt <- melt(as.data.table(mat)[, rn := 1:.N], id.vars = "rn")
+            binned.dt <- melt(as.data.table(binned.mat)[, rn := 1:.N], id.vars = "rn")
             binned.dt[, variable := as.integer(gsub("^V", "", as.character(variable)))]
             binned.dt[, norm_value := value*1e6/nrow(hybrid.dt)]
             binned.dt <- binned.dt[value != 0]
