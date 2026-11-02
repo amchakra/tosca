@@ -26,7 +26,7 @@ process STAR {
     args += " --outSAMattributes All --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within " // need to keep unmapped for later filtering
     args += " --outFilterMultimapNmax 20 --outSAMmultNmax 1 "
     args += " --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterType BySJout "
-    args += " --alignIntronMin 20 --alignIntronMax 100000 "
+    args += " --alignIntronMin 20 --alignIntronMax 1000000 " // ENCODE value; 100000 left reads across longer introns unspliced
     args += " --limitBAMsortRAM 60000000000"
     args += " " + params.star_args
 
