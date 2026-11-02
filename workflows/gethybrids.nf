@@ -8,13 +8,14 @@ include { SPLIT_FASTQ; FASTQ_TO_FASTA } from '../modules/splitfastq.nf'
 include { BLAT_ALL_IN_ONE } from '../modules/maphybrids.nf'
 include { IDENTIFY_HYBRIDS; MERGE_HYBRIDS } from '../modules/identifyhybrids.nf'
 include { AGGREGATE_LOGS } from '../modules/logging.nf'
-include { DEDUPLICATE } from '../modules/deduplicate.nf'
+include { DEDUPLICATE; FLAG_REPEAT_SHIFTS } from '../modules/deduplicate.nf'
 
 workflow GET_HYBRIDS {
 
     take:
         reads       // channel: fastq
         fasta       // channel: /path/to/transcript/fasta/
+        fai         // channel: /path/to/transcript/fasta/index
 
     main:
         // Split
@@ -56,9 +57,10 @@ workflow GET_HYBRIDS {
 
         AGGREGATE_LOGS(ch_aggregate_logs)
         DEDUPLICATE(MERGE_HYBRIDS.out.hybrids) // Remove PCR duplicates
+        FLAG_REPEAT_SHIFTS(DEDUPLICATE.out.hybrids, fasta.collect(), fai.collect()) // Flag (or drop) repeat-shift hybrids
 
     emit:
-        hybrids = DEDUPLICATE.out.hybrids
+        hybrids = FLAG_REPEAT_SHIFTS.out.hybrids
         raw_hybrids = MERGE_HYBRIDS.out.hybrids
         logs = AGGREGATE_LOGS.out.logs.join(DEDUPLICATE.out.log, by: 0)
 

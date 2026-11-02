@@ -1,20 +1,22 @@
-FROM nfcore/base:1.12.1
+# Tosca image 2.0.2dev: amclab/tosca:2.0.0dev plus toscatools v1.1.0.9002.
+#
+# Layered on the published 2.0.0dev image (pinned by digest) so that every tool and R package
+# is byte-identical to 2.0.0dev and only toscatools changes (minus-strand convert_coordinates()
+# fix; optional crosslink-distance filter in get_valid_hybrids(); annotate_hybrids() labels snRNA, 7SK,
+# 7SL, Y RNA and chrM non-genomic entries). Rebuilding the conda
+# environment from Dockerfile.base would not reproduce 2.0.0dev: see docker/README.md.
+#
+# Build (the cluster is x86_64):
+#   docker buildx build --platform linux/amd64 -t amclab/tosca:2.0.2dev --load docker/
+
+FROM amclab/tosca@sha256:1a0d64eba4a2a8b30655b2c5251bf154de5241e6fb617dcb913ff8a02f385d52
+
 LABEL authors="Anob Chakrabarti" \
-      description="Docker image containing all software requirements for Tosca"
+      description="Docker image containing all software requirements for Tosca (2.0.0dev + toscatools v1.1.0.9002)"
 
-# Install the conda environment
-COPY environment.yml /
-RUN conda env create --quiet -f /environment.yml && conda clean -a
-
-# Add conda installation dir to PATH (instead of doing 'conda activate')
-ENV PATH /opt/conda/envs/tosca-1.0.0/bin:$PATH
-
-# Dump the details of the installed packages to a file for posterity
-RUN conda env export --name tosca-1.0.0 > tosca-1.0.0.yml
-
-# Install R packages
-RUN R -e 'devtools::install_github("amchakra/toscatools")'
-
-# Instruct R processes to use these empty files instead of clashing with a local version
-RUN touch .Rprofile
-RUN touch .Renviron
+# toscatools pinned to a release tag (not a moving branch); upgrade = "never" leaves the R
+# packages already in the image alone; the build fails if the installed version does not match
+ARG TOSCATOOLS_VERSION=1.1.0.9002
+# (installed from the tag's source tarball, which needs no GitHub API calls and so is not rate-limited)
+RUN R -e "remotes::install_url('https://github.com/amchakra/toscatools/archive/refs/tags/v${TOSCATOOLS_VERSION}.tar.gz', upgrade = 'never')" && \
+    R -e "stopifnot(as.character(packageVersion('toscatools')) == '${TOSCATOOLS_VERSION}')"

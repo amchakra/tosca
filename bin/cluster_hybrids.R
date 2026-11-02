@@ -13,7 +13,8 @@ option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "ch
             make_option(c("", "--percent_overlap"), action = "store", type = "numeric", help = "Percent overlap"),
             make_option(c("", "--sample_size"), action = "store", type = "integer", help = "Sample size"),
             make_option(c("", "--threads"), action = "store", type = "integer", default = 8, help = "Number of threads [default: %default]"),
-            make_option(c("", "--slurm"), action = "store_true", type = "logical", default = FALSE, help = "Use SLURM [default: %default]"))
+            make_option(c("", "--slurm"), action = "store_true", type = "logical", default = FALSE, help = "Use SLURM [default: %default]"),
+            make_option(c("", "--nongenomic_entries"), action = "store", type = "character", default = "^(rRNA|rDNA|tRNA|snRNA_|7SK$|7SL$|YRNA_|chrM$)", help = "Regex for non-genomic reference entries (no genome coordinates); self-hybrids on them are dropped [default: %default]"))
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
@@ -26,11 +27,9 @@ setkey(hybrids.dt, name)
 
 # Filter hybrids
 message("Number of hybrids: ", nrow(hybrids.dt))
-message("Removing rRNA-rRNA")
+message("Removing self-hybrids on non-genomic entries (rRNA, tRNA, snRNA, ...)")
 atlas.hybrids.dt <- hybrids.dt[, total_count := .N, by = .(L_seqnames, R_seqnames)]
-atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45S")]
-atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
-atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
+atlas.hybrids.dt <- atlas.hybrids.dt[!(L_seqnames == R_seqnames & grepl(opt$nongenomic_entries, L_seqnames))]
 
 # message(nrow(atlas.hybrids.dt[total_count > 1e4]), " high incidence (>10,000) gene pairs not clustered")
 # atlas.hybrids.dt <- atlas.hybrids.dt[total_count < 1e4 & total_count > 1]

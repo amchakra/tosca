@@ -12,7 +12,8 @@ option_list <- list(make_option(c("", "--hybrids"), action = "store", type = "ch
                 make_option(c("", "--output"), action = "store", type = "character", help = "Output file"),
                 make_option(c("", "--nodes"), action = "store", type = "integer", default = 100, help = "Number of nodes to allocate [default: %default]"),
                 make_option(c("", "--shuffled_mfe"), action = "store_true", type = "logical", help = "Calculate shuffled binding energy (100 iterations)", default = FALSE),
-                make_option(c("", "--clusters_only"), action = "store_true", type = "logical", help = "Analyse structure for hybrids in clusters only", default = FALSE))
+                make_option(c("", "--clusters_only"), action = "store_true", type = "logical", help = "Analyse structure for hybrids in clusters only", default = FALSE),
+                make_option(c("", "--nongenomic_entries"), action = "store", type = "character", default = "^(rRNA|rDNA|tRNA|snRNA_|7SK$|7SL$|YRNA_|chrM$)", help = "Regex for non-genomic reference entries (no genome coordinates); self-hybrids on them are dropped [default: %default]"))
 opt_parser = OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
@@ -36,9 +37,8 @@ toc()
 
 stopifnot(!any(is.na(c(hybrids.dt$L_sequence, hybrids.dt$L_sequence))))
 
-sel.hybrids.dt <- hybrids.dt[!(L_seqnames == "rRNA_45S" & R_seqnames == "rRNA_45S")]
-sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rDNA" & R_seqnames == "rDNA")]
-sel.hybrids.dt <- sel.hybrids.dt[!(L_seqnames == "rRNA_5S" & R_seqnames == "rRNA_5S")]
+# Remove self-hybrids on non-genomic entries (rRNA, tRNA, snRNA, ...)
+sel.hybrids.dt <- hybrids.dt[!(L_seqnames == R_seqnames & grepl(opt$nongenomic_entries, L_seqnames))]
 
 if(opt$clusters_only) sel.hybrids.dt <- sel.hybrids.dt[!is.na(cluster)][cluster != "."]
 

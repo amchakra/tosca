@@ -1,43 +1,45 @@
 # You can use this file to create a conda environment for this pipeline:
 # conda env create -f environment.yml
 
-name: tosca-1.0.0
+name: tosca-2.0.0dev
 channels:
   - conda-forge
   - bioconda
   - defaults
 
 dependencies:
-  - conda-forge::python=3.7.3
-  - conda-forge::pigz=2.3.4
-  - conda-forge::pandas=1.2.0 
-  - bioconda::fastqc=0.11.9
-  - bioconda::cutadapt=3.0
-  - bioconda::bbmap=38.87
-  - bioconda::star=2.7.4a
-  - bioconda::pblat=2.5
-  - bioconda::bedtools=2.29.2
-  - bioconda::umi_tools=1.1.1
-  - bioconda::samtools=1.11
-  - bioconda::viennarna=2.4.14
+  - conda-forge::python=3.12.11
+  - conda-forge::pigz=2.8
+  - conda-forge::pandas=2.3.0
+  - bioconda::fastqc=0.12.1
+  - bioconda::cutadapt=5.1
+  - bioconda::bbmap=39.28
+  - bioconda::star=2.7.11b
+  - bioconda::pblat=2.5.1
+  - bioconda::bedtools=2.31.1
+  - bioconda::umi_tools=1.1.6
+  - bioconda::samtools=1.22
+  - bioconda::viennarna=2.7.0
   - bioconda::ushuffle=1.2.2
-  - bioconda::multiqc=1.10.1
-  - bioconda::pysam=0.16.0.1
+  - bioconda::multiqc=1.19 # 1.29
+  - bioconda::pysam=0.23.1
 
-# R packages
-  - conda-forge::r-base=4.0.3
-  - conda-forge::r-devtools=2.3.2
-  - conda-forge::r-data.table=1.13.6
-  - conda-forge::r-r.utils=2.10.1
-  - conda-forge::r-ggplot2=3.3.3
-  - conda-forge::r-scales=1.1.1
-  - conda-forge::r-tictoc=1.0
-  - conda-forge::r-optparse=1.6.6
-  - conda-forge::r-rslurm=0.6.1
-  - conda-forge::r-cowplot=1.1.1
-  - conda-forge::r-ggthemes=4.2.0
-  - conda-forge::r-igraph=1.2.6
-  - bioconda::bioconductor-genomicalignments=1.26.0
-  - bioconda::bioconductor-rtracklayer=1.50.0
-  - bioconda::bioconductor-rbgl=1.66.0
-  - bioconda::bioconductor-graph=1.68.0
+  # # R packages
+  - conda-forge::r-base=4.4.3
+  - conda-forge::r-remotes=2.5.0
+  - conda-forge::r-tidyverse=2.0.0
+  - conda-forge::r-data.table=1.17.6
+  - conda-forge::r-r.utils=2.13.0
+  - conda-forge::r-ggplot2=3.5.2
+  - conda-forge::r-scales=1.4.0
+  - conda-forge::r-tictoc=1.2.1
+  - conda-forge::r-optparse=1.7.5
+  - conda-forge::r-cowplot=1.2.0
+  - conda-forge::r-ggthemes=5.1.0
+  - conda-forge::r-patchwork=1.3.1
+  - conda-forge::r-viridis=0.6.5
+  - conda-forge::r-igraph=2.0.3
+  - conda-forge::r-stringr=1.5.1
+  - conda-forge::r-networkd3=0.4.1
+  - bioconda::bioconductor-genomicalignments=1.42.0
+  - bioconda::bioconductor-rtracklayer=1.66.0
